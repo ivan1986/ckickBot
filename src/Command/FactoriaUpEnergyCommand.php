@@ -2,21 +2,15 @@
 
 namespace App\Command;
 
-use Psr\Cache\CacheItemInterface;
 use Psr\Cache\CacheItemPoolInterface;
-use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 
 #[AsCommand(
-    name: 'factoria:upEnergy',
+    name: 'factora:upEnergy',
     description: 'TODO',
 )]
 class FactoriaUpEnergyCommand extends Command
@@ -59,9 +53,7 @@ class FactoriaUpEnergyCommand extends Command
 
         while ($userInfo['currentEnergy'] < $topUp) {
             $maxClicks = $topUp - $userInfo['currentEnergy'];
-            var_dump($maxClicks);
             $maxClicks /= $userInfo['tapPower'];
-            var_dump($maxClicks);
             $maxClicks = intval($maxClicks);
             $clicks = min(random_int(20,40), $maxClicks);
 

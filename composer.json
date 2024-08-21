@@ -7,14 +7,16 @@
         "php": ">=8.2",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "chrome-php/chrome": "^1.11",
+        "guzzlehttp/guzzle": "^7.9",
+        "symfony/cache": "7.1.*",
         "symfony/console": "7.1.*",
         "symfony/dotenv": "7.1.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "7.1.*",
+        "symfony/panther": "^2.1",
         "symfony/runtime": "7.1.*",
         "symfony/yaml": "7.1.*"
-    },
-    "require-dev": {
     },
     "config": {
         "allow-plugins": {
@@ -64,5 +66,8 @@
             "allow-contrib": false,
             "require": "7.1.*"
         }
+    },
+    "require-dev": {
+        "symfony/maker-bundle": "^1.60"
     }
 }

@@ -42,6 +42,24 @@
             "src/Kernel.php"
         ]
     },
+    "symfony/maker-bundle": {
+        "version": "1.60",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "1.0",
+            "ref": "fadbfe33303a76e25cb63401050439aa9b1a9c7f"
+        }
+    },
+    "symfony/panther": {
+        "version": "2.1",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "1.0",
+            "ref": "673836afb0eac2b0ec36c44f2ff0379e5a4b2177"
+        }
+    },
     "symfony/routing": {
         "version": "7.1",
         "recipe": {

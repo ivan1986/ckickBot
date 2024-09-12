@@ -1,31 +1,35 @@
 <?php
 
-namespace App\Command;
+namespace App\Bots;
 
-use Psr\Cache\CacheItemPoolInterface;
-use Symfony\Component\Console\Attribute\AsCommand;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Contracts\Service\Attribute\Required;
+use App\Message\CustomFunction;
+use App\Message\UpdateUrl;
+use Symfony\Component\Scheduler\RecurringMessage;
+use Symfony\Component\Scheduler\Schedule;
 
-#[AsCommand(
-    name: 'factora:upEnergy',
-    description: 'TODO',
-)]
-class FactoriaUpEnergyCommand extends Command
+class FactoraBot extends BaseBot implements BotInterface
 {
-    const KEY = 'auth';
-
-    #[Required] public CacheItemPoolInterface $cache;
-    private $client;
     private $auth;
+    private $client;
 
-    protected function configure(): void
+    public function addSchedule(Schedule $schedule)
     {
+        $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName(), '/k/#@FactoraBot'))->withJitter(7200));
+        $schedule->add(RecurringMessage::every('1 hour', new CustomFunction($this->getName(), 'topUpEnergy')));
     }
 
-    protected function initialize(InputInterface $input, OutputInterface $output): void
+    public function saveUrl($url)
+    {
+        parent::saveUrl($url);
+        $fragment = parse_url($url, PHP_URL_FRAGMENT);
+        parse_str($fragment, $params);
+        $auth = base64_encode($params['tgWebAppData']);
+        $item = $this->cache->getItem($this->getName() . ':auth');
+        $item->set($auth);
+        $this->cache->save($item);
+    }
+
+    protected function initClient()
     {
         $this->client = new \GuzzleHttp\Client([
             'base_uri' => 'https://api.factoragame.com/FactoraTapApi/',
@@ -35,17 +39,13 @@ class FactoriaUpEnergyCommand extends Command
                 'User-Agent' => 'Mozilla/5.0 (Linux; Android 9; K) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/80.0.3987.132 Mobile Safari/537.36',
             ]
         ]);
-        $authCache = $this->cache->getItem(self::KEY);
+        $authCache = $this->cache->getItem($this->getName() . ':auth');
         $this->auth = $authCache->get();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    public function topUpEnergy()
     {
-        $auth = 'dXNlcj0lN0IlMjJpZCUyMiUzQTE5NDMxMDgwNiUyQyUyMmZpcnN0X25hbWUlMjIlM0ElMjJJdmFuJTIyJTJDJTIybGFzdF9uYW1lJTIyJTNBJTIyQm9yemVua292JTIyJTJDJTIydXNlcm5hbWUlMjIlM0ElMjJJdmFuQm9yemVua292MTk4NiUyMiUyQyUyMmxhbmd1YWdlX2NvZGUlMjIlM0ElMjJydSUyMiUyQyUyMmFsbG93c193cml0ZV90b19wbSUyMiUzQXRydWUlN0QmY2hhdF9pbnN0YW5jZT0zMzk1ODAyNjcxMzE4NTMzMjU3JmNoYXRfdHlwZT1zZW5kZXImYXV0aF9kYXRlPTE3MjQ0MTc3NDkmaGFzaD1iMDViODQ5MTQwYjVlOTk3YTVkODRjYTI1MzI1MWQ0MDBmYmRlYWQ1OTUwMWFiY2E2N2RmZmZiOTE3NjE4MTJi';
-//        $authCache = $this->cache->getItem(self::KEY);
-//        $authCache->set($auth);
-//        $this->cache->save($authCache);
-
+        $this->initClient();
         $userInfo = $this->getuserInfo();
 
         if ($userInfo['currentEnergy'] > $userInfo['totalEnergyConsumptionPerHour'] * 1.5) {
@@ -64,13 +64,6 @@ class FactoriaUpEnergyCommand extends Command
             $this->tap(0);
             $userInfo = $this->getuserInfo();
         }
-
-//        $userInfo['totalEnergyConsumptionPerHour']
-//        $userInfo['currentEnergy'];
-//        $userInfo['energyLimit'];
-//        $userInfo['tapPower'];
-
-        return 0;
     }
 
     /**

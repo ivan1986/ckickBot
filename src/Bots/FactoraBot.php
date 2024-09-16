@@ -46,6 +46,9 @@ class FactoraBot extends BaseBot implements BotInterface
     public function topUpEnergy()
     {
         $this->initClient();
+        if (!$this->auth) {
+            return;
+        }
         $userInfo = $this->getuserInfo();
 
         if ($userInfo['currentEnergy'] > $userInfo['totalEnergyConsumptionPerHour'] * 1.5) {

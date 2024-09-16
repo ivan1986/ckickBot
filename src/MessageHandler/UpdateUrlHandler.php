@@ -20,7 +20,7 @@ final class UpdateUrlHandler
 
     public function __invoke(UpdateUrl $message): void
     {
-        $client = $this->clientFactory->getOrCreateBrowser('default', !$message->debug);
+        $client = $this->clientFactory->getOrCreateBrowser(!$message->debug);
 
         // load bot chat
         $page = $client->request('GET', 'https://web.telegram.org' . $message->url);
@@ -50,10 +50,8 @@ final class UpdateUrlHandler
         $client->executeScript('document.getElementsByClassName("animated-close-icon")[1].click();');
         sleep(2);
 
-        if (!$message->debug) {
+        //if (!$message->debug) {
             $this->botSelector->getBot($message->name)->saveUrl($src);
-        }
-
-        $this->clientFactory->closeBrowser('default');
+        //}
     }
 }

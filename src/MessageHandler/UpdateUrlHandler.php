@@ -51,7 +51,7 @@ final class UpdateUrlHandler
         sleep(2);
 
         //if (!$message->debug) {
-            $this->botSelector->getBot($message->name)->saveUrl($src);
+            $this->botSelector->getBot($message->name)->saveUrl($client, $src);
         //}
     }
 }

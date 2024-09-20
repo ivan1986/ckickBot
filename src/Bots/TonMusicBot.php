@@ -46,6 +46,7 @@ class TonMusicBot extends BaseBot implements BotInterface
         $resourcesResponse = $apiClient->get('/api/resources')->getBody()->getContents();
         $resourcesResponse = json_decode($resourcesResponse, true);
         $resources = $resourcesResponse['result']['resources'];
+        $resourcesOkForBig = $resources['disks'] > 50 && $resources['cans'] > 50 && $resources['coins'] > 50;
 
         $slotsResponse = $apiClient->get('/api/slots')->getBody()->getContents();
         $slotsResponse = json_decode($slotsResponse, true);
@@ -57,6 +58,13 @@ class TonMusicBot extends BaseBot implements BotInterface
         });
         $slots = array_filter($slots, function ($slot) {
             return $slot['seconds_till_end_of_mining'] === null;
+        });
+        // disable not promo if we have small resources
+        $slots = array_filter($slots, function ($slot) use ($resourcesOkForBig) {
+            if (str_contains($slot['instrument_type'], 'promo')) {
+                return true;
+            }
+            return $resourcesOkForBig;
         });
         if (empty($slots)) {
             return;
@@ -82,9 +90,7 @@ class TonMusicBot extends BaseBot implements BotInterface
         if ($resources['energy'] < $price['energy']) {
             $needEnergy = $price['energy'] - $resources['energy'];
             $needCans = ceil( $needEnergy / 10);
-            var_dump($needCans);
-            var_dump($resources['energy']);
-            var_dump($price['energy']);
+            $needCans = min($needCans, $resources['cans']);
             $apiClient->post('/api/accounts/drink', ['json' => ['cans' => $needCans]]);
             sleep(2);
         }

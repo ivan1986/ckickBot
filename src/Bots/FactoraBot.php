@@ -18,7 +18,7 @@ class FactoraBot extends BaseBot implements BotInterface
         $schedule->add(RecurringMessage::every('1 hour', new CustomFunction($this->getName(), 'topUpEnergy')));
     }
 
-    public function saveUrl($url)
+    public function saveUrl($client, $url)
     {
         parent::saveUrl($url);
         $fragment = parse_url($url, PHP_URL_FRAGMENT);

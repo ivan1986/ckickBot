@@ -27,10 +27,11 @@ class TestCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->botSelector->getBot('FactoraBot')->topUpEnergy();
+        //$this->botSelector->getBot('FactoraBot')->topUpEnergy();
         //$this->bus->dispatch(new UpdateUrl('FactoraBot', '/k/#@FactoraBot', true));
-        //$this->bus->dispatch(new UpdateUrl('TonMusicBot', '/k/#@tonmusic_game_bot', true));
-        //$this->botSelector->getBot('TonMusicBot')->checkSlots();
+        //$this->bus->dispatch(new UpdateUrl('OneWinBot', '/k/#@token1win_bot', true));
+        $this->botSelector->getBot('TonMusicBot')->checkSlots();
+        //$this->botSelector->getBot('OneWinBot')->dailyIncome();
 
         return Command::SUCCESS;
     }

@@ -18,7 +18,7 @@ class BaseBot
         return (new ReflectionClass(static::class))->getShortName();
     }
 
-    public function saveUrl($url)
+    public function saveUrl($client, $url)
     {
         $item = $this->cache->getItem($this->getName() . ':url');
         $item->set($url);
@@ -28,6 +28,11 @@ class BaseBot
     public function getUrl()
     {
         return $this->cache->getItem($this->getName() . ':url')->get();
+    }
+
+    protected function platformFix($url)
+    {
+        return str_replace('tgWebAppPlatform=web', 'tgWebAppPlatform=android', $url);
     }
 
     protected function convertCookies(SymfonyCookieJar $symfonyCookieJar): GuzzleCookieJar

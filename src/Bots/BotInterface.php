@@ -10,6 +10,6 @@ use Symfony\Component\Scheduler\Schedule;
 interface BotInterface
 {
     public function addSchedule(Schedule $schedule);
-    public function saveUrl($url);
+    public function saveUrl($client, $url);
 
 }

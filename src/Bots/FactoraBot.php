@@ -20,7 +20,7 @@ class FactoraBot extends BaseBot implements BotInterface
 
     public function saveUrl($client, $url)
     {
-        parent::saveUrl($url);
+        parent::saveUrl($client, $url);
         $fragment = parse_url($url, PHP_URL_FRAGMENT);
         parse_str($fragment, $params);
         $auth = base64_encode($params['tgWebAppData']);

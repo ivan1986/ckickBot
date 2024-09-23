@@ -23,7 +23,8 @@ class OneWinBot extends BaseBot implements BotInterface
 
     public function saveUrl($client, $url)
     {
-        $client->request('GET', $this->platformFix($url));
+        $url = $this->platformFix($url);
+        $client->request('GET', $url);
         $client->waitForElementToContain('#root', 'Не забудь собрать ежедневную награду');
         $client->request('GET', 'https://cryptocklicker-frontend-rnd-prod.100hp.app/' . 'earnings');
         $client->waitForElementToContain('#root', 'Ежедневные');
@@ -37,16 +38,16 @@ class OneWinBot extends BaseBot implements BotInterface
         $item = $this->cache->getItem($this->getName() . ':userId');
         $item->set($userId);
         $this->cache->save($item);
+
+        parent::saveUrl($client, $url);
     }
 
     public function passiveIncome()
     {
-        if (!$apiClient = $this->getClient()) {
-            return;
-        }
-
-        $resp = $apiClient->get('/game/config?lang=ru');
-        $config = json_decode($resp->getBody()->getContents(), true);
+        $client = $this->clientFactory->getOrCreateBrowser();
+        $client->request('GET', $this->getUrl());
+        $client->waitForElementToContain('#root', 'Не забудь собрать ежедневную награду');
+        sleep(10);
     }
 
     public function dailyIncome()
@@ -54,20 +55,20 @@ class OneWinBot extends BaseBot implements BotInterface
         if (!$apiClient = $this->getClient()) {
             return;
         }
-        return;
-
-        $resp = $apiClient->get('/game/config?lang=ru');
-        $config = json_decode($resp->getBody()->getContents(), true);
-        $everydayReward = $config['EverydayReward'];
 
         $resp = $apiClient->get('/tasks/everydayreward');
         $exist = json_decode($resp->getBody()->getContents(), true);
-
-        if ($exist['secondsLeft'] > 0) {
+        $toCollect = null;
+        foreach ($exist['days'] as $k => $v) {
+            if ($v['isCollected'] === false) {
+                $toCollect = $v['id'];
+                break;
+            }
+        }
+        if (!$toCollect) {
             return;
         }
-        var_dump($everydayReward);
-        var_dump($exist);
+        $apiClient->post('/tasks/everydayreward');
     }
 
     public function update()

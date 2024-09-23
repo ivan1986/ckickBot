@@ -50,7 +50,7 @@ class TonMusicBot extends BaseBot implements BotInterface
 
         $slotsResponse = $apiClient->get('/api/slots')->getBody()->getContents();
         $slotsResponse = json_decode($slotsResponse, true);
-        $slots = $slotsResponse['result']['slots'];
+        $slots = $slotsResponse['result']['inventory_slots'];
 
         // only available slots
         $slots = array_filter($slots, function ($slot) {

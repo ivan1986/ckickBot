@@ -16,9 +16,9 @@ class ClientFactory
         $this->path = $path;
     }
 
-    public function getOrCreateBrowser(bool $headless = true): Client
+    public function getOrCreateBrowser(string $profile, bool $headless = true): Client
     {
-            $options = ['--user-data-dir=' . $this->path . '/profile', '--no-first-run', '--user-agent=' . self::UA];
+            $options = ['--user-data-dir=' . $this->path . '/profiles/' . $profile, '--no-first-run', '--user-agent=' . self::UA];
 
             if ($headless) {
                 $options[] = '--headless';

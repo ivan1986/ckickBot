@@ -27,7 +27,7 @@ class TonMusicBot extends BaseBot implements BotInterface
             return;
         }
 
-        $client = $this->clientFactory->getOrCreateBrowser();
+        $client = $this->clientFactory->getOrCreateBrowser('ivan');
         $client->request('GET', $url);
         $page = $client->getPageSource();
         preg_match('#<meta name="csrf-token" content="(.*?)">#', $page, $matches);

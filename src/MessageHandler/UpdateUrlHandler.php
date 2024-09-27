@@ -20,7 +20,7 @@ final class UpdateUrlHandler
 
     public function __invoke(UpdateUrl $message): void
     {
-        $client = $this->clientFactory->getOrCreateBrowser(!$message->debug);
+        $client = $this->clientFactory->getOrCreateBrowser('ivan', !$message->debug);
 
         // load bot chat
         $page = $client->request('GET', 'https://web.telegram.org' . $message->url);

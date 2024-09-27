@@ -44,7 +44,7 @@ class OneWinBot extends BaseBot implements BotInterface
 
     public function passiveIncome()
     {
-        $client = $this->clientFactory->getOrCreateBrowser();
+        $client = $this->clientFactory->getOrCreateBrowser('ivan');
         $client->request('GET', $this->getUrl());
         $client->waitForElementToContain('#root', 'Не забудь собрать ежедневную награду');
         sleep(10);

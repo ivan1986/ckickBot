@@ -68,21 +68,20 @@ class DogiatorsBot extends BaseBot implements BotInterface
             return;
         }
 
-        return; // TODO
-
-        $resp = $apiClient->get('/tasks/everydayreward');
-        $exist = json_decode($resp->getBody()->getContents(), true);
+        $resp = $apiClient->get('quests/info');
+        $quests = json_decode($resp->getBody()->getContents(), true);
+        $quests = $quests['result']['daily_rewards']['reward_days'];
         $toCollect = null;
-        foreach ($exist['days'] as $k => $v) {
-            if ($v['isCollected'] === false) {
-                $toCollect = $v['id'];
+        foreach ($quests as $k => $v) {
+            if ($v['is_completed'] === false && $v['is_current'] === true) {
+                $toCollect = $v['day'];
                 break;
             }
         }
         if (!$toCollect) {
             return;
         }
-        $apiClient->post('/tasks/everydayreward');
+        $apiClient->post('daily-reward/claim');
     }
 
     public function update()

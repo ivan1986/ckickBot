@@ -2,9 +2,14 @@
 
 namespace App\Command;
 
+use App\Bots\CatsDogsBot;
+use App\Bots\DogiatorsBot;
 use App\Bots\FactoraBot;
+use App\Bots\OneWinBot;
 use App\Message\UpdateUrl;
 use App\Service\BotSelector;
+use App\Service\CacheService;
+use App\Service\ProfileService;
 use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -24,17 +29,35 @@ class TestCommand extends Command
 {
     #[Required] public BotSelector $botSelector;
     #[Required] public MessageBusInterface $bus;
+    #[Required] public ProfileService $profileService;
+    #[Required] public CacheService $cacheService;
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        //$this->botSelector->getBot('FactoraBot')->topUpEnergy();
-        //$this->bus->dispatch(new UpdateUrl('DogiatorsBot', '/k/#@Dogiators_bot', true));
+//        $bot = $this->botSelector->getBot('CatsDogsBot');
+//        $bot->setProfile('ivan');
+//        /** @var CatsDogsBot $bot */
+//        $bot->claim();
+        $this->bus->dispatch(new UpdateUrl('DogiatorsBot', '/k/#@Dogiators_bot'));
+
+        $bot = $this->botSelector->getBot('DogiatorsBot');
+        $bot->setProfile('ivan');
+        /** @var DogiatorsBot $bot */
+        $bot->update();
+
+        //$this->botSelector->getBot('FactoraBot')->topUpEnergy//();
+        //$this->bus->dispatch(new UpdateUrl('CatsDogsBot', '/k/#@catsdogs_game_bot'));
+        //$this->bus->dispatch(new UpdateUrl('CityHolderBot', '/k/#@cityholder', true));
         //$this->bus->dispatch(new UpdateUrl('OneWinBot', '/k/#@token1win_bot', true));
         //$this->bus->dispatch(new UpdateUrl('TonMusicBot', '/k/#@tonmusic_game_bot'));
-        //$this->botSelector->getBot('TonMusicBot')->checkSlots();
+        //$this->bus->dispatch(new UpdateUrl('WeMineBot', '/k/#@WeMineBot'));
+        //$this->botSelector->getBot('TonMusicBot')->checkSlots;
         //$this->botSelector->getBot('OneWinBot')->update();
-        //$this->botSelector->getBot('DogiatorsBot')->passiveIncome();
-        $this->botSelector->getBot('DogiatorsBot')->update();
+        //$this->botSelector->getBot('CityHolderBot')->update();
+        //$this->botSelector->getBot('WeMineBot')->claimAndReset();
+        //$this->botSelector->getBot('CatsDogsBot')->claim();
+        //$this->botSelector->getBot('DogiatorsBot')->dailyIncome();
+
 
         return Command::SUCCESS;
     }

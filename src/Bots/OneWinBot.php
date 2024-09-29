@@ -4,15 +4,13 @@ namespace App\Bots;
 
 use App\Message\CustomFunction;
 use App\Message\UpdateUrl;
-use App\Service\ClientFactory;
+use App\Service\ProfileService;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 use Symfony\Contracts\Service\Attribute\Required;
 
 class OneWinBot extends BaseBot implements BotInterface
 {
-    #[Required] public ClientFactory $clientFactory;
-
     public function addSchedule(Schedule $schedule)
     {
         $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName(), '/k/#@token1win_bot'))->withJitter(7200));
@@ -31,20 +29,15 @@ class OneWinBot extends BaseBot implements BotInterface
         $token = $client->executeScript('return window.localStorage.getItem("token");');
         $userId = $client->executeScript('return window.localStorage.getItem("tgId");');
 
-        $item = $this->cache->getItem($this->getName() . ':token');
-        $item->set($token);
-        $this->cache->save($item);
-
-        $item = $this->cache->getItem($this->getName() . ':userId');
-        $item->set($userId);
-        $this->cache->save($item);
+        $this->UCSet('token', $token);
+        $this->UCSet('userId', $userId);
 
         parent::saveUrl($client, $url);
     }
 
     public function passiveIncome()
     {
-        $client = $this->clientFactory->getOrCreateBrowser('ivan');
+        $client = $this->profileService->getOrCreateBrowser($this->curProfile);
         $client->request('GET', $this->getUrl());
         $client->waitForElementToContain('#root', 'Не забудь собрать ежедневную награду');
         sleep(10);
@@ -84,7 +77,7 @@ class OneWinBot extends BaseBot implements BotInterface
         $resp = $apiClient->get('/user/balance');
         $balance = json_decode($resp->getBody()->getContents(), true);
         $coinsBalance = $balance['coinsBalance'];
-        $miningPerHour = $balance['miningPerHour'];
+        $this->updateStat($balance);
 
         $resp = $apiClient->get('/minings');
         $exist = json_decode($resp->getBody()->getContents(), true);
@@ -129,10 +122,30 @@ class OneWinBot extends BaseBot implements BotInterface
         ]);
     }
 
+    protected function updateStat($balance)
+    {
+        $gauge = $this->collectionRegistry->getOrRegisterGauge(
+            $this->getName(),
+            'balance',
+            'Balance',
+            ['user']
+        );
+        $gauge->set($balance['coinsBalance'], [$this->curProfile]);
+        $gauge = $this->collectionRegistry->getOrRegisterGauge(
+            $this->getName(),
+            'profit',
+            'Profit per hour',
+            ['user']
+        );
+        $gauge->set($balance['miningPerHour'], [$this->curProfile]);
+        $this->cache->hSet($this->userKey('status'), 'balance', $balance['coinsBalance']);
+        $this->cache->hSet($this->userKey('status'), 'profit', $balance['miningPerHour']);
+    }
+
     protected function getClient(): ?\GuzzleHttp\Client
     {
-        $token = $this->cache->getItem($this->getName() . ':token')->get();
-        $userId = $this->cache->getItem($this->getName() . ':userId')->get();
+        $token = $this->UCGet('token');
+        $userId = $this->UCGet('userId');
 
         if (!$token || !$userId) {
             return null;
@@ -144,7 +157,7 @@ class OneWinBot extends BaseBot implements BotInterface
                 'X-User-Id' => $userId,
                 'Authorization' => 'Bearer ' . $token,
                 'Content-Type' => 'application/json',
-                'User-Agent' => ClientFactory::UA,
+                'User-Agent' => ProfileService::UA,
             ]
         ]);
     }

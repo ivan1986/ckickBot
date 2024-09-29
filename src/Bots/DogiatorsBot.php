@@ -4,15 +4,13 @@ namespace App\Bots;
 
 use App\Message\CustomFunction;
 use App\Message\UpdateUrl;
-use App\Service\ClientFactory;
+use App\Service\ProfileService;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 use Symfony\Contracts\Service\Attribute\Required;
 
 class DogiatorsBot extends BaseBot implements BotInterface
 {
-    #[Required] public ClientFactory $clientFactory;
-
     public function addSchedule(Schedule $schedule)
     {
         $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName(), '/k/#@Dogiators_bot'))->withJitter(7200));
@@ -29,21 +27,13 @@ class DogiatorsBot extends BaseBot implements BotInterface
         parse_str($urlFragment, $urlData);
         $tg_data = $urlData['tgWebAppData'];
 
-        $item = $this->cache->getItem($this->getName() . ':tgData');
-        $item->set($tg_data);
-        $this->cache->save($item);
+        $this->UCSet('tgData', $tg_data);
 
         parent::saveUrl($client, $url);
     }
 
     public function passiveIncome()
     {
-//        $client = $this->clientFactory->getOrCreateBrowser();
-//        $client->request('GET', $this->getUrl());
-//        sleep(2);
-//        $client->waitForElementToContain('.MenuModule', 'Upgrade');
-//        sleep(2);
-
         if (!$apiClient = $this->getClient()) {
             return;
         }
@@ -58,8 +48,7 @@ class DogiatorsBot extends BaseBot implements BotInterface
         ]);
         $balance = json_decode($resp->getBody()->getContents(), true);
         $balance = $balance['result']['profile'];
-        $coinsBalance = $balance['balance'];
-        $miningPerHour = $balance['profit_per_hour'];
+        $this->updateStat($balance);
     }
 
     public function dailyIncome()
@@ -100,6 +89,7 @@ class DogiatorsBot extends BaseBot implements BotInterface
         ]);
         $balance = json_decode($resp->getBody()->getContents(), true);
         $balance = $balance['result']['profile'];
+        $this->updateStat($balance);
         $coinsBalance = $balance['balance'];
         $userLevel = $balance['level'];
         $refs = $balance['referrals_count'];
@@ -163,15 +153,31 @@ class DogiatorsBot extends BaseBot implements BotInterface
         $apiClient->post('upgrade/buy', [
             'json' => ['upgrade_id' => $updates['id']]
         ]);
-//        $update = $update['result']['upgrades'];
-//        $coinsBalance = $balance['coinsBalance'];
-//        $miningPerHour = $balance['miningPerHour'];
+    }
 
+    protected function updateStat($balance)
+    {
+        $gauge = $this->collectionRegistry->getOrRegisterGauge(
+            $this->getName(),
+            'balance',
+            'Balance',
+            ['user']
+        );
+        $gauge->set($balance['balance'], [$this->curProfile]);
+        $gauge = $this->collectionRegistry->getOrRegisterGauge(
+            $this->getName(),
+            'profit',
+            'Profit per hour',
+            ['user']
+        );
+        $gauge->set($balance['profit_per_hour'], [$this->curProfile]);
+        $this->cache->hSet($this->userKey('status'), 'balance', $balance['balance']);
+        $this->cache->hSet($this->userKey('status'), 'profit', $balance['profit_per_hour']);
     }
 
     protected function getClient(): ?\GuzzleHttp\Client
     {
-        $tgData = $this->cache->getItem($this->getName() . ':tgData')->get();
+        $tgData = $this->UCGet('tgData');
 
         if (!$tgData) {
             return null;
@@ -184,7 +190,7 @@ class DogiatorsBot extends BaseBot implements BotInterface
             ],
             'headers' => [
                 'Content-Type' => 'application/json',
-                'User-Agent' => ClientFactory::UA,
+                'User-Agent' => ProfileService::UA,
             ]
         ]);
     }

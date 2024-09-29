@@ -4,15 +4,13 @@ namespace App\Bots;
 
 use App\Message\CustomFunction;
 use App\Message\UpdateUrl;
-use App\Service\ClientFactory;
+use App\Service\ProfileService;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 use Symfony\Contracts\Service\Attribute\Required;
 
 class WeMineBot extends BaseBot implements BotInterface
 {
-    #[Required] public ClientFactory $clientFactory;
-
     public function addSchedule(Schedule $schedule)
     {
         $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName(), '/k/#@WeMineBot'))->withJitter(7200));
@@ -26,9 +24,7 @@ class WeMineBot extends BaseBot implements BotInterface
         $client->waitForElementToContain('#root .balanceWrapper', 'wBTC/d');
         $token = $client->executeScript('return window.localStorage.getItem("accessToken");');
 
-        $item = $this->cache->getItem($this->getName() . ':token');
-        $item->set($token);
-        $this->cache->save($item);
+        $this->UCSet('token', $token);
 
         parent::saveUrl($client, $url);
     }
@@ -55,7 +51,7 @@ class WeMineBot extends BaseBot implements BotInterface
 
     protected function getClient(): ?\GuzzleHttp\Client
     {
-        $token = $this->cache->getItem($this->getName() . ':token')->get();
+        $token = $this->UCGet('token');
 
         if (!$token) {
             return null;
@@ -66,7 +62,7 @@ class WeMineBot extends BaseBot implements BotInterface
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
                 'Content-Type' => 'application/json',
-                'User-Agent' => ClientFactory::UA,
+                'User-Agent' => ProfileService::UA,
             ]
         ]);
     }

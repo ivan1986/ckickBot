@@ -4,16 +4,13 @@ namespace App\Bots;
 
 use App\Message\CustomFunction;
 use App\Message\UpdateUrl;
-use App\Service\ClientFactory;
+use App\Service\ProfileService;
 use GuzzleHttp\Exception\ClientException;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
-use Symfony\Contracts\Service\Attribute\Required;
 
 class TonMusicBot extends BaseBot implements BotInterface
 {
-    #[Required] public ClientFactory $clientFactory;
-
     public function addSchedule(Schedule $schedule)
     {
         $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName(), '/k/#@tonmusic_game_bot'))->withJitter(7200));
@@ -27,7 +24,7 @@ class TonMusicBot extends BaseBot implements BotInterface
             return;
         }
 
-        $client = $this->clientFactory->getOrCreateBrowser('ivan');
+        $client = $this->profileService->getOrCreateBrowser($this->curProfile);
         $client->request('GET', $url);
         $page = $client->getPageSource();
         preg_match('#<meta name="csrf-token" content="(.*?)">#', $page, $matches);
@@ -40,7 +37,7 @@ class TonMusicBot extends BaseBot implements BotInterface
                 'X-CSRF-Token' => $csrfToken,
                 'Content-Type' => 'application/json, text/plain, */*',
                 'Sec-Fetch-Dest' => 'empty',
-                'User-Agent' => ClientFactory::UA,
+                'User-Agent' => ProfileService::UA,
             ]
         ]);
         $resourcesResponse = $apiClient->get('/api/resources')->getBody()->getContents();

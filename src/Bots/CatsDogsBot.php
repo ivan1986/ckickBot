@@ -4,7 +4,7 @@ namespace App\Bots;
 
 use App\Message\CustomFunction;
 use App\Message\UpdateUrl;
-use App\Service\ClientFactory;
+use App\Service\ProfileService;
 use DateTime;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
@@ -24,9 +24,7 @@ class CatsDogsBot extends BaseBot implements BotInterface
         parse_str($fragment, $params);
         $auth = $params['tgWebAppData'];
 
-        $item = $this->cache->getItem($this->getName() . ':auth');
-        $item->set($auth);
-        $this->cache->save($item);
+        $this->UCSet('auth', $auth);
     }
 
     public function claim()
@@ -47,12 +45,33 @@ class CatsDogsBot extends BaseBot implements BotInterface
             $current = json_decode($resp->getBody()->getContents(), true);
             $amount = $current['reward']['cats']; // TODO: need look diff with dogs
             $apiClient->post('game/claim', ['json' => ['claimed_amount' => $amount]]);
+
+            $this->updateStat($apiClient);
         }
+    }
+
+    protected function updateStat($apiClient)
+    {
+        $resp = $apiClient->get('user/balance');
+        $balance = json_decode($resp->getBody()->getContents(), true);
+        $balanceAll = 0;
+        foreach ($balance as $b) {
+            $balanceAll += $b;
+        }
+
+        $gauge = $this->collectionRegistry->getOrRegisterGauge(
+            $this->getName(),
+            'balance',
+            'Balance',
+            ['user']
+        );
+        $gauge->set($balanceAll, [$this->curProfile]);
+        $this->cache->hSet($this->userKey('status'), 'balance', $balanceAll);
     }
 
     protected function getClient(): ?\GuzzleHttp\Client
     {
-        $token = $this->cache->getItem($this->getName() . ':auth')->get();
+        $token = $this->UCGet('auth');
 
         if (!$token) {
             return null;
@@ -63,7 +82,7 @@ class CatsDogsBot extends BaseBot implements BotInterface
             'headers' => [
                 'x-telegram-web-app-data' => $token,
                 'Content-Type' => 'application/json',
-                'User-Agent' => ClientFactory::UA,
+                'User-Agent' => ProfileService::UA,
             ]
         ]);
     }

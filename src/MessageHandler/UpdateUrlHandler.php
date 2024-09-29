@@ -4,7 +4,7 @@ namespace App\MessageHandler;
 
 use App\Message\UpdateUrl;
 use App\Service\BotSelector;
-use App\Service\ClientFactory;
+use App\Service\ProfileService;
 use Facebook\WebDriver\Exception\NoSuchElementException;
 use Facebook\WebDriver\WebDriverBy;
 use Psr\Cache\CacheItemPoolInterface;
@@ -15,7 +15,7 @@ use Symfony\Contracts\Service\Attribute\Required;
 #[AsMessageHandler]
 final class UpdateUrlHandler
 {
-    #[Required] public ClientFactory $clientFactory;
+    #[Required] public ProfileService $clientFactory;
     #[Required] public BotSelector $botSelector;
 
     public function __invoke(UpdateUrl $message): void
@@ -40,6 +40,7 @@ final class UpdateUrlHandler
             sleep(2);
         }
         $bot = $this->botSelector->getBot($message->name);
+        $bot->setProfile('ivan');
 
         $bot->runInTg($client);
         $iframe = $page->findElement(WebDriverBy::cssSelector('iframe'));

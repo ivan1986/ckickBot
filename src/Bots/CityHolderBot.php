@@ -4,15 +4,13 @@ namespace App\Bots;
 
 use App\Message\CustomFunction;
 use App\Message\UpdateUrl;
-use App\Service\ClientFactory;
+use App\Service\ProfileService;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 use Symfony\Contracts\Service\Attribute\Required;
 
 class CityHolderBot extends BaseBot implements BotInterface
 {
-    #[Required] public ClientFactory $clientFactory;
-
     public function addSchedule(Schedule $schedule)
     {
         $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName(), '/k/#@cityholder'))->withJitter(7200));
@@ -29,33 +27,27 @@ class CityHolderBot extends BaseBot implements BotInterface
         parse_str($urlFragment, $urlData);
         $tg_data = $urlData['tgWebAppData'];
 
-        $item = $this->cache->getItem($this->getName() . ':tgData');
-        $item->set($tg_data);
-        $this->cache->save($item);
+        $this->UCSet('tgData', $tg_data);
 
         $authClient = new \GuzzleHttp\Client([
             'base_uri' => 'https://api-reserve.city-holder.com/',
             'headers' => [
                 'Content-Type' => 'application/json',
-                'User-Agent' => ClientFactory::UA,
+                'User-Agent' => ProfileService::UA,
             ]
         ]);
         $resp = $authClient->post('auth', ['json' => ['auth' => $tg_data]]);
         $auth = json_decode($resp->getBody()->getContents(), true);
 
-        $item = $this->cache->getItem($this->getName() . ':token');
-        $item->set($auth['token']);
-        $this->cache->save($item);
-        $item = $this->cache->getItem($this->getName() . ':settings');
-        $item->set($auth['settings']);
-        $this->cache->save($item);
+        $this->UCSet('token', $auth['token']);
+        $this->UCSet('settings', $auth['settings']);
 
         parent::saveUrl($client, $url);
     }
 
     public function update()
     {
-        $client = $this->clientFactory->getOrCreateBrowser('ivan');
+        $client = $this->profileService->getOrCreateBrowser($this->curProfile);
         $client->request('GET', $this->getUrl());
         sleep(1);
         $client->waitForElementToContain('body', 'Отлично!');
@@ -150,7 +142,7 @@ class CityHolderBot extends BaseBot implements BotInterface
 
     protected function getClient(): ?\GuzzleHttp\Client
     {
-        $token = $this->cache->getItem($this->getName() . ':token')->get();
+        $token = $this->UCGet('token');
 
         if (!$token) {
             return null;
@@ -163,7 +155,7 @@ class CityHolderBot extends BaseBot implements BotInterface
             ],
             'headers' => [
                 'Content-Type' => 'application/json',
-                'User-Agent' => ClientFactory::UA,
+                'User-Agent' => ProfileService::UA,
             ]
         ]);
     }

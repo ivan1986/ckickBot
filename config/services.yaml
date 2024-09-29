@@ -4,6 +4,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    env(REDIS_DSN): 'redis://127.0.0.1:6379/10'
+    env(PROFILES): '%kernel.project_dir%/profiles'
 
 services:
     # default configuration for services in *this* file
@@ -22,3 +24,4 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    Prometheus\CollectorRegistry: '@prometheus_metrics_bundle.collector_registry'

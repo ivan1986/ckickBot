@@ -15,6 +15,8 @@ final class CustomFunctionHandler
     public function __invoke(CustomFunction $message): void
     {
         //echo 'here: '.$message->name . ' ' . $message->callback . PHP_EOL;
-        $this->botSelector->getBot($message->name)->{$message->callback}();
+        $bot = $this->botSelector->getBot($message->name);
+        $bot->setProfile('ivan');
+        $bot->{$message->callback}();
     }
 }

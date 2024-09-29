@@ -24,9 +24,7 @@ class FactoraBot extends BaseBot implements BotInterface
         $fragment = parse_url($url, PHP_URL_FRAGMENT);
         parse_str($fragment, $params);
         $auth = base64_encode($params['tgWebAppData']);
-        $item = $this->cache->getItem($this->getName() . ':auth');
-        $item->set($auth);
-        $this->cache->save($item);
+        $this->UCSet('auth', $auth);
     }
 
     protected function initClient()
@@ -39,8 +37,7 @@ class FactoraBot extends BaseBot implements BotInterface
                 'User-Agent' => 'Mozilla/5.0 (Linux; Android 9; K) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/80.0.3987.132 Mobile Safari/537.36',
             ]
         ]);
-        $authCache = $this->cache->getItem($this->getName() . ':auth');
-        $this->auth = $authCache->get();
+        $this->auth = $this->UCGet('auth');
     }
 
     public function topUpEnergy()
@@ -64,7 +61,8 @@ class FactoraBot extends BaseBot implements BotInterface
             $clicks = min(random_int(20,40), $maxClicks);
 
             $this->tap($clicks);
-            $this->tap(0);
+            $this->tap(0);        $authCache = $this->cache->getItem($this->getName() . ':auth');
+
             $userInfo = $this->getuserInfo();
         }
     }

@@ -2,20 +2,40 @@
 
 namespace App\Bots;
 
+use App\Service\CacheService;
+use App\Service\ProfileService;
 use GuzzleHttp\Cookie\CookieJar as GuzzleCookieJar;
 use GuzzleHttp\Cookie\SetCookie;
-use Psr\Cache\CacheItemPoolInterface;
+use Prometheus\CollectorRegistry;
 use ReflectionClass;
 use Symfony\Component\Panther\Cookie\CookieJar as SymfonyCookieJar;
 use Symfony\Contracts\Service\Attribute\Required;
 
 class BaseBot
 {
-    #[Required] public CacheItemPoolInterface $cache;
+    const TTL = 3600 * 24;
+    #[Required] public CacheService $cache;
+    #[Required] public ProfileService $profileService;
+    #[Required] public CollectorRegistry $collectionRegistry;
+    protected string $curProfile = '';
+
+    public function setProfile(string $profile)
+    {
+        $this->curProfile = $profile;
+    }
 
     public function getName(): string
     {
         return (new ReflectionClass(static::class))->getShortName();
+    }
+
+    public function UCSet($key, $value)
+    {
+        return $this->cache->setEx($this->userKey($key), self::TTL, $value);
+    }
+    public function UCGet($key)
+    {
+        return $this->cache->get($this->userKey($key));
     }
 
     public function runInTg($client)
@@ -24,14 +44,12 @@ class BaseBot
 
     public function saveUrl($client, $url)
     {
-        $item = $this->cache->getItem($this->getName() . ':url');
-        $item->set($url);
-        $this->cache->save($item);
+        $this->UCSet('url', $url);
     }
 
     public function getUrl()
     {
-        return $this->cache->getItem($this->getName() . ':url')->get();
+        return $this->UCGet('url');
     }
 
     protected function platformFix($url)
@@ -52,5 +70,15 @@ class BaseBot
             ]));
         }
         return $jar;
+    }
+
+    protected function userKey(string $key)
+    {
+        return $this->getName() . ':' . $this->curProfile . ':' . $key;
+    }
+
+    protected function botKey(string $key)
+    {
+        return $this->getName() . ':::' . $key;
     }
 }

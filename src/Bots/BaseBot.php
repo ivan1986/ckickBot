@@ -18,6 +18,10 @@ class BaseBot
         return (new ReflectionClass(static::class))->getShortName();
     }
 
+    public function runInTg($client)
+    {
+    }
+
     public function saveUrl($client, $url)
     {
         $item = $this->cache->getItem($this->getName() . ':url');

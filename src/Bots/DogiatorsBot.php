@@ -81,7 +81,7 @@ class DogiatorsBot extends BaseBot implements BotInterface
         if (!$toCollect) {
             return;
         }
-        $apiClient->post('daily-reward/claim');
+        $apiClient->post('quests/daily-reward/claim');
     }
 
     public function update()

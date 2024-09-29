@@ -39,19 +39,18 @@ final class UpdateUrlHandler
             $client->executeScript('document.getElementsByClassName("popup-button")[0].click();');
             sleep(2);
         }
+        $bot = $this->botSelector->getBot($message->name);
 
+        $bot->runInTg($client);
         $iframe = $page->findElement(WebDriverBy::cssSelector('iframe'));
         $src = $iframe->getAttribute('src');
         if ($message->debug) {
             echo $src . PHP_EOL;
         }
         sleep(2);
-
         $client->executeScript('document.getElementsByClassName("animated-close-icon")[1].click();');
         sleep(2);
 
-        //if (!$message->debug) {
-            $this->botSelector->getBot($message->name)->saveUrl($client, $src);
-        //}
+        $bot->saveUrl($client, $src);
     }
 }

@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block page_content %}
+{% for profile in profiles %}
+    <h3>{{ profile }}</h3>
+    <div class="row row-deck row-cards">
+    {% for bot in bots %}
+        <div class="col-sm-6 col-lg-3">
+            <div class="card">
+                <div class="ribbon ribbon-top">
+                    <input class="form-check-input" type="checkbox" {% if bs.isEnabled(profile, bot) %} checked {% endif %}
+                        data-url="{{ path('toggle_bot', {'profile': profile, 'bot': bot}) }}">
+                </div>
+                <div class="card-body">
+                    <p class="card-title">{{ bot }}
+                        <a target="_blank" href="{{ bs.botUrl(profile, bot) }}">
+                            <img alt="" src="{{ asset('img/external-link.svg') }}" style="width: 24px; top: -3px; position: relative" />
+                        </a>
+                    </p>
+
+                    {{ render(controller('App\\Controller\\MainController::botBlock', {profile: profile, bot: bot})) }}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+{% endfor %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.querySelectorAll('input[data-url]').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function(e) {
+                let data = new FormData();
+                data.append('value', e.target.checked ? 1 : 0);
+                fetch(e.target.dataset.url, {
+                    method:'POST',
+                    body: data
+                })
+            });
+        });
+    </script>
+{% endblock %}

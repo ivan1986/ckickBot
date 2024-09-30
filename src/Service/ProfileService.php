@@ -8,6 +8,7 @@ use Symfony\Component\Panther\Client;
 class ProfileService
 {
     private string $path;
+    private array $profiles = [];
 
     const UA = 'Mozilla/5.0 (Linux; Android 9; K) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/80.0.3987.132 Mobile Safari/537.36';
 
@@ -34,11 +35,14 @@ class ProfileService
 
     public function list(): array
     {
-        $files = glob($this->path . '/*');
-        $profiles = [];
-        foreach ($files as $file) {
-            $profiles[] = basename($file);
+        if (!$this->profiles) {
+            $files = glob($this->path . '/*');
+            $profiles = [];
+            foreach ($files as $file) {
+                $profiles[] = basename($file);
+            }
+            $this->profiles = $profiles;
         }
-        return $profiles;
+        return $this->profiles;
     }
 }

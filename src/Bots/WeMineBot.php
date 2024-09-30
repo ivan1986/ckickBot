@@ -37,9 +37,9 @@ class WeMineBot extends BaseBot implements BotInterface
 
         $resp = $apiClient->get('auth/profile');
         $profile = json_decode($resp->getBody()->getContents(), true);
+        $this->updateStat($profile);
         $start = \DateTime::createFromFormat(\DateTime::RFC3339_EXTENDED, $profile['miningStartTime']);
         $last = \DateTime::createFromFormat(\DateTime::RFC3339_EXTENDED, $profile['lastClaimTime']);
-        //var_dump($profile['balance']);
         $delta = $last ? $last->diff(New \DateTime()) : \DateInterval::createFromDateString('30 minutes');
         $limit = \DateInterval::createFromDateString('20 minutes');
         $deltaS = $delta->h * 3600 + $delta->i * 60 + $delta->s;
@@ -47,6 +47,37 @@ class WeMineBot extends BaseBot implements BotInterface
         if ($deltaS > $limitS) {
             $apiClient->post('mining/start-claim');
         }
+    }
+
+    protected function updateStat($balance)
+    {
+        $usd = round($balance['balance']['wUSD'], 2);
+        $btc = round($balance['balance']['wBTC'], 8);
+        $all = round($balance['allTimeBTC'], 8);
+        $gauge = $this->collectionRegistry->getOrRegisterGauge(
+            $this->getName(),
+            'balance_wusd',
+            'Balance wUSD',
+            ['user']
+        );
+        $gauge->set($usd, [$this->curProfile]);
+        $gauge = $this->collectionRegistry->getOrRegisterGauge(
+            $this->getName(),
+            'balance_wbtc',
+            'Balance wBTC',
+            ['user']
+        );
+        $gauge->set($btc, [$this->curProfile]);
+        $gauge = $this->collectionRegistry->getOrRegisterGauge(
+            $this->getName(),
+            'all_wbtc',
+            'All wBTC',
+            ['user']
+        );
+        $gauge->set($all, [$this->curProfile]);
+        $this->cache->hSet($this->userKey('status'), 'wUSD', $usd);
+        $this->cache->hSet($this->userKey('status'), 'wBTC', $btc);
+        $this->cache->hSet($this->userKey('status'), 'All', $all);
     }
 
     protected function getClient(): ?\GuzzleHttp\Client

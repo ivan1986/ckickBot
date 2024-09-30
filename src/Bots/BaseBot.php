@@ -72,12 +72,12 @@ class BaseBot
         return $jar;
     }
 
-    protected function userKey(string $key)
+    public function userKey(string $key)
     {
         return $this->getName() . ':' . $this->curProfile . ':' . $key;
     }
 
-    protected function botKey(string $key)
+    public function botKey(string $key)
     {
         return $this->getName() . ':::' . $key;
     }

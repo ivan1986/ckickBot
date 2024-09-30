@@ -7,7 +7,7 @@ framework:
     session: true
 
     #esi: true
-    #fragments: true
+    fragments: true
 
 when@test:
     framework:

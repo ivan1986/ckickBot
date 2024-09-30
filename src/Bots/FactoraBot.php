@@ -61,7 +61,7 @@ class FactoraBot extends BaseBot implements BotInterface
             $clicks = min(random_int(20,40), $maxClicks);
 
             $this->tap($clicks);
-            $this->tap(0);        $authCache = $this->cache->getItem($this->getName() . ':auth');
+            $this->tap(0);
 
             $userInfo = $this->getuserInfo();
         }

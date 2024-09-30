@@ -10,16 +10,26 @@
         "artprima/prometheus-metrics-bundle": "^1.19",
         "chrome-php/chrome": "^1.11",
         "guzzlehttp/guzzle": "^7.9",
+        "kevinpapst/tabler-bundle": "^1.5",
+        "nesbot/carbon": "^3.8",
         "symfony/cache": "7.1.*",
         "symfony/console": "7.1.*",
         "symfony/dotenv": "7.1.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "7.1.*",
         "symfony/messenger": "7.1.*",
+        "symfony/monolog-bundle": "^3.10",
         "symfony/panther": "^2.1",
         "symfony/runtime": "7.1.*",
         "symfony/scheduler": "7.1.*",
-        "symfony/yaml": "7.1.*"
+        "symfony/security-bundle": "7.1.*",
+        "symfony/security-http": "7.1.*",
+        "symfony/twig-bundle": "7.1.*",
+        "symfony/yaml": "7.1.*",
+        "twig/extra-bundle": "^3.13"
+    },
+    "require-dev": {
+        "symfony/maker-bundle": "^1.60"
     },
     "config": {
         "allow-plugins": {
@@ -69,8 +79,5 @@
             "allow-contrib": false,
             "require": "7.1.*"
         }
-    },
-    "require-dev": {
-        "symfony/maker-bundle": "^1.60"
     }
 }

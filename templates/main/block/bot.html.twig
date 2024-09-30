@@ -1,0 +1,22 @@
+<div class="row">
+    <div class="col-6">
+        <table class="table table-responsive table-nowrap">
+            {% for k,v in status %}
+            <tr>
+                <td>{{ k }}</td>
+                <td>{{ v }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div class="col-6">
+        <table class="table table-responsive table-nowrap">
+            {% for k,v in run %}
+                <tr>
+                    <td>{{ k }}</td>
+                    <td>{{ v }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>

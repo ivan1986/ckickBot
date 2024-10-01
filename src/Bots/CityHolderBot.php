@@ -63,11 +63,31 @@ class CityHolderBot extends BaseBot implements BotInterface
         document.head.appendChild(my_awesome_script);
         JS);
         sleep(2);
-        echo 'script'.PHP_EOL;
         $client->executeScript(<<<JS
             $('[class^="_dialogHolderComeBack"]').find('button').click()
         JS);
-        echo 'OK'.PHP_EOL;
+
+        // идем в казну и берем числа
+        $client->executeScript(<<<JS
+            $('a[href="/treasury"]')[0].click();
+        JS);
+        sleep(2);
+        $result = $client->executeScript(<<<JS
+            let result = [];
+            $('[class^="_header"] [class^="_info"] [class^="_container"]').each((i, item) => {
+                if (i > 0) result.push(item.innerText.split('\\n')[1]);
+            });
+            result.push($('[class^="_wrapper"] [class^="_money"]')[0].innerText);
+            return JSON.stringify(result);
+        JS);
+        $result = json_decode($result, true);
+        $items = [];
+        foreach ($result as $i => $item) {
+            $items[$i] = str_replace(',', '', $item);
+        }
+        $this->updateStat($items);
+
+
         $client->executeScript(<<<JS
             $('a[href="/city"]')[0].click();
         JS);
@@ -75,8 +95,8 @@ class CityHolderBot extends BaseBot implements BotInterface
         $client->executeScript(<<<JS
             $('a[href="/city/build"]')[0].click();
         JS);
-
         sleep(2);
+
         $result = $client->executeScript(<<<JS
             const sleep = ms => new Promise(r => setTimeout(r, ms));
             var tabs = $('[class^="_buildNav"] [class^="_navItem"]').filter((i, item) => $(item).find('[class^="_count"]').length>0);
@@ -142,6 +162,37 @@ class CityHolderBot extends BaseBot implements BotInterface
         JS);
 
         sleep(5);
+    }
+
+    protected function updateStat($balance)
+    {
+        $income = $balance[0];
+        $population = $balance[1];
+        $money = $balance[2];
+        $gauge = $this->collectionRegistry->getOrRegisterGauge(
+            $this->getName(),
+            'income',
+            'Income',
+            ['user']
+        );
+        $gauge->set($income, [$this->curProfile]);
+        $gauge = $this->collectionRegistry->getOrRegisterGauge(
+            $this->getName(),
+            'population',
+            'Population',
+            ['user']
+        );
+        $gauge->set($population, [$this->curProfile]);
+        $gauge = $this->collectionRegistry->getOrRegisterGauge(
+            $this->getName(),
+            'money',
+            'Maney',
+            ['user']
+        );
+        $gauge->set($money, [$this->curProfile]);
+        $this->cache->hSet($this->userKey('status'), 'income', $income);
+        $this->cache->hSet($this->userKey('status'), 'population', $population);
+        $this->cache->hSet($this->userKey('status'), 'money', $money);
     }
 
     protected function getClient(): ?\GuzzleHttp\Client

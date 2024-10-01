@@ -1,4 +1,8 @@
 {% extends '@Tabler/layout-horizontal.html.twig' %}
+{% block head %}
+    {{ parent() }}
+    <link rel="icon" type="image/png" href="/click.png">
+{% endblock %}
 {% block breadcrumb %}{% endblock %}
 {% block page_subtitle %}{% endblock %}
 {% block page_actions %}{% endblock %}

@@ -39,11 +39,8 @@ class TestCommand extends Command
 //        $bot->setProfile('ivan');
 //        /** @var CatsDogsBot $bot */
 //        $bot->claim();
-        //$this->bus->dispatch(new UpdateUrl('DogiatorsBot', '/k/#@Dogiators_bot'));
+        $this->bus->dispatch(new UpdateUrl('EasyWatchBot', '/k/#@ESWatch_bot', true));
 
-        $bot = $this->botSelector->getBot('WeMineBot');
-        $bot->setProfile('ivan');
-        $bot->claimAndReset();
 
         //$this->botSelector->getBot('FactoraBot')->topUpEnergy//();
         //$this->bus->dispatch(new UpdateUrl('CatsDogsBot', '/k/#@catsdogs_game_bot'));

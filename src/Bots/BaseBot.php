@@ -8,6 +8,7 @@ use GuzzleHttp\Cookie\CookieJar as GuzzleCookieJar;
 use GuzzleHttp\Cookie\SetCookie;
 use Prometheus\CollectorRegistry;
 use ReflectionClass;
+use Symfony\Component\Panther\Client;
 use Symfony\Component\Panther\Cookie\CookieJar as SymfonyCookieJar;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -38,7 +39,7 @@ class BaseBot
         return $this->cache->get($this->userKey($key));
     }
 
-    public function runInTg($client)
+    public function runInTg(Client $client)
     {
     }
 

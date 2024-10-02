@@ -32,6 +32,11 @@ final class UpdateUrlHandler
         $client->executeScript('document.getElementsByClassName("new-message-bot-commands-view")[0].click();');
         sleep(2);
 
+        $bot = $this->botSelector->getBot($message->name);
+        $bot->setProfile('ivan');
+
+        $bot->runInTg($client);
+
         // click Launch
         try {
             $page->findElement(WebDriverBy::cssSelector('iframe'));;
@@ -39,10 +44,6 @@ final class UpdateUrlHandler
             $client->executeScript('document.getElementsByClassName("popup-button")[0].click();');
             sleep(2);
         }
-        $bot = $this->botSelector->getBot($message->name);
-        $bot->setProfile('ivan');
-
-        $bot->runInTg($client);
         $iframe = $page->findElement(WebDriverBy::cssSelector('iframe'));
         $src = $iframe->getAttribute('src');
         if ($message->debug) {

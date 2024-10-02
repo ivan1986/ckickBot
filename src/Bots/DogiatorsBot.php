@@ -157,22 +157,24 @@ class DogiatorsBot extends BaseBot implements BotInterface
 
     protected function updateStat($balance)
     {
+        $b = round($balance['balance']);
+        $p = round($balance['profit_per_hour']);
         $gauge = $this->collectionRegistry->getOrRegisterGauge(
             $this->getName(),
             'balance',
             'Balance',
             ['user']
         );
-        $gauge->set($balance['balance'], [$this->curProfile]);
+        $gauge->set($b, [$this->curProfile]);
         $gauge = $this->collectionRegistry->getOrRegisterGauge(
             $this->getName(),
             'profit',
             'Profit per hour',
             ['user']
         );
-        $gauge->set($balance['profit_per_hour'], [$this->curProfile]);
-        $this->cache->hSet($this->userKey('status'), 'balance', $balance['balance']);
-        $this->cache->hSet($this->userKey('status'), 'profit', $balance['profit_per_hour']);
+        $gauge->set($p, [$this->curProfile]);
+        $this->cache->hSet($this->userKey('status'), 'balance', $b);
+        $this->cache->hSet($this->userKey('status'), 'profit', $p);
     }
 
     protected function getClient(): ?\GuzzleHttp\Client

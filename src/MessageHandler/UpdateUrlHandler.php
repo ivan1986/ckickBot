@@ -6,6 +6,7 @@ use App\Message\UpdateUrl;
 use App\Message\UpdateUrlUser;
 use App\Service\BotSelector;
 use App\Service\ProfileService;
+use Carbon\Carbon;
 use Facebook\WebDriver\Exception\NoSuchElementException;
 use Facebook\WebDriver\WebDriverBy;
 use Psr\Cache\CacheItemPoolInterface;
@@ -23,8 +24,11 @@ final class UpdateUrlHandler
     {
         $client = $this->clientFactory->getOrCreateBrowser($message->profile, !$message->debug);
 
+        $bot = $this->botSelector->getBot($message->name);
+        $bot->setProfile($message->profile);
+
         // load bot chat
-        $page = $client->request('GET', 'https://web.telegram.org' . $message->url);
+        $page = $client->request('GET', 'https://web.telegram.org/k/#@' . $bot->getTgBotName());
         sleep(2);
         $client->waitFor('div', 5);;
         sleep(2);
@@ -32,9 +36,6 @@ final class UpdateUrlHandler
         // open miniapp
         $client->executeScript('document.getElementsByClassName("new-message-bot-commands-view")[0].click();');
         sleep(2);
-
-        $bot = $this->botSelector->getBot($message->name);
-        $bot->setProfile($message->profile);
 
         $bot->runInTg($client);
 
@@ -56,7 +57,11 @@ final class UpdateUrlHandler
 
         if ($src) { // А вдруг телеграм помер
             $bot->saveUrl($client, $src);
+            $bot->cache->hSet(
+                $bot->userKey('run'),
+                'TgUrl',
+                Carbon::now()->getTimestamp()
+            );
         }
-        sleep(2);
     }
 }

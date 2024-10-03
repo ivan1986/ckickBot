@@ -11,9 +11,11 @@ use Symfony\Contracts\Service\Attribute\Required;
 
 class WeMineBot extends BaseBot implements BotInterface
 {
+    public function getTgBotName() { return 'WeMineBot'; }
+
     public function addSchedule(Schedule $schedule)
     {
-        $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName(), '/k/#@WeMineBot'))->withJitter(7200));
+        $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName()))->withJitter(7200));
         $schedule->add(RecurringMessage::every('30 minutes', new CustomFunction($this->getName(), 'claimAndReset')));
     }
 

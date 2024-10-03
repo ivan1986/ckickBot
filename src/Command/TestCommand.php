@@ -44,7 +44,8 @@ class TestCommand extends Command
 //        $x = new CustomFunction('EasyWatchBot', 'checkStream');
 //        $x = new UpdateUrl('EasyWatchBot', 'checkStream');
 
-        $this->bus->dispatch(new UpdateUrl('OneWinBot', '/k/#@token1win_bot', true));
+//        $this->bus->dispatch(new UpdateUrlUser('olya', 'EasyWatchBot', '/k/#@ESWatch_bot', true));
+//        $this->bus->dispatch(new UpdateUrlUser('olya', 'WeMineBot', '/k/#@WeMineBot', true));
 
 
         //$this->botSelector->getBot('FactoraBot')->topUpEnergy//();

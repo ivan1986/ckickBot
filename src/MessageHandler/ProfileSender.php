@@ -27,7 +27,6 @@ class ProfileSender
             $this->bus->dispatch(new UpdateUrlUser(
                 $profile,
                 $message->name,
-                $message->url,
                 $message->debug
             ));
         }

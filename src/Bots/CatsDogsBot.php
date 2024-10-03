@@ -11,9 +11,11 @@ use Symfony\Component\Scheduler\Schedule;
 
 class CatsDogsBot extends BaseBot implements BotInterface
 {
+    public function getTgBotName() { return 'catsdogs_game_bot'; }
+
     public function addSchedule(Schedule $schedule)
     {
-        $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName(), '/k/#@catsdogs_game_bot'))->withJitter(7200));
+        $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName()))->withJitter(7200));
         $schedule->add(RecurringMessage::every('4 hour', new CustomFunction($this->getName(), 'claim')));
     }
 

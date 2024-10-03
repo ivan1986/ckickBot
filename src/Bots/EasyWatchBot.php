@@ -11,9 +11,11 @@ use Symfony\Component\Scheduler\Schedule;
 
 class EasyWatchBot extends BaseBot implements BotInterface
 {
+    public function getTgBotName() { return 'ESWatch_bot'; }
+
     public function addSchedule(Schedule $schedule)
     {
-        $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName(), '/k/#@ESWatch_bot'))->withJitter(7200));
+        $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName()))->withJitter(7200));
         $schedule->add(RecurringMessage::every('30 min', new CustomFunction($this->getName(), 'checkStream')));
     }
 
@@ -43,7 +45,7 @@ class EasyWatchBot extends BaseBot implements BotInterface
             return;
         }
 
-        $client = $this->profileService->getOrCreateBrowser($this->curProfile, false);
+        $client = $this->profileService->getOrCreateBrowser($this->curProfile);
         $client->get($this->getUrl());
         $client->request('GET', $this->getUrl());
         sleep(1);

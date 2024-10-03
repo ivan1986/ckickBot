@@ -11,9 +11,11 @@ use Symfony\Component\Scheduler\Schedule;
 
 class TonMusicBot extends BaseBot implements BotInterface
 {
+    public function getTgBotName() { return 'tonmusic_game_bot'; }
+
     public function addSchedule(Schedule $schedule)
     {
-        $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName(), '/k/#@tonmusic_game_bot'))->withJitter(7200));
+        $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName()))->withJitter(7200));
         $schedule->add(RecurringMessage::every('1 hour', new CustomFunction($this->getName(), 'checkSlots')));
     }
 

@@ -12,6 +12,8 @@ interface BotInterface
 {
     public function addSchedule(Schedule $schedule);
     public function setProfile(string $profile);
+
+    public function getTgBotName();
     public function runInTg(Client $client);
     public function saveUrl($client, $url);
 

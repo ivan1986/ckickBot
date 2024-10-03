@@ -29,6 +29,7 @@ class TestRunCommand extends Command
     protected function configure(): void
     {
         $this
+            ->addArgument('profile', InputArgument::REQUIRED, 'Profile')
             ->addArgument('bot', InputArgument::REQUIRED, 'Bot')
             ->addArgument('callback', InputArgument::REQUIRED, 'Function')
         ;
@@ -37,7 +38,7 @@ class TestRunCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $bot = $this->botSelector->getBot($input->getArgument('bot'));
-        $bot->setProfile('ivan');
+        $bot->setProfile($input->getArgument('profile'));
         $callback = $input->getArgument('callback');
         $bot->$callback();
 

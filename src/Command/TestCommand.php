@@ -44,7 +44,7 @@ class TestCommand extends Command
 //        $x = new CustomFunction('EasyWatchBot', 'checkStream');
 //        $x = new UpdateUrl('EasyWatchBot', 'checkStream');
 
-//        $this->bus->dispatch(new UpdateUrlUser('olya', 'EasyWatchBot', '/k/#@ESWatch_bot', true));
+        $this->bus->dispatch(new UpdateUrlUser('dasha', 'DogiatorsBot', true));
 //        $this->bus->dispatch(new UpdateUrlUser('olya', 'WeMineBot', '/k/#@WeMineBot', true));
 
 

@@ -1,8 +1,17 @@
 {% extends 'base.html.twig' %}
 
 {% block page_content %}
+    <ul class="nav nav-tabs nav-fill" data-bs-toggle="tabs" role="tablist">
+        {% for profile in profiles %}
+        <li class="nav-item" role="presentation">
+            <a href="#tabs-{{ profile }}" class="nav-link {{ profile == 'ivan' ? 'active' : '' }}" data-bs-toggle="tab" aria-selected="true" role="tab">{{ profile }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+
+<div class="tab-content">
 {% for profile in profiles %}
-    <h3>{{ profile }}</h3>
+    <div class="tab-pane {{ profile == 'ivan' ? 'active show' : '' }}" id="tabs-{{ profile }}" role="tabpanel">
     <div class="row row-deck row-cards">
     {% for bot in bots %}
         <div class="col-sm-6 col-lg-3">
@@ -13,9 +22,13 @@
                 </div>
                 <div class="card-body">
                     <p class="card-title">{{ bot }}
-                        <a target="_blank" href="{{ bs.botUrl(profile, bot) }}">
+                        {% set url = bs.botUrl(profile, bot) %}
+                        {% if url %}
+                        <a target="_blank" href="{{ url }}">
                             <img alt="" src="{{ asset('img/external-link.svg') }}" style="width: 24px; top: -3px; position: relative" />
                         </a>
+                        {% endif %}
+                        {{ bs.botUrlUpdate(profile, bot) }}
                     </p>
 
                     {{ render(controller('App\\Controller\\MainController::botBlock', {profile: profile, bot: bot})) }}
@@ -24,7 +37,9 @@
         </div>
     {% endfor %}
     </div>
+    </div>
 {% endfor %}
+</div>
 {% endblock %}
 
 {% block javascripts %}

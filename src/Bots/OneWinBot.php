@@ -43,7 +43,7 @@ class OneWinBot extends BaseBot implements BotInterface
     {
         $client = $this->profileService->getOrCreateBrowser($this->curProfile);
         $client->request('GET', $this->getUrl());
-        $client->waitForElementToContain('#root', 'Не забудь собрать ежедневную награду');
+        //$client->waitForElementToContain('#root', 'Не забудь собрать ежедневную награду');
         sleep(10);
     }
 

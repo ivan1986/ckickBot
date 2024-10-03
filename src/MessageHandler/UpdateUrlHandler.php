@@ -57,11 +57,7 @@ final class UpdateUrlHandler
 
         if ($src) { // А вдруг телеграм помер
             $bot->saveUrl($client, $src);
-            $bot->cache->hSet(
-                $bot->userKey('run'),
-                'TgUrl',
-                Carbon::now()->getTimestamp()
-            );
+            $bot->UCSet('TgUrlUpdate', Carbon::now()->getTimestamp());
         }
     }
 }

@@ -54,6 +54,7 @@ class CustomEasyWatchCommand extends Command
                         $stop = 'Stream has not been started';
                         if (str_contains($output, $stop)) {
                             $this->cacheService->del($this->bot->botKey('stream'));
+                            continue;
                         }
                     }
                     $processList[$profile] = $this->getProcess($cookie);

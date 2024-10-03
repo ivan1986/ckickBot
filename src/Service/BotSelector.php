@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Bots\BotInterface;
+use Carbon\Carbon;
 use ReflectionClass;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Contracts\Service\Attribute\Required;
@@ -66,11 +67,19 @@ class BotSelector
         $key = $bot . ':' . $profile . ':' . 'url';
         return $this->cacheService->get($key) ?: false;
     }
+    public function getBotUrlUpdate(string $profile, string $bot)
+    {
+        $ts = $this->cacheService->get($this->botKey($profile, $bot) . ':TgUrlUpdate') ?: false;
+        return $ts ? str_replace(' ago', '', Carbon::createFromTimestamp($ts)->diffForHumans()) : '';
+    }
 
     public function isEnabled(string $profile, string $bot): bool
     {
-        $key = $bot . ':' . $profile . '::' . 'enable';
-        return $this->cacheService->get($key) ?: false;
+        return $this->cacheService->get($this->botKey($profile, $bot) . '::' . 'enable') ?: false;
     }
 
+    protected function botKey(string $profile, string $bot): string
+    {
+        return $bot . ':' . $profile;
+    }
 }

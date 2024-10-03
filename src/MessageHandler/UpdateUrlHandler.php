@@ -3,6 +3,7 @@
 namespace App\MessageHandler;
 
 use App\Message\UpdateUrl;
+use App\Message\UpdateUrlUser;
 use App\Service\BotSelector;
 use App\Service\ProfileService;
 use Facebook\WebDriver\Exception\NoSuchElementException;
@@ -18,9 +19,9 @@ final class UpdateUrlHandler
     #[Required] public ProfileService $clientFactory;
     #[Required] public BotSelector $botSelector;
 
-    public function __invoke(UpdateUrl $message): void
+    public function __invoke(UpdateUrlUser $message): void
     {
-        $client = $this->clientFactory->getOrCreateBrowser('ivan', !$message->debug);
+        $client = $this->clientFactory->getOrCreateBrowser($message->profile, !$message->debug);
 
         // load bot chat
         $page = $client->request('GET', 'https://web.telegram.org' . $message->url);
@@ -33,7 +34,7 @@ final class UpdateUrlHandler
         sleep(2);
 
         $bot = $this->botSelector->getBot($message->name);
-        $bot->setProfile('ivan');
+        $bot->setProfile($message->profile);
 
         $bot->runInTg($client);
 
@@ -53,6 +54,9 @@ final class UpdateUrlHandler
         $client->executeScript('document.getElementsByClassName("animated-close-icon")[1].click();');
         sleep(2);
 
-        $bot->saveUrl($client, $src);
+        if ($src) { // А вдруг телеграм помер
+            $bot->saveUrl($client, $src);
+        }
+        sleep(2);
     }
 }

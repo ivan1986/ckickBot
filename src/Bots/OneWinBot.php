@@ -23,8 +23,10 @@ class OneWinBot extends BaseBot implements BotInterface
     {
         $url = $this->platformFix($url);
         $client->request('GET', $url);
-        $client->waitForElementToContain('#root', 'Не забудь собрать ежедневную награду');
+        //$client->waitForElementToContain('#root', 'Не забудь собрать ежедневную награду');
+        sleep(10);
         $client->request('GET', 'https://cryptocklicker-frontend-rnd-prod.100hp.app/' . 'earnings');
+        sleep(5);
         $client->waitForElementToContain('#root', 'Ежедневные');
         $token = $client->executeScript('return window.localStorage.getItem("token");');
         $userId = $client->executeScript('return window.localStorage.getItem("tgId");');

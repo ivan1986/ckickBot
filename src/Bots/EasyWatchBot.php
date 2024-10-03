@@ -35,7 +35,7 @@ class EasyWatchBot extends BaseBot implements BotInterface
         if (!$this->getUrl()) {
             return;
         }
-        if ($this->cache->get($this->botKey('stream'))) {
+        if ($this->cache->get($this->botKey('stream')) && $this->UCGet('cookies')) {
             return;
         }
         // Ночью все скипаем

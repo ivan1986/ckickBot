@@ -3,7 +3,7 @@
 namespace App\MessageHandler;
 
 use App\Bots\BaseBot;
-use App\Message\CustomFunction;
+use App\Message\CustomFunctionUser;
 use App\Service\BotSelector;
 use App\Service\CacheService;
 use Carbon\Carbon;
@@ -16,11 +16,11 @@ final class CustomFunctionHandler
     #[Required] public BotSelector $botSelector;
     #[Required] public CacheService $cache;
 
-    public function __invoke(CustomFunction $message): void
+    public function __invoke(CustomFunctionUser $message): void
     {
         /** @var BaseBot $bot */
         $bot = $this->botSelector->getBot($message->name);
-        $bot->setProfile('ivan');
+        $bot->setProfile($message->profile);
         $bot->{$message->callback}();
 
         $bot->cache->hSet(

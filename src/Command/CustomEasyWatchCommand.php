@@ -74,7 +74,10 @@ class CustomEasyWatchCommand extends Command
         foreach ($this->profileService->list() as $profile) {
             if ($this->botSelector->isEnabled($profile, 'EasyWatchBot')) {
                 $this->bot->setProfile($profile);
-                $activeProfiles[$profile] = $this->bot->UCGet('cookies');
+                $cookie = $this->bot->UCGet('cookies');
+                if ($cookie) {
+                    $activeProfiles[$profile] = $cookie;
+                }
             }
         }
         return $activeProfiles;

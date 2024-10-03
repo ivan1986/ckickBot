@@ -7,7 +7,9 @@ use App\Bots\DogiatorsBot;
 use App\Bots\FactoraBot;
 use App\Bots\OneWinBot;
 use App\Bots\WeMineBot;
+use App\Message\CustomFunction;
 use App\Message\UpdateUrl;
+use App\Message\UpdateUrlUser;
 use App\Service\BotSelector;
 use App\Service\CacheService;
 use App\Service\ProfileService;
@@ -39,7 +41,10 @@ class TestCommand extends Command
 //        $bot->setProfile('ivan');
 //        /** @var CatsDogsBot $bot */
 //        $bot->claim();
-        $this->bus->dispatch(new UpdateUrl('EasyWatchBot', '/k/#@ESWatch_bot', true));
+//        $x = new CustomFunction('EasyWatchBot', 'checkStream');
+//        $x = new UpdateUrl('EasyWatchBot', 'checkStream');
+
+        $this->bus->dispatch(new UpdateUrl('OneWinBot', '/k/#@token1win_bot', true));
 
 
         //$this->botSelector->getBot('FactoraBot')->topUpEnergy//();

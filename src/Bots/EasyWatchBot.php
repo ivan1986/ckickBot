@@ -37,8 +37,10 @@ class EasyWatchBot extends BaseBot implements BotInterface
         if (!$this->getUrl()) {
             return;
         }
-        if ($this->cache->get($this->botKey('stream')) && $this->UCGet('cookies')) {
-            return;
+        if ($this->cache->get($this->botKey('stream'))) {
+            if ($this->cache->ttl($this->userKey('cookies')) > 40000) {
+                return;
+            }
         }
         // Ночью все скипаем
         if (Carbon::now()->format('H') < 6) {
@@ -85,5 +87,4 @@ class EasyWatchBot extends BaseBot implements BotInterface
         $gauge->set($balance, [$this->curProfile]);
         $this->cache->hSet($this->userKey('status'), 'balance', $balance);
     }
-
 }

@@ -56,6 +56,8 @@ class CustomEasyWatchCommand extends Command
                             $this->cacheService->del($this->bot->botKey('stream'));
                             continue;
                         }
+                        $authError = 'User is not authorized';
+                        // TODO: error notify
                     }
                     $processList[$profile] = $this->getProcess($cookie);
                     $processList[$profile]->start();

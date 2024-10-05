@@ -4,6 +4,7 @@ namespace App\Bots;
 
 use App\Message\CustomFunction;
 use App\Message\UpdateUrl;
+use Carbon\Carbon;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 
@@ -15,6 +16,8 @@ class HarryCoinBot extends BaseBot implements BotInterface
     {
         $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName()))->withJitter(7200));
         $schedule->add(RecurringMessage::every('1 hour', new CustomFunction($this->getName(), 'resetMine')));
+        $schedule->add(RecurringMessage::every('30 min', new CustomFunction($this->getName(), 'watchAd')));
+        $schedule->add(RecurringMessage::every('1 day', new CustomFunction($this->getName(), 'claimRewards')));
     }
 
     public function saveUrl($client, $url)
@@ -58,6 +61,82 @@ class HarryCoinBot extends BaseBot implements BotInterface
                 sleep(1);
             }
         }
+    }
+
+    public function watchAd()
+    {
+        if (!$this->getUrl()) {
+            return;
+        }
+        if ($this->UCGet('adLock')) {
+            return;
+        }
+
+        $client = $this->profileService->getOrCreateBrowser($this->curProfile);
+        $client->request('GET', $this->getUrl());
+        sleep(1);
+        $client->waitForVisibility('.user-tap-button');
+        sleep(5);
+
+        $client->executeScript(<<<JS
+            document.querySelector('a[href="/tasks"]').click();
+        JS);
+        sleep(1);
+
+        sleep(10);
+
+        // spna - да, там опечатка
+        $lock = $client->executeScript(<<<JS
+            let item = document.querySelectorAll('.earn-item')[0];
+            return item.querySelector('spna').innerText;
+        JS);
+        $lock = trim($lock, '()');
+        if ($lock) {
+            $time = explode(':', $lock);
+            $time = ($time[0] * 60 + $time[1]) * 60 + $time[2];
+            $this->cache->setEx($this->userKey('adLock'), $time, 1);
+            return;
+        }
+
+        $client->executeScript(<<<JS
+            let item = document.querySelectorAll('.earn-item')[0];
+            item.querySelector('button').click();
+        JS);
+        $existPopup = true;
+        while ($existPopup) {
+            sleep(10);
+            $existPopup = $client->executeScript(<<<JS
+                return document.querySelectorAll('body > div').length > 2;
+            JS);
+        }
+        $this->cache->hSet(
+            $this->userKey('run'),
+            'realWatch',
+            Carbon::now()->getTimestamp()
+        );
+
+        //sleep(1000);
+    }
+
+    public function claimRewards()
+    {
+        if (!$this->getUrl()) {
+            return;
+        }
+
+        $client = $this->profileService->getOrCreateBrowser($this->curProfile, false);
+        $client->request('GET', $this->getUrl());
+        sleep(1);
+        $client->waitForVisibility('.user-tap-button');
+        sleep(5);
+
+        $client->executeScript(<<<JS
+            document.querySelector('a[href="/friends"]').click();
+        JS);
+        sleep(2);
+        $client->executeScript(<<<JS
+            document.querySelector('.airdrop-top button').click();
+        JS);
     }
 
     protected function updateStat($balance)

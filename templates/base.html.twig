@@ -3,6 +3,14 @@
     {{ parent() }}
     <link rel="icon" type="image/png" href="/click.png">
 {% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        table.table td {
+            padding: 0.2em;
+        }
+    </style>
+{% endblock %}
 {% block breadcrumb %}{% endblock %}
 {% block page_subtitle %}{% endblock %}
 {% block page_actions %}{% endblock %}

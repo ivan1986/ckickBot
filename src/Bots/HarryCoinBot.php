@@ -124,7 +124,7 @@ class HarryCoinBot extends BaseBot implements BotInterface
             return;
         }
 
-        $client = $this->profileService->getOrCreateBrowser($this->curProfile, false);
+        $client = $this->profileService->getOrCreateBrowser($this->curProfile);
         $client->request('GET', $this->getUrl());
         sleep(1);
         $client->waitForVisibility('.user-tap-button');
@@ -134,9 +134,11 @@ class HarryCoinBot extends BaseBot implements BotInterface
             document.querySelector('a[href="/friends"]').click();
         JS);
         sleep(2);
+
         $client->executeScript(<<<JS
             document.querySelector('.airdrop-top button').click();
         JS);
+        sleep(2);
     }
 
     protected function updateStat($balance)

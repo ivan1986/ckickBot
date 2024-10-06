@@ -16,6 +16,7 @@ interface BotInterface
     public function getTgBotName();
     public function runInTg(Client $client);
     public function saveUrl($client, $url);
+    public function getUrl();
 
     public function UCSet($key, $value);
     public function UCGet($key);

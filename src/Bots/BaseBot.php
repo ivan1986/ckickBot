@@ -23,6 +23,7 @@ class BaseBot
     public function setProfile(string $profile)
     {
         $this->curProfile = $profile;
+        return $this;
     }
 
     public function getName(): string
@@ -30,9 +31,9 @@ class BaseBot
         return (new ReflectionClass(static::class))->getShortName();
     }
 
-    public function UCSet($key, $value)
+    public function UCSet($key, $value, $ttl = self::TTL)
     {
-        return $this->cache->setEx($this->userKey($key), self::TTL, $value);
+        return $this->cache->setEx($this->userKey($key), $ttl, $value);
     }
     public function UCGet($key)
     {

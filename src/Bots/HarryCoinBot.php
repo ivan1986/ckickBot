@@ -93,8 +93,8 @@ class HarryCoinBot extends BaseBot implements BotInterface
         $lock = trim($lock, '()');
         if ($lock) {
             $time = explode(':', $lock);
-            $time = ($time[0] * 60 + $time[1]) * 60 + $time[2];
-            $this->cache->setEx($this->userKey('adLock'), $time, 1);
+            $timeSec = ($time[0] * 60 + $time[1]) * 60 + $time[2];
+            $this->UCSet('adLock', 1, $timeSec);
             return;
         }
 

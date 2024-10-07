@@ -6,6 +6,7 @@ use App\Bots\EasyWatchBot;
 use App\Service\BotSelector;
 use App\Service\CacheService;
 use App\Service\ProfileService;
+use Carbon\Carbon;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -57,7 +58,16 @@ class CustomEasyWatchCommand extends Command
                             continue;
                         }
                         $authError = 'User is not authorized';
-                        // TODO: error notify
+                        if (str_contains($output, $authError)) {
+                            echo $profile;
+                            $this->bot->setProfile($profile);
+                            $this->cacheService->hSet(
+                                $this->bot->userKey('run'),
+                                'errorAuth',
+                                Carbon::now()->getTimestamp()
+                            );
+                            continue;
+                        }
                     }
                     $processList[$profile] = $this->getProcess($cookie);
                     $processList[$profile]->start();

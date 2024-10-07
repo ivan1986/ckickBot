@@ -38,7 +38,7 @@ class EasyWatchBot extends BaseBot implements BotInterface
             return;
         }
         if ($this->cache->get($this->botKey('stream'))) {
-            if ($this->cache->ttl($this->userKey('cookies')) > 40000) {
+            if ($this->cache->ttl($this->userKey('cookies')) > 3600 * 12) {
                 return;
             }
         }
@@ -50,7 +50,7 @@ class EasyWatchBot extends BaseBot implements BotInterface
         $client = $this->profileService->getOrCreateBrowser($this->curProfile);
         $client->get($this->getUrl());
         $client->request('GET', $this->getUrl());
-        sleep(1);
+        sleep(2);
         $cookies = $client->getCookieJar();
         $client->waitForVisibility('[data-test-id="user-balance"]');
         $balance = $client->executeScript(<<<JS
@@ -71,6 +71,11 @@ class EasyWatchBot extends BaseBot implements BotInterface
             $cookiesArray[] = $cookie->getName() . '=' . $cookie->getValue();
         }
         $this->UCSet('cookies', 'cookie: ' . join('; ', $cookiesArray));
+        $this->cache->hSet(
+            $this->userKey('run'),
+            'updateCookie',
+            Carbon::now()->getTimestamp()
+        );
 
         $this->cache->set($this->botKey('stream'), $stream);
     }

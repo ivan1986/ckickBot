@@ -21,11 +21,6 @@ class TestRunCommand extends Command
 {
     #[Required] public BotSelector $botSelector;
 
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
     protected function configure(): void
     {
         $this

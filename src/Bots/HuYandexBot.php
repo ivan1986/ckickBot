@@ -3,11 +3,13 @@
 namespace App\Bots;
 
 use App\Message\CustomFunction;
+use App\Message\CustomFunctionUser;
 use App\Message\UpdateUrl;
 use App\Service\ProfileService;
 use Carbon\Carbon;
 use GuzzleHttp\Cookie\CookieJar as GuzzleCookieJar;
 use GuzzleHttp\Cookie\SetCookie;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 
@@ -112,6 +114,10 @@ class HuYandexBot extends BaseBot implements BotInterface
             $this->userKey('run'),
             'realUpgrade',
             Carbon::now()->getTimestamp()
+        );
+        $this->bus->dispatch(
+            new CustomFunctionUser($this->curProfile, $this->getName(), 'upgrade'),
+            [new DelayStamp(10 * 1000)]
         );
     }
 

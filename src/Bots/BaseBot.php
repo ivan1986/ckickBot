@@ -8,6 +8,7 @@ use GuzzleHttp\Cookie\CookieJar as GuzzleCookieJar;
 use GuzzleHttp\Cookie\SetCookie;
 use Prometheus\CollectorRegistry;
 use ReflectionClass;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Panther\Client;
 use Symfony\Component\Panther\Cookie\CookieJar as SymfonyCookieJar;
 use Symfony\Contracts\Service\Attribute\Required;
@@ -18,6 +19,7 @@ class BaseBot
     #[Required] public CacheService $cache;
     #[Required] public ProfileService $profileService;
     #[Required] public CollectorRegistry $collectionRegistry;
+    #[Required] public MessageBusInterface $bus;
     protected string $curProfile = '';
 
     public function setProfile(string $profile)
@@ -72,6 +74,22 @@ class BaseBot
             ]));
         }
         return $jar;
+    }
+
+    /**
+     * @param string $name
+     * @param float $value
+     */
+    protected function updateStatItem($name, $value)
+    {
+        $gauge = $this->collectionRegistry->getOrRegisterGauge(
+            $this->getName(),
+            $name,
+            ucfirst($name),
+            ['user']
+        );
+        $gauge->set($value, [$this->curProfile]);
+        $this->cache->hSet($this->userKey('status'), $name, $value);
     }
 
     public function userKey(string $key)

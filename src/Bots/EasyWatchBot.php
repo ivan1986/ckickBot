@@ -48,7 +48,6 @@ class EasyWatchBot extends BaseBot implements BotInterface
         }
 
         $client = $this->profileService->getOrCreateBrowser($this->curProfile);
-        $client->get($this->getUrl());
         $client->request('GET', $this->getUrl());
         sleep(2);
         $cookies = $client->getCookieJar();

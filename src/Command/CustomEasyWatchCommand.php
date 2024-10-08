@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Bots\EasyWatchBot;
+use App\Message\CustomFunctionUser;
 use App\Service\BotSelector;
 use App\Service\CacheService;
 use App\Service\ProfileService;
@@ -11,6 +12,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Process\Process;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -20,6 +23,7 @@ use Symfony\Contracts\Service\Attribute\Required;
 )]
 class CustomEasyWatchCommand extends Command
 {
+    #[Required] public MessageBusInterface $bus;
     #[Required] public BotSelector $botSelector;
     #[Required] public ProfileService $profileService;
     #[Required] public CacheService $cacheService;
@@ -44,10 +48,10 @@ class CustomEasyWatchCommand extends Command
 
     public function activeStream()
     {
-        $activeProfiles = $this->getActiveProfiles();
         /** @var Process[] $processList */
         $processList = [];
         while ($this->cacheService->get($this->bot->botKey('stream'))) {
+            $activeProfiles = $this->getActiveProfiles();
             foreach ($activeProfiles as $profile => $cookie) {
                 if (empty($processList[$profile]) || !$processList[$profile]->isRunning()) {
                     if (!empty($processList[$profile])) {
@@ -66,6 +70,14 @@ class CustomEasyWatchCommand extends Command
                                 'errorAuth',
                                 Carbon::now()->getTimestamp()
                             );
+                            $this->cacheService->expire(
+                                $this->bot->userKey('cookies'),
+                                100
+                            );
+                            $this->bus->dispatch(
+                                new CustomFunctionUser($profile, 'EasyWatchBot', 'checkStream')
+                            );
+                            unset($activeProfiles[$profile]);
                             continue;
                         }
                     }

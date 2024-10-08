@@ -3,8 +3,10 @@
 namespace App\Bots;
 
 use App\Message\CustomFunction;
+use App\Message\CustomFunctionUser;
 use App\Message\UpdateUrl;
 use App\Service\ProfileService;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 use Symfony\Contracts\Service\Attribute\Required;
@@ -144,6 +146,9 @@ class DogiatorsBot extends BaseBot implements BotInterface
         });
 
         $updates = array_filter($updates, function ($i) use ($coinsBalance) {
+            if (empty($i['next'])) {
+                return false;
+            }
             return $i['next']['price'] <= $coinsBalance;
         });
         usort($updates, fn ($a, $b) => $b['next']['profit_per_hour_relative'] / $b['next']['price'] <=> $a['next']['profit_per_hour_relative'] / $a['next']['price']);
@@ -155,6 +160,10 @@ class DogiatorsBot extends BaseBot implements BotInterface
         $apiClient->post('upgrade/buy', [
             'json' => ['upgrade_id' => $updates['id']]
         ]);
+        $this->bus->dispatch(
+            new CustomFunctionUser($this->curProfile, $this->getName(), 'update'),
+            [new DelayStamp(10 * 1000)]
+        );
     }
 
     protected function updateStat($balance)

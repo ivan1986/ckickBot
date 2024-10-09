@@ -17,6 +17,7 @@ class WeMineBot extends BaseBot implements BotInterface
     {
         $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName()))->withJitter(7200));
         $schedule->add(RecurringMessage::every('30 minutes', new CustomFunction($this->getName(), 'claimAndReset')));
+        $schedule->add(RecurringMessage::every('6 hour', new CustomFunction($this->getName(), 'convertAndUpgrade')));
     }
 
     public function saveUrl($client, $url)
@@ -51,35 +52,73 @@ class WeMineBot extends BaseBot implements BotInterface
         }
     }
 
+    public function convertAndUpgrade()
+    {
+        if (!$apiClient = $this->getClient()) {
+            return;
+        }
+
+        $resp = $apiClient->get('auth/profile');
+        $profile = json_decode($resp->getBody()->getContents(), true);
+        $this->updateStat($profile);
+        $last = \DateTime::createFromFormat(\DateTime::RFC3339_EXTENDED, $profile['lastExchangeTime']);
+        $delta = $last ? $last->diff(New \DateTime()) : \DateInterval::createFromDateString('30 minutes');
+        $deltaS = $delta->h * 3600 + $delta->i * 60 + $delta->s;
+        if ($deltaS > 1800 && $profile['balance']['wBTC'] > 0.001) {
+            $apiClient->post('exchange/btc-to-usd', ['json' => ['amount' => $profile['balance']['wBTC']]]);
+        }
+
+        $curAsicId = $profile['currentAsic'];
+        $curAsicLevel = null;
+        $nextAsic = null;
+        $resp = $apiClient->get('mining/asics');
+        $asics = json_decode($resp->getBody()->getContents(), true);
+        foreach ($asics as $k => $v) {
+            if ($v['_id'] === $curAsicId) {
+                $curAsicLevel = $v['level'];
+                $nextAsic = $asics[$k + 1] ?? null;
+                break;
+            }
+        }
+        if ($nextAsic && $nextAsic['purchaseCost'] < $profile['balance']['wUSD']) {
+            $apiClient->post('mining/purchase', ['json' => ['asicId' => $nextAsic['_id']]]);
+        }
+
+        $curLevelsCode = $curAsicLevel * 10;
+        $upgrades = [
+            'coolingSystem' => 8,
+            'ramCapacity' => 8,
+            'softwareEnhancement' => 8,
+            //'reductionOfHeatLoss' => 4,
+            //'processAutomation' => 4
+        ];
+        $info = null;
+        foreach ($upgrades as $upgrade => $maxLevel) {
+            $curLevel = $profile['upgrades'][$upgrade];
+            $curLevelsCode = $curLevelsCode * 10 + $curLevel;
+            if ($curLevel < min($curAsicLevel, $maxLevel)) {
+                if (!$info) {
+                    $resp = $apiClient->get('upgrades');
+                    $info = json_decode($resp->getBody()->getContents(), true);
+                }
+                foreach ($info as $v) {
+                    if ($v['type'] === $upgrade) {
+                        if ($v['levelCosts'][$curLevel + 1] < $profile['balance']['wUSD']) {
+                            $apiClient->post('upgrades/upgrade', ['json' => ['upgradeType' => $upgrade]]);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        $this->updateStatItem('level', $curLevelsCode);
+    }
+
     protected function updateStat($balance)
     {
-        $usd = round($balance['balance']['wUSD'], 2);
-        $btc = round($balance['balance']['wBTC'], 8);
-        $all = round($balance['allTimeBTC'], 8);
-        $gauge = $this->collectionRegistry->getOrRegisterGauge(
-            $this->getName(),
-            'balance_wusd',
-            'Balance wUSD',
-            ['user']
-        );
-        $gauge->set($usd, [$this->curProfile]);
-        $gauge = $this->collectionRegistry->getOrRegisterGauge(
-            $this->getName(),
-            'balance_wbtc',
-            'Balance wBTC',
-            ['user']
-        );
-        $gauge->set($btc, [$this->curProfile]);
-        $gauge = $this->collectionRegistry->getOrRegisterGauge(
-            $this->getName(),
-            'all_wbtc',
-            'All wBTC',
-            ['user']
-        );
-        $gauge->set($all, [$this->curProfile]);
-        $this->cache->hSet($this->userKey('status'), 'wUSD', $usd);
-        $this->cache->hSet($this->userKey('status'), 'wBTC', $btc);
-        $this->cache->hSet($this->userKey('status'), 'All', $all);
+        $this->updateStatItem('wUSD', round($balance['balance']['wUSD'], 2));
+        $this->updateStatItem('wBTC', round($balance['balance']['wBTC'], 8));
+        $this->updateStatItem('All', round($balance['allTimeBTC'], 8));
     }
 
     protected function getClient(): ?\GuzzleHttp\Client

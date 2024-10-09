@@ -3,8 +3,10 @@
 namespace App\Bots;
 
 use App\Message\CustomFunction;
+use App\Message\CustomFunctionUser;
 use App\Message\UpdateUrl;
 use App\Service\ProfileService;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 use Symfony\Contracts\Service\Attribute\Required;
@@ -124,6 +126,10 @@ class OneWinBot extends BaseBot implements BotInterface
         $apiClient->post('/minings', [
             'json' => ['id' => $profit['id']]
         ]);
+        $this->bus->dispatch(
+            new CustomFunctionUser($this->curProfile, $this->getName(), 'update'),
+            [new DelayStamp(10 * 1000)]
+        );
     }
 
     protected function updateStat($balance)

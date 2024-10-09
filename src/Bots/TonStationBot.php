@@ -64,6 +64,9 @@ class TonStationBot extends BaseBot implements BotInterface
         $client = $this->profileService->getOrCreateBrowser($this->curProfile);
         $client->request('GET', $this->getUrl());
         sleep(10);
+        $client->executeScript(<<<JS
+            document.querySelector('#scroll-container button').click();
+        JS);
         $client->waitForVisibility('span.title-xl');
 
         $balance = $client->executeScript(<<<JS

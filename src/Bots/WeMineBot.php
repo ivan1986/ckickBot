@@ -48,7 +48,7 @@ class WeMineBot extends BaseBot implements BotInterface
         $deltaS = $delta->h * 3600 + $delta->i * 60 + $delta->s;
         $limitS = $limit->i * 60 + $limit->s;
         if ($deltaS > $limitS) {
-            $apiClient->post('mining/start-claim');
+            $apiClient->post('mining/wbtc/start-claim');
         }
     }
 
@@ -71,7 +71,7 @@ class WeMineBot extends BaseBot implements BotInterface
         $curAsicId = $profile['currentAsic'];
         $curAsicLevel = null;
         $nextAsic = null;
-        $resp = $apiClient->get('mining/asics');
+        $resp = $apiClient->get('mining/wbtc/asics');
         $asics = json_decode($resp->getBody()->getContents(), true);
         foreach ($asics as $k => $v) {
             if ($v['_id'] === $curAsicId) {

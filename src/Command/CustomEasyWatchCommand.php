@@ -50,7 +50,7 @@ class CustomEasyWatchCommand extends Command
     {
         /** @var Process[] $processList */
         $processList = [];
-        while ($this->cacheService->get($this->bot->botKey('stream'))) {
+        while ($streamId = $this->cacheService->get($this->bot->botKey('stream'))) {
             $activeProfiles = $this->getActiveProfiles();
             foreach ($activeProfiles as $profile => $cookie) {
                 if (empty($processList[$profile]) || !$processList[$profile]->isRunning()) {
@@ -62,6 +62,7 @@ class CustomEasyWatchCommand extends Command
                             continue;
                         }
                         $authError = 'User is not authorized';
+                        var_dump($output);
                         if (str_contains($output, $authError)) {
                             echo $profile;
                             $this->bot->setProfile($profile);
@@ -81,7 +82,7 @@ class CustomEasyWatchCommand extends Command
                             continue;
                         }
                     }
-                    $processList[$profile] = $this->getProcess($cookie);
+                    $processList[$profile] = $this->getProcess($streamId, $cookie);
                     $processList[$profile]->start();
                 }
             }
@@ -108,11 +109,11 @@ class CustomEasyWatchCommand extends Command
         return $activeProfiles;
     }
 
-    protected function getProcess($cookiesStr)
+    protected function getProcess($id, $cookiesStr)
     {
         return new Process([
             'curl',
-            'https://easywatch.tech/wallet/v1/stream/income/events',
+            'https://easywatch.tech/wallet/v1/stream/' . $id . '/income/events',
             '-H', $cookiesStr,
             '-H', 'user-agent: ' . ProfileService::UA,
             '-H', 'referer: https://easywatch.tech/stream',

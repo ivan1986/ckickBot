@@ -58,12 +58,14 @@ class EasyWatchBot extends BaseBot implements BotInterface
         $balance = (float)str_replace(' ', '', $balance['title']);
         $this->updateStat($balance);
         $client->executeScript(<<<JS
-            document.querySelector('a[href="/stream"]').click();
+            document.querySelector('a[href="/streams"]').click();
         JS);
         sleep(2);
         $stream = $client->executeScript(<<<JS
-            return document.querySelector('iframe#stream-live-event') != null;
+            return document.querySelector('a[href^="/streams/"]').href;
         JS);
+        $stream = explode('/', $stream);
+        $stream = array_pop($stream);
 
         $cookiesArray = [];
         foreach ($cookies->all() as $cookie) {

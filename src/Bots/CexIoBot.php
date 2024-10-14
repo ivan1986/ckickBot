@@ -85,13 +85,22 @@ class CexIoBot extends BaseBot implements BotInterface
         $resp = $apiClient->post('convert', [
             'json' => $this->getJsonData() + [
                 'data' => [
-                    'fromAmount' => $user['balance_BTC'] * 0.9 / 100000,
+                    'fromAmount' => $user['balance_BTC'] * 0.9 / 1000000,
                     'fromCcy' => 'BTC',
                     'price' => $convert,
                     'toCcy' => 'USD',
                 ]
             ]
         ]);
+        $convert = json_decode($resp->getBody()->getContents(), true);
+
+        $resp = $apiClient->post('getUserInfo');
+        $user = json_decode($resp->getBody()->getContents(), true);
+        $user = $user['data'];
+        $this->updateStatItem('USD', $user['balance_USD']);
+        $this->updateStatItem('mBTC', $user['balance_BTC']);
+        $this->updateStatItem('CEXP', $user['balance_CEXP']);
+
         $this->cache->hSet(
             $this->userKey('run'),
             'realExchange',

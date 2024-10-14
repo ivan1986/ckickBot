@@ -24,6 +24,11 @@ final class CustomFunctionHandler
         /** @var BaseBot $bot */
         $bot = $this->botSelector->getBot($message->name);
         $bot->setProfile($message->profile);
+        $this->logger->info('Run for {profile}: {bot}->{callback}', [
+            'profile' => $message->profile,
+            'bot' => $message->name,
+            'callback' => $message->callback
+        ]);
         try {
             $bot->{$message->callback}();
         } catch (Exception $e) {

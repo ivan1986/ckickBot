@@ -8,6 +8,7 @@ use App\Service\BotSelector;
 use App\Service\CacheService;
 use App\Service\ProfileService;
 use Carbon\Carbon;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -27,6 +28,7 @@ class CustomEasyWatchCommand extends Command
     #[Required] public BotSelector $botSelector;
     #[Required] public ProfileService $profileService;
     #[Required] public CacheService $cacheService;
+    #[Required] public LoggerInterface $logger;
     public EasyWatchBot $bot;
 
     protected function configure(): void
@@ -62,9 +64,10 @@ class CustomEasyWatchCommand extends Command
                             continue;
                         }
                         $authError = 'User is not authorized';
-                        var_dump($output);
                         if (str_contains($output, $authError)) {
-                            echo $profile;
+                            $this->logger->error('Error EasyWatch for {profile}: not authorized', [
+                                'profile' => $profile,
+                            ]);
                             $this->bot->setProfile($profile);
                             $this->cacheService->hSet(
                                 $this->bot->userKey('run'),
@@ -116,7 +119,7 @@ class CustomEasyWatchCommand extends Command
             'https://easywatch.tech/wallet/v1/stream/' . $id . '/income/events',
             '-H', $cookiesStr,
             '-H', 'user-agent: ' . ProfileService::UA,
-            '-H', 'referer: https://easywatch.tech/stream',
+            '-H', 'referer: https://easywatch.tech/stream/' . $id,
             '-H', 'accept: text/event-stream',
         ], timeout: 500);
     }

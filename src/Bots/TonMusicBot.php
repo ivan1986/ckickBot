@@ -47,6 +47,10 @@ class TonMusicBot extends BaseBot implements BotInterface
         $resources = $resourcesResponse['result']['resources'];
         $resourcesOkForBig = $resources['disks'] > 50 && $resources['cans'] > 50 && $resources['coins'] > 50;
 
+        foreach (['disks', 'cans', 'coins'] as $resource) {
+            $this->updateStatItem($resource, $resources[$resource]);
+        }
+
         $slotsResponse = $apiClient->get('/api/slots')->getBody()->getContents();
         $slotsResponse = json_decode($slotsResponse, true);
         $slots = $slotsResponse['result']['inventory_slots'];

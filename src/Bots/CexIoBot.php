@@ -81,11 +81,12 @@ class CexIoBot extends BaseBot implements BotInterface
         if ($user['balance_BTC'] < 1000) {
             return;
         }
+        $fromAmount = $user['balance_BTC'] * 0.9 / 100000;
 
         $resp = $apiClient->post('convert', [
             'json' => $this->getJsonData() + [
                 'data' => [
-                    'fromAmount' => $user['balance_BTC'] * 0.9 / 1000000,
+                    'fromAmount' => $fromAmount,
                     'fromCcy' => 'BTC',
                     'price' => $convert,
                     'toCcy' => 'USD',

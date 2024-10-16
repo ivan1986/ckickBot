@@ -62,8 +62,13 @@ class EasyWatchBot extends BaseBot implements BotInterface
         JS);
         sleep(2);
         $stream = $client->executeScript(<<<JS
-            return document.querySelector('a[href^="/streams/"]').href;
+            let link = document.querySelector('a[href^="/streams/"]');
+            return link ? link.href : null;
         JS);
+        if (!$stream) {
+            $this->cache->del($this->botKey('stream'));
+            return;
+        }
         $stream = explode('/', $stream);
         $stream = array_pop($stream);
 

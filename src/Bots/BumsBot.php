@@ -5,6 +5,7 @@ namespace App\Bots;
 use App\Message\CustomFunction;
 use App\Message\CustomFunctionUser;
 use App\Message\UpdateUrl;
+use App\Message\UpdateUrlUser;
 use App\Service\ProfileService;
 use Carbon\Carbon;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
@@ -60,6 +61,13 @@ class BumsBot extends BaseBot implements BotInterface
         }
 
         $resp = $apiClient->get('miniapps/api/user_game_level/getGameInfo');
+        if ($resp->getStatusCode() == 401) {
+            $this->bus->dispatch(
+                new UpdateUrlUser($this->curProfile, $this->getName()),
+                [new DelayStamp(10 * 1000)]
+            );
+            return;
+        }
         $info = json_decode($resp->getBody()->getContents(), true);
         $pph = $info['data']['mineInfo']['minePower'];
         $info = $info['data']['gameInfo'];

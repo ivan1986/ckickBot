@@ -9,6 +9,7 @@ use App\Service\ProfileService;
 use Carbon\Carbon;
 use GuzzleHttp\Cookie\CookieJar as GuzzleCookieJar;
 use GuzzleHttp\Cookie\SetCookie;
+use GuzzleHttp\Exception\ClientException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -70,7 +71,7 @@ class TonStationBot extends BaseBot implements BotInterface
             return;
         }
 
-        $client = $this->profileService->getOrCreateBrowser($this->curProfile, false, ua: self::UA);
+        $client = $this->profileService->getOrCreateBrowser($this->curProfile, ua: self::UA);
         $client->request('GET', 'https://tonstation.app/');
         $client->getWebDriver()->manage()->addCookie([
             'name' => 'cf_clearance',
@@ -192,6 +193,7 @@ class TonStationBot extends BaseBot implements BotInterface
             return $cookie;
         }
 
+        $errorPrefix = $this->getName() . ' for ' . $this->curProfile;
         $cfMs = new \GuzzleHttp\Client([
             'base_uri' => 'http://localhost:3000/',
         ]);
@@ -203,13 +205,13 @@ class TonStationBot extends BaseBot implements BotInterface
             ]
         ]);
         if ($res->getStatusCode() != 200) {
-            $this->logger->error($this->getName() . ' CF error HTTP code');
+            $this->logger->error($errorPrefix . ' CF error HTTP code');
             return null;
         }
         $info = $res->getBody()->getContents();
         $info = json_decode($info, true);
         if ($info['code'] != 200) {
-            $this->logger->error($this->getName() . ' CF error result code');
+            $this->logger->error($errorPrefix . ' CF error result code');
             return null;
         }
         foreach ($info['cookies'] as $v) {
@@ -218,7 +220,7 @@ class TonStationBot extends BaseBot implements BotInterface
                 return $v['value'];
             }
         }
-        $this->logger->error($this->getName() . ' CF error not found cookie');
+        $this->logger->error($errorPrefix . ' CF error not found cookie');
         return null;
     }
 
@@ -249,7 +251,14 @@ class TonStationBot extends BaseBot implements BotInterface
                 'User-Agent' => self::UA,
             ]
         ]);
-        $resp = $authClient->post('userprofile/api/v1/users/auth', ['json' => ['initData' => $tgData]]);
+        try {
+            $resp = $authClient->post('userprofile/api/v1/users/auth', ['json' => ['initData' => $tgData]]);
+        } catch (ClientException $e) {
+            $errorPrefix = $this->getName() . ' for ' . $this->curProfile;
+            $this->logger->error($errorPrefix . ' Auth error - del CF cookie - status: ' . $e->getResponse()->getStatusCode());
+            $this->cache->del($this->userKey('cf-cookie'));
+            return null;
+        }
         $auth = json_decode($resp->getBody()->getContents(), true);
 
         $this->UCSet('token', $auth['accessToken'], ($auth['lifetimeAccessToken'] / 1000) - 10);

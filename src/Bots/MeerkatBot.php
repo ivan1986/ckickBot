@@ -51,6 +51,9 @@ class MeerkatBot extends BaseBot implements BotInterface
 
     public function claimAndReset()
     {
+        if ($this->UCGet('lock')) {
+            return;
+        }
         if (!$apiClient = $this->getClient()) {
             return;
         }
@@ -95,6 +98,7 @@ class MeerkatBot extends BaseBot implements BotInterface
                 new CustomFunctionUser($this->curProfile, $this->getName(), 'claimAndReset'),
                 [new DelayStamp(($boostDuration + 10) * 1000)]
             );
+            return;
         }
 
         $nextClaim = $status['state']['lastClaimAt'] + $duration;
@@ -104,6 +108,9 @@ class MeerkatBot extends BaseBot implements BotInterface
                 new CustomFunctionUser($this->curProfile, $this->getName(), 'claimAndReset'),
                 [new DelayStamp(($duration + 10) * 1000)]
             );
+        }
+        if (!$lastBoost && $nextClaim > time() + 3600) {
+            $this->UCSet('lock', 1, 3000);
         }
     }
 

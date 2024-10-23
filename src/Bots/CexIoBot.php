@@ -19,7 +19,7 @@ class CexIoBot extends BaseBot implements BotInterface
     public function addSchedule(Schedule $schedule)
     {
         $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName()))->withJitter(7200));
-        $schedule->add(RecurringMessage::every('2 hour', new CustomFunction($this->getName(), 'claimAndExchange')));
+        $schedule->add(RecurringMessage::every('6 hour', new CustomFunction($this->getName(), 'claimAndExchange')));
         $schedule->add(RecurringMessage::every('4 hour', new CustomFunction($this->getName(), 'upgrade')));
     }
 
@@ -204,11 +204,13 @@ class CexIoBot extends BaseBot implements BotInterface
         }
 
         return new \GuzzleHttp\Client([
-            'base_uri' => 'https://cexp.cex.io/api/v2/',
+            'base_uri' => 'https://app.cexptap.com/api/v2/',
             'headers' => [
                 'Content-Type' => 'application/json',
                 'User-Agent' => ProfileService::UA,
                 'x-request-userhash' => $hash,
+                'x-appl-version' => '0.19.0',
+                'x-requested-with' => 'org.telegram.messenger',
             ],
             'json' => $this->getJsonData()
         ]);

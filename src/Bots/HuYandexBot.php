@@ -81,6 +81,9 @@ class HuYandexBot extends BaseBot implements BotInterface
                 $exist[$k] = $v['level'];
             }
         }
+        if ($this->auth['user']['minePerHour'] > 300000) {
+            return;
+        }
         $profit = $this->auth['upgrades'];
         $profit = array_filter($profit, function ($item) use ($exist) {
             if ($item['kind'] != 'minePerHour') {

@@ -55,7 +55,7 @@ class HarryCoinBot extends BaseBot implements BotInterface
         }
 
         if ($taps > 0) {
-            $client->getWebDriver()->manage()->timeouts()->setScriptTimeout(300);
+            $client->getWebDriver()->manage()->timeouts()->setScriptTimeout(1800);
             for ($i = 0; $i < $taps ; $i++) {
                 $client->executeScript('document.querySelector("button.user-tap-button").click()');
                 sleep(1);

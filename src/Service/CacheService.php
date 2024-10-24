@@ -11,11 +11,8 @@ class CacheService extends \Redis
         $info = parse_url($dsn);
         $db = trim($info['path'], '/');
         $db = intval($db);
-        parent::__construct([
-            'host' => $info['host'],
-            'port' => $info['port'] ?? 6379,
-            'persistent' => true,
-        ]);
+        parent::__construct();
+        $this->pconnect($info['host'], $info['port'] ?? 6379);
         $this->select($db);
     }
 }

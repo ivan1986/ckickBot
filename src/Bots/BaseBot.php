@@ -7,6 +7,7 @@ use App\Service\ProfileService;
 use GuzzleHttp\Cookie\CookieJar as GuzzleCookieJar;
 use GuzzleHttp\Cookie\SetCookie;
 use Prometheus\CollectorRegistry;
+use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Panther\Client;
@@ -16,6 +17,7 @@ use Symfony\Contracts\Service\Attribute\Required;
 class BaseBot
 {
     const TTL = 3600 * 24;
+    #[Required] public LoggerInterface $logger;
     #[Required] public CacheService $cache;
     #[Required] public ProfileService $profileService;
     #[Required] public CollectorRegistry $collectionRegistry;

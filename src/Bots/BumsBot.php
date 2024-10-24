@@ -8,6 +8,7 @@ use App\Message\UpdateUrl;
 use App\Message\UpdateUrlUser;
 use App\Service\ProfileService;
 use Carbon\Carbon;
+use GuzzleHttp\Exception\ClientException;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
@@ -60,8 +61,10 @@ class BumsBot extends BaseBot implements BotInterface
             return;
         }
 
-        $resp = $apiClient->get('miniapps/api/user_game_level/getGameInfo');
-        if ($resp->getStatusCode() == 401) {
+        try {
+            $resp = $apiClient->get('miniapps/api/user_game_level/getGameInfo');
+        } catch (ClientException $e) {
+            $this->logger->error($this->getName() . ' for ' . $this->curProfile . ' auth error');
             $this->bus->dispatch(
                 new UpdateUrlUser($this->curProfile, $this->getName()),
                 [new DelayStamp(10 * 1000)]

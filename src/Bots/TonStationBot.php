@@ -5,24 +5,17 @@ namespace App\Bots;
 use App\Message\CustomFunction;
 use App\Message\CustomFunctionUser;
 use App\Message\UpdateUrl;
-use App\Service\ProfileService;
 use Carbon\Carbon;
 use GuzzleHttp\Cookie\CookieJar as GuzzleCookieJar;
 use GuzzleHttp\Cookie\SetCookie;
 use GuzzleHttp\Exception\ClientException;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\BrowserKit\Cookie;
-use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Panther\Client;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
-use Symfony\Contracts\Service\Attribute\Required;
 
 class TonStationBot extends BaseBot implements BotInterface
 {
-    #[Required] public LoggerInterface $logger;
-
     const UA = 'Mozilla/5.0 (X11; Android 10; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
 
     public function getTgBotName() { return 'tonstationgames_bot'; }

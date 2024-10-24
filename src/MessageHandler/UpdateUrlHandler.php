@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Facebook\WebDriver\Exception\NoSuchElementException;
 use Facebook\WebDriver\WebDriverBy;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Contracts\Service\Attribute\Required;
@@ -17,6 +18,7 @@ use Symfony\Contracts\Service\Attribute\Required;
 #[AsMessageHandler]
 final class UpdateUrlHandler
 {
+    #[Required] public LoggerInterface $logger;
     #[Required] public ProfileService $clientFactory;
     #[Required] public BotSelector $botSelector;
 
@@ -26,6 +28,10 @@ final class UpdateUrlHandler
 
         $bot = $this->botSelector->getBot($message->name);
         $bot->setProfile($message->profile);
+        $this->logger->info('Update url for {profile}: {bot}', [
+            'profile' => $message->profile,
+            'bot' => $message->name
+        ]);
 
         // load bot chat
         $page = $client->request('GET', 'https://web.telegram.org/k/#@' . $bot->getTgBotName());
@@ -58,6 +64,15 @@ final class UpdateUrlHandler
         if ($src) { // А вдруг телеграм помер
             $bot->saveUrl($client, $src);
             $bot->UCSet('TgUrlUpdate', Carbon::now()->getTimestamp());
+            $this->logger->info('Update url for {profile}: {bot} success', [
+                'profile' => $message->profile,
+                'bot' => $message->name
+            ]);
+        } else {
+            $this->logger->error('Update url for {profile}: {bot} fail get url', [
+                'profile' => $message->profile,
+                'bot' => $message->name
+            ]);
         }
     }
 }

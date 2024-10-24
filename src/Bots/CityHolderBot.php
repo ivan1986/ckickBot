@@ -201,7 +201,7 @@ class CityHolderBot extends BaseBot implements BotInterface
         sleep(2);
 
         // психануть и купить все
-        $client->getWebDriver()->manage()->timeouts()->setScriptTimeout(300);
+        $client->getWebDriver()->manage()->timeouts()->setScriptTimeout(1800);
         $client->executeScript(<<<JS
             const sleep = ms => new Promise(r => setTimeout(r, ms));
             var f3 = async function (tabs) {

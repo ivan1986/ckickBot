@@ -16,7 +16,6 @@ class FactoraBot extends BaseBot implements BotInterface
 
     public function addSchedule(Schedule $schedule)
     {
-        $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName()))->withJitter(7200));
         $schedule->add(RecurringMessage::every('1 hour', new CustomFunction($this->getName(), 'topUpEnergy')));
     }
 

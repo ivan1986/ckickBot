@@ -17,7 +17,6 @@ class DogiatorsBot extends BaseBot implements BotInterface
 
     public function addSchedule(Schedule $schedule)
     {
-        $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName()))->withJitter(7200));
         $schedule->add(RecurringMessage::every('1 hour', new CustomFunction($this->getName(), 'passiveIncome')));
         $schedule->add(RecurringMessage::every('6 hour', new CustomFunction($this->getName(), 'dailyIncome')));
         $schedule->add(RecurringMessage::every('3 hour', new CustomFunction($this->getName(), 'update')));

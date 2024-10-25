@@ -14,7 +14,6 @@ class HarryCoinBot extends BaseBot implements BotInterface
 
     public function addSchedule(Schedule $schedule)
     {
-        $schedule->add(RecurringMessage::every('12 hour', new UpdateUrl($this->getName()))->withJitter(7200));
         $schedule->add(RecurringMessage::every('1 hour', new CustomFunction($this->getName(), 'resetMine')));
         $schedule->add(RecurringMessage::every('30 min', new CustomFunction($this->getName(), 'watchAd')));
         $schedule->add(RecurringMessage::every('1 day', new CustomFunction($this->getName(), 'claimRewards')));

@@ -5,6 +5,7 @@ namespace App\Bots;
 use App\Message\CustomFunction;
 use App\Message\CustomFunctionUser;
 use App\Message\UpdateUrl;
+use App\Service\CFScraper;
 use Carbon\Carbon;
 use GuzzleHttp\Cookie\CookieJar as GuzzleCookieJar;
 use GuzzleHttp\Cookie\SetCookie;
@@ -13,10 +14,14 @@ use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Panther\Client;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
+use Symfony\Contracts\Service\Attribute\Required;
 
 class TonStationBot extends BaseBot implements BotInterface
 {
     const UA = 'Mozilla/5.0 (X11; Android 10; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
+    const CF_COOKIE = 'cf-cookie';
+
+    #[Required] public CFScraper $scraper;
 
     public function getTgBotName() { return 'tonstationgames_bot'; }
 
@@ -68,7 +73,7 @@ class TonStationBot extends BaseBot implements BotInterface
         $client->request('GET', 'https://tonstation.app/');
         $client->getWebDriver()->manage()->addCookie([
             'name' => 'cf_clearance',
-            'value' => $this->getCFCookie(),
+            'value' => $this->getCachedCFCookie(),
             'path' => '/',
             'domain' => 'tonstation.app',
             'secure' => true,
@@ -166,7 +171,7 @@ class TonStationBot extends BaseBot implements BotInterface
         $jar->setCookie(new SetCookie([
             'Domain' => 'tonstation.app',
             'Name' => 'cf_clearance',
-            'Value' => $this->getCFCookie()
+            'Value' => $this->getCachedCFCookie(),
         ]));
 
         return new \GuzzleHttp\Client([
@@ -180,41 +185,14 @@ class TonStationBot extends BaseBot implements BotInterface
         ]);
     }
 
-    protected function getCFCookie()
+    protected function getCachedCFCookie()
     {
-        if ($cookie = $this->UCGet('cf-cookie')) {
-            return $cookie;
+        $cookie = $this->UCGet(self::CF_COOKIE);
+        if (!$cookie) {
+            $cookie = $this->scraper->getCookie('https://tonstation.app/app/', self::UA);
+            $this->UCSet(self::CF_COOKIE, $cookie, 3600 * 24 * 180);
         }
-
-        $errorPrefix = $this->getName() . ' for ' . $this->curProfile;
-        $cfMs = new \GuzzleHttp\Client([
-            'base_uri' => 'http://localhost:3000/',
-        ]);
-        $res = $cfMs->post('/cf-clearance-scraper', [
-            'json' => [
-                'mode' => 'waf-session',
-                'url' => 'https://tonstation.app/app/',
-                'userAgent' => self::UA,
-            ]
-        ]);
-        if ($res->getStatusCode() != 200) {
-            $this->logger->error($errorPrefix . ' CF error HTTP code');
-            return null;
-        }
-        $info = $res->getBody()->getContents();
-        $info = json_decode($info, true);
-        if ($info['code'] != 200) {
-            $this->logger->error($errorPrefix . ' CF error result code');
-            return null;
-        }
-        foreach ($info['cookies'] as $v) {
-            if ($v['name'] == 'cf_clearance') {
-                $this->UCSet('cf-cookie', $v['value'], 3600 * 24 * 180);
-                return $v['value'];
-            }
-        }
-        $this->logger->error($errorPrefix . ' CF error not found cookie');
-        return null;
+        return $cookie;
     }
 
     protected function getToken()
@@ -249,7 +227,7 @@ class TonStationBot extends BaseBot implements BotInterface
         } catch (ClientException $e) {
             $errorPrefix = $this->getName() . ' for ' . $this->curProfile;
             $this->logger->error($errorPrefix . ' Auth error - del CF cookie - status: ' . $e->getResponse()->getStatusCode());
-            $this->cache->del($this->userKey('cf-cookie'));
+            $this->cache->del($this->userKey(self::CF_COOKIE));
             return null;
         }
         $auth = json_decode($resp->getBody()->getContents(), true);

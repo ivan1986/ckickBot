@@ -6,6 +6,7 @@
 parameters:
     env(REDIS_DSN): 'redis://127.0.0.1:6379/10'
     env(PROFILES): '%kernel.project_dir%/profiles'
+    env(SCRAPER): 'http://localhost:3000/'
 
 services:
     # default configuration for services in *this* file

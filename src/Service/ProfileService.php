@@ -4,9 +4,13 @@ namespace App\Service;
 
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Panther\Client;
+use Symfony\Contracts\Service\Attribute\Required;
 
 class ProfileService
 {
+    #[Required] public CacheService $cacheService;
+
+    const TTL = 3600 * 24 * 2;
     private string $path;
     private array $profiles = [];
 
@@ -37,14 +41,24 @@ class ProfileService
 
     public function list(): array
     {
-        if (!$this->profiles) {
-            $files = glob($this->path . '/*');
-            $profiles = [];
-            foreach ($files as $file) {
-                $profiles[] = basename($file);
-            }
-            $this->profiles = $profiles;
+        if ($this->profiles) {
+            return $this->profiles;
         }
+        $cached = $this->cacheService->get('profiles');
+        if ($cached) {
+            return $this->profiles = json_decode($cached, true);
+        }
+
+        $files = glob($this->path . '/*');
+        $profiles = [];
+        foreach ($files as $file) {
+            $profiles[] = basename($file);
+        }
+        if(empty($profiles)) {
+            return [];
+        }
+        $this->cacheService->setex('profiles', self::TTL, json_encode($profiles));
+        $this->profiles = $profiles;
         return $this->profiles;
     }
 }

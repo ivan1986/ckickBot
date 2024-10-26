@@ -2,6 +2,7 @@
 
 namespace App\Bots;
 
+use App\Message\CustomFunction;
 use App\Service\CacheService;
 use App\Service\ProfileService;
 use GuzzleHttp\Cookie\CookieJar as GuzzleCookieJar;
@@ -12,6 +13,8 @@ use ReflectionClass;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Panther\Client;
 use Symfony\Component\Panther\Cookie\CookieJar as SymfonyCookieJar;
+use Symfony\Component\Scheduler\RecurringMessage;
+use Symfony\Component\Scheduler\Schedule;
 use Symfony\Contracts\Service\Attribute\Required;
 
 class BaseBot
@@ -61,6 +64,10 @@ class BaseBot
     protected function platformFix($url)
     {
         return str_replace('tgWebAppPlatform=web', 'tgWebAppPlatform=android', $url);
+    }
+
+    public function addSchedule(Schedule $schedule)
+    {
     }
 
     protected function convertCookies(SymfonyCookieJar $symfonyCookieJar): GuzzleCookieJar

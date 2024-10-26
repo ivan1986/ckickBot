@@ -2,8 +2,8 @@
 
 namespace App\Bots;
 
+use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunction;
-use App\Message\UpdateUrl;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 
@@ -13,11 +13,6 @@ class FactoraBot extends BaseBot implements BotInterface
 
     private $auth;
     private $client;
-
-    public function addSchedule(Schedule $schedule)
-    {
-        $schedule->add(RecurringMessage::every('1 hour', new CustomFunction($this->getName(), 'topUpEnergy')));
-    }
 
     public function saveUrl($client, $url)
     {
@@ -41,6 +36,7 @@ class FactoraBot extends BaseBot implements BotInterface
         $this->auth = $this->UCGet('auth');
     }
 
+    #[ScheduleCallback('1 hour')]
     public function topUpEnergy()
     {
         $this->initClient();

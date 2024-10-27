@@ -164,6 +164,7 @@ class OneWinBot extends BaseBot implements BotInterface
             'base_uri' => 'https://crypto-clicker-backend-go-prod.100hp.app/',
             'headers' => [
                 'X-User-Id' => $userId,
+                'referer' => 'https://cryptocklicker-frontend-rnd-prod.100hp.app/',
                 'Authorization' => 'Bearer ' . $token,
                 'Content-Type' => 'application/json',
                 'User-Agent' => ProfileService::UA,

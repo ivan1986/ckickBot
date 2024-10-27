@@ -2,24 +2,28 @@ monolog:
     channels:
         - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
 
-when@dev:
-    monolog:
-        handlers:
-            main:
-                type: rotating_file
-                path: "%kernel.logs_dir%/%kernel.environment%.log"
-                level: debug
-                channels: ["!event", '!messenger', '!deprecation', "!security", "!request"]
-                max_files: 5
-            messenger:
-                type: rotating_file
-                path: "%kernel.logs_dir%/message-%kernel.environment%.log"
-                level: debug
-                channels: ["messenger"]
-                max_files: 5
-            web:
-                type: rotating_file
-                path: "%kernel.logs_dir%/web-%kernel.environment%.log"
-                level: debug
-                channels: ["security", "request"]
-                max_files: 5
+    handlers:
+        app:
+            type: rotating_file
+            path: "%kernel.logs_dir%/app-%kernel.environment%.log"
+            level: debug
+            channels: ["app"]
+            max_files: 5
+        main:
+            type: rotating_file
+            path: "%kernel.logs_dir%/%kernel.environment%.log"
+            level: debug
+            channels: ["!event", '!messenger', '!deprecation', "!security", "!request", '!app']
+            max_files: 5
+        messenger:
+            type: rotating_file
+            path: "%kernel.logs_dir%/message-%kernel.environment%.log"
+            level: debug
+            channels: ["messenger"]
+            max_files: 5
+        web:
+            type: rotating_file
+            path: "%kernel.logs_dir%/web-%kernel.environment%.log"
+            level: debug
+            channels: ["security", "request"]
+            max_files: 5

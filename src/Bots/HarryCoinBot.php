@@ -105,7 +105,7 @@ class HarryCoinBot extends BaseBot implements BotInterface
         while ($existPopup) {
             sleep(10);
             $existPopup = $client->executeScript(<<<JS
-                return document.querySelectorAll('body > div').length > 2;
+                return document.querySelectorAll('html > div').length > 0;
             JS);
         }
         $this->cache->hSet(

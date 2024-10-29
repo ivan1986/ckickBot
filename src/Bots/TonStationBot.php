@@ -210,7 +210,7 @@ class TonStationBot extends BaseBot implements BotInterface
         $jar->setCookie(new SetCookie([
             'Domain' => 'tonstation.app',
             'Name' => 'cf_clearance',
-            'Value' => $this->getCFCookie()
+            'Value' => $this->getCachedCFCookie()
         ]));
 
         $authClient = new \GuzzleHttp\Client([

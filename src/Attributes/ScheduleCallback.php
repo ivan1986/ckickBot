@@ -8,7 +8,8 @@ use Attribute;
 class ScheduleCallback
 {
     public function __construct(
-        public string $frequency
+        public string $frequency,
+        public int $delta = 0
     )
     {}
 }

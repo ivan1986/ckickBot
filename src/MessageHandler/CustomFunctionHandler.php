@@ -32,6 +32,11 @@ final class CustomFunctionHandler
         try {
             $bot->{$message->callback}();
         } catch (Exception $e) {
+            $bot->cache->hSet(
+                $bot->userKey('run'),
+                'exception',
+                Carbon::now()->getTimestamp()
+            );
             $this->logger->error('Error for ' . $message->profile . ' in ' . $message->name . ' ' . $message->callback . ' :' . $e->getMessage());
             return;
         }

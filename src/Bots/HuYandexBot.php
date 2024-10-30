@@ -80,9 +80,6 @@ class HuYandexBot extends BaseBot implements BotInterface
                 $exist[$k] = $v['level'];
             }
         }
-        if ($this->auth['user']['minePerHour'] > 300000) {
-            return;
-        }
         $profit = $this->auth['upgrades'];
         $profit = array_filter($profit, function ($item) use ($exist) {
             if ($item['kind'] != 'minePerHour') {
@@ -96,6 +93,11 @@ class HuYandexBot extends BaseBot implements BotInterface
                 if ($c['kind'] == 'upgrade') if (!isset($exist[$c['upgradeId']]) || $exist[$c['upgradeId']] < $c['level']) {
                     return false;
                 }
+            }
+            $cf = $item['next']['price'] / $item['next']['increment'];
+            // окупаемость больше месяца
+            if ($cf > 24*30) {
+                return false;
             }
             if (!empty($item['upgradedAt'])) {
                 $delay = $this->auth['sharedConfig']['upgradeDelay'][$item['level'] + 1];

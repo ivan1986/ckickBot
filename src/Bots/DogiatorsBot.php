@@ -90,12 +90,10 @@ class DogiatorsBot extends BaseBot implements BotInterface
                 'ts' => 0,
             ]
         ]);
-        $balance = json_decode($resp->getBody()->getContents(), true);
-        $balance = $balance['result']['profile'];
-        $this->updateStat($balance);
-        $coinsBalance = $balance['balance'];
-        $userLevel = $balance['level'];
-        $refs = $balance['referrals_count'];
+        $profile = json_decode($resp->getBody()->getContents(), true);
+        $profile = $profile['result']['profile'];
+        $this->updateStat($profile);
+        $coinsBalance = $profile['balance'];
 
         $resp = $apiClient->get('upgrade/list');
         $updateData = json_decode($resp->getBody()->getContents(), true);
@@ -106,10 +104,11 @@ class DogiatorsBot extends BaseBot implements BotInterface
             preg_match('#(\D+)(\d+)#', $v['id'], $matches);
             $exist[$v['upgrade_id']] = $v['level'];
         }
+        $arenaStat = $updateData['arena_stats'];
 
         // оставляем только следующий номер для каждого инструмента
         $updates = [];
-        foreach (array_merge($updateData['system_upgrades'], $updateData['special_upgrades']) as $v) {
+        foreach (array_merge($updateData['system_upgrades'], $updateData['special_upgrades'], $updateData['arena_upgrades']) as $v) {
             $level = $exist[$v['id']] ?? 0;
             foreach ($v['modifiers'] as $m) {
                 if ($m['level'] == $level + 1) {
@@ -122,15 +121,15 @@ class DogiatorsBot extends BaseBot implements BotInterface
         }
 
         // оставляем только те у которых есть услови других зданий
-        $updates = array_filter($updates, function ($i) use ($exist, $userLevel, $refs) {
+        $updates = array_filter($updates, function ($i) use ($exist, $profile, $arenaStat) {
             if (empty($i['requirements'])) {
                 return true;
             }
             $req = $i['requirements'][0];
-            if ($req['level'] > $userLevel) {
+            if ($req['level'] >  $profile['level']) {
                 return false;
             }
-            if ($req['min_referrals_count'] > $refs) {
+            if ($req['min_referrals_count'] > $profile['referrals_count']) {
                 return false;
             }
             if ($req['reach_upgrade_id']) {
@@ -140,6 +139,21 @@ class DogiatorsBot extends BaseBot implements BotInterface
                 if ($req['reach_upgrade_level'] > $exist[$req['reach_upgrade_id']]) {
                     return false;
                 }
+            }
+            if ($req['min_fight_pvp_count'] > $arenaStat['battle_in_the_arena_count']) {
+                return false;
+            }
+            if ($req['min_fight_pve_count'] > $arenaStat['battle_in_the_dungeon_count']) {
+                return false;
+            }
+            if ($req['min_in_rest_count'] > $arenaStat['in_rest_count']) {
+                return false;
+            }
+            if ($req['min_in_planning_count'] > $arenaStat['in_planning_count']) {
+                return false;
+            }
+            if ($req['min_in_rage_count'] > $arenaStat['in_rage_count']) {
+                return false;
             }
             return true;
         });
@@ -167,24 +181,8 @@ class DogiatorsBot extends BaseBot implements BotInterface
 
     protected function updateStat($balance)
     {
-        $b = round($balance['balance']);
-        $p = round($balance['profit_per_hour']);
-        $gauge = $this->collectionRegistry->getOrRegisterGauge(
-            $this->getName(),
-            'balance',
-            'Balance',
-            ['user']
-        );
-        $gauge->set($b, [$this->curProfile]);
-        $gauge = $this->collectionRegistry->getOrRegisterGauge(
-            $this->getName(),
-            'profit',
-            'Profit per hour',
-            ['user']
-        );
-        $gauge->set($p, [$this->curProfile]);
-        $this->cache->hSet($this->userKey('status'), 'balance', $b);
-        $this->cache->hSet($this->userKey('status'), 'profit', $p);
+        $this->updateStatItem('balance', round($balance['balance']));
+        $this->updateStatItem('profit', round($balance['profit_per_hour']));
     }
 
     protected function getClient(): ?\GuzzleHttp\Client

@@ -144,4 +144,13 @@ class BaseBot
         return $stat;
     }
     //</editor-fold>
+
+    public function markRun(string $name)
+    {
+        $this->cache->hSet(
+            $this->userKey('run'),
+            $name,
+            Carbon::now()->getTimestamp()
+        );
+    }
 }

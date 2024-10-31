@@ -28,7 +28,7 @@ class ActionStatusDto
     {
         $maxK = ''; $maxV = 0;
         foreach ($this->redisData as $k => $v) {
-            if ($v > $maxV) {
+            if ($v >= $maxV) {
                 $maxV = $v;
                 $maxK = $k;
             }

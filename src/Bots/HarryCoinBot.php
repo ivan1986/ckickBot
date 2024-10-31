@@ -2,6 +2,7 @@
 
 namespace App\Bots;
 
+use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunction;
 use App\Message\UpdateUrl;
 use Carbon\Carbon;
@@ -12,19 +13,13 @@ class HarryCoinBot extends BaseBot implements BotInterface
 {
     public function getTgBotName() { return 'harry_coin_bot'; }
 
-    public function addSchedule(Schedule $schedule)
-    {
-        $schedule->add(RecurringMessage::every('1 hour', new CustomFunction($this->getName(), 'resetMine')));
-        $schedule->add(RecurringMessage::every('30 min', new CustomFunction($this->getName(), 'watchAd')));
-        $schedule->add(RecurringMessage::every('1 day', new CustomFunction($this->getName(), 'claimRewards')));
-    }
-
     public function saveUrl($client, $url)
     {
         $url = $this->platformFix($url);
         parent::saveUrl($client, $url);
     }
 
+    #[ScheduleCallback('1 hour')]
     public function resetMine()
     {
         if (!$this->getUrl()) {
@@ -51,6 +46,7 @@ class HarryCoinBot extends BaseBot implements BotInterface
         if ($mining == '00:00:00') {
             $client->executeScript('document.querySelector(".user-tap-row button").click()');
             sleep(1);
+            return true;
         }
 
         if ($taps > 0) {
@@ -59,9 +55,11 @@ class HarryCoinBot extends BaseBot implements BotInterface
                 $client->executeScript('document.querySelector("button.user-tap-button").click()');
                 sleep(1);
             }
+            $this->markRun('tap');
         }
     }
 
+    #[ScheduleCallback('30 min')]
     public function watchAd()
     {
         if (!$this->getUrl()) {
@@ -108,15 +106,10 @@ class HarryCoinBot extends BaseBot implements BotInterface
                 return document.querySelectorAll('html > div').length > 0;
             JS);
         }
-        $this->cache->hSet(
-            $this->userKey('run'),
-            'realWatch',
-            Carbon::now()->getTimestamp()
-        );
-
-        //sleep(1000);
+        return true;
     }
 
+    #[ScheduleCallback('1 day')]
     public function claimRewards()
     {
         if (!$this->getUrl()) {

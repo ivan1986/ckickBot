@@ -2,6 +2,7 @@
 
 namespace App\Bots;
 
+use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunction;
 use App\Message\CustomFunctionUser;
 use App\Message\UpdateUrl;
@@ -16,12 +17,6 @@ use Symfony\Component\Scheduler\Schedule;
 class HuYandexBot extends BaseBot implements BotInterface
 {
     public function getTgBotName() { return 'qlyukerbot'; }
-
-    public function addSchedule(Schedule $schedule)
-    {
-        $schedule->add(RecurringMessage::every('2 hour', new CustomFunction($this->getName(), 'claim')));
-        $schedule->add(RecurringMessage::every('4 hour', new CustomFunction($this->getName(), 'upgrade')));
-    }
 
     public function saveUrl($client, $url)
     {
@@ -39,6 +34,7 @@ class HuYandexBot extends BaseBot implements BotInterface
     protected $auth;
 
 
+    #[ScheduleCallback('2 hour')]
     public function claim()
     {
         if (!$auth = $this->startRequest()) {
@@ -49,6 +45,7 @@ class HuYandexBot extends BaseBot implements BotInterface
         if (empty($this->auth['user']['dailyReward']['claimed'])) {
             sleep(5);
             $client->post('tasks/daily');
+            return true;
         }
 
         if ($this->auth['user']['currentEnergy'] > 400) {
@@ -63,10 +60,13 @@ class HuYandexBot extends BaseBot implements BotInterface
             ];
             $resp = $client->post('game/sync', [ 'json' => $data ]);
             $res = json_decode($resp->getBody()->getContents(), true);
-            $this->updateStat($res['currentCoins'], $this->auth['user']['minePerHour']);
+            $this->updateStatItem('balance', $res['currentCoins']);
+            $this->updateStatItem('profit', $this->auth['user']['minePerHour']);
+            $this->markRun('tap-tap');
         }
     }
 
+    #[ScheduleCallback('4 hour')]
     public function upgrade()
     {
         if (!$auth = $this->startRequest()) {
@@ -114,37 +114,12 @@ class HuYandexBot extends BaseBot implements BotInterface
         }
 
         $client->post('upgrades/buy', [ 'json' => ['upgradeId' => $profit[0]['id']] ]);
-        $this->cache->hSet(
-            $this->userKey('run'),
-            'realUpgrade',
-            Carbon::now()->getTimestamp()
-        );
         $this->bus->dispatch(
             new CustomFunctionUser($this->curProfile, $this->getName(), 'upgrade'),
             [new DelayStamp(10 * 1000)]
         );
+        return true;
     }
-
-    protected function updateStat($balance, $profit)
-    {
-        $gauge = $this->collectionRegistry->getOrRegisterGauge(
-            $this->getName(),
-            'balance',
-            'Balance',
-            ['user']
-        );
-        $gauge->set($balance, [$this->curProfile]);
-        $gauge = $this->collectionRegistry->getOrRegisterGauge(
-            $this->getName(),
-            'profit',
-            'Profit per hour',
-            ['user']
-        );
-        $gauge->set($profit, [$this->curProfile]);
-        $this->cache->hSet($this->userKey('status'), 'balance', $balance);
-        $this->cache->hSet($this->userKey('status'), 'profit', $profit);
-    }
-
 
     protected function getClient($cookie): ?\GuzzleHttp\Client
     {

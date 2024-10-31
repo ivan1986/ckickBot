@@ -2,6 +2,7 @@
 
 namespace App\Bots;
 
+use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunction;
 use App\Message\CustomFunctionUser;
 use App\Message\UpdateUrl;
@@ -15,12 +16,6 @@ use Symfony\Component\Scheduler\Schedule;
 class MeerkatBot extends BaseBot implements BotInterface
 {
     public function getTgBotName() { return 'meerkat_coin_bot'; }
-
-    public function addSchedule(Schedule $schedule)
-    {
-        $schedule->add(RecurringMessage::every('10 min', new CustomFunction($this->getName(), 'claimAndReset')));
-        //$schedule->add(RecurringMessage::every('8 hour', new CustomFunction($this->getName(), 'getBalance')));
-    }
 
     public function runInTg(Client $client)
     {
@@ -48,6 +43,7 @@ class MeerkatBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
+    #[ScheduleCallback('15 min')]
     public function claimAndReset()
     {
         if ($this->UCGet('lock')) {
@@ -97,7 +93,8 @@ class MeerkatBot extends BaseBot implements BotInterface
                 new CustomFunctionUser($this->curProfile, $this->getName(), 'claimAndReset'),
                 [new DelayStamp(($boostDuration + 10) * 1000)]
             );
-            return;
+            $this->markRun('turbo');
+            return true;
         }
 
         $nextClaim = $status['state']['lastClaimAt'] + $duration;
@@ -107,6 +104,7 @@ class MeerkatBot extends BaseBot implements BotInterface
                 new CustomFunctionUser($this->curProfile, $this->getName(), 'claimAndReset'),
                 [new DelayStamp(($duration + 10) * 1000)]
             );
+            return true;
         }
         if (!$lastBoost && $nextClaim > time() + 3600) {
             $this->UCSet('lock', 1, 3000);

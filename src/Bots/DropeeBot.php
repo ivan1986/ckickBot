@@ -61,8 +61,8 @@ class DropeeBot extends BaseBot implements BotInterface
         $sync = json_decode($sync, true);
         $sync = $sync['playerStats'];
 
-        $this->updateStatItem('coins', $sync['coins']);
-        $this->updateStatItem('profit', $sync['profit']);
+        $this->updateStatItem('coins', round($sync['coins']));
+        $this->updateStatItem('profit', round($sync['profit']));
 
         $myUpgrades = [];
         foreach ($sync['upgrades'] as $k => $v) {

@@ -113,6 +113,9 @@ class DogiatorsBot extends BaseBot implements BotInterface
             foreach ($v['modifiers'] as $m) {
                 if ($m['level'] == $level + 1) {
                     $v['next'] = $m;
+                    if (isset($v['requirements'][$m['level']])) {
+                        $v['reqn'] = $v['requirements'][$level];
+                    }
                     break;
                 }
             }
@@ -125,8 +128,8 @@ class DogiatorsBot extends BaseBot implements BotInterface
             if (empty($i['requirements'])) {
                 return true;
             }
-            $req = $i['requirements'][0];
-            if ($req['level'] >  $profile['level']) {
+            $req = $i['reqn'] ?? $i['requirements'][0];
+            if ($req['level'] > $profile['level']) {
                 return false;
             }
             if ($req['min_referrals_count'] > $profile['referrals_count']) {
@@ -140,19 +143,26 @@ class DogiatorsBot extends BaseBot implements BotInterface
                     return false;
                 }
             }
-            if ($req['min_fight_pvp_count'] > $arenaStat['battle_in_the_arena_count']) {
-                return false;
+            $reqMap = [
+                'min_rating' => 'rating',
+                'min_fight_pvp_count' => 'battle_in_the_arena_count',
+                'min_fight_pve_count' => 'battle_in_the_dungeon_count',
+                'min_in_rest_count' => 'in_rest_count',
+                'min_in_planning_count' => 'in_planning_count',
+                'min_in_rage_count' => 'in_rage_count',
+                'min_chest_bronze_open_count' => 'chest_bronze_open_count',
+                'min_chest_silver_open_count' => 'chest_silver_open_count',
+                'min_chest_gold_open_count' => 'chest_gold_open_count',
+                'min_feed_count' => 'feed_count',
+                'min_durability_repair_count' => 'durability_repair_count',
+                'min_tokens_earned' => 'tokens_earned',
+            ];
+            foreach ($reqMap as $k => $v) {
+                if ($req[$k] > $arenaStat[$v]) {
+                    return false;
+                }
             }
-            if ($req['min_fight_pve_count'] > $arenaStat['battle_in_the_dungeon_count']) {
-                return false;
-            }
-            if ($req['min_in_rest_count'] > $arenaStat['in_rest_count']) {
-                return false;
-            }
-            if ($req['min_in_planning_count'] > $arenaStat['in_planning_count']) {
-                return false;
-            }
-            if ($req['min_in_rage_count'] > $arenaStat['in_rage_count']) {
+            if ($req['min_player_item_upgrade_count'] > 0) {
                 return false;
             }
             return true;

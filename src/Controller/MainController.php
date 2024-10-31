@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Model\ActionState;
 use App\Service\BotSelector;
 use App\Service\CacheService;
 use App\Service\ProfileService;
@@ -28,7 +29,19 @@ class MainController extends AbstractController
         ]);
     }
 
-    public function botBlock(string $profile, string $bot)
+    #[Route('/user/{profile}', name: 'userIndex')]
+    public function userIndex(string $profile)
+    {
+
+    }
+
+    #[Route('/bot/{bot}', name: 'botIndex')]
+    public function botIndex(string $bot)
+    {
+
+    }
+
+    public function botBlock(string $title, string $profile, string $bot)
     {
         $botObj = $this->botSelector->getBot($bot);
         $botObj->setProfile($profile);
@@ -38,9 +51,31 @@ class MainController extends AbstractController
             $run[$k] = str_replace(' ago', '', Carbon::createFromTimestamp($v)->diffForHumans());
         }
 
+        $actionsTable = '';
+        if ($actions = $botObj->getActions()) {
+            $actionsTable = '<table class="table table-responsive table-nowrap">';
+            foreach ($actions as $name => $actionStatusDto)
+            {
+                $actionsTable .= <<<TR
+                    <tr>
+                        <td>{$name}</td>
+                        <td>{$actionStatusDto->timeAgo(ActionState::START)}</td>
+                        <td>{$actionStatusDto->timeAgo(ActionState::CHANGE)}</td>
+                        <td>{$actionStatusDto->lastStatus()}</td>
+                    </tr>
+                TR;
+            }
+            $actionsTable .= '</table>';
+        }
+
         return $this->render('main/block/bot.html.twig', [
+            'bs' => $this->botSelector,
+            'title' => $title,
+            'bot' => $botObj,
+            'profile' => $profile,
             'status' => $status,
             'run' => $run,
+            'actionsTable' => $actionsTable,
         ]);
     }
 

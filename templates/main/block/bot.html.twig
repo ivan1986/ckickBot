@@ -1,22 +1,45 @@
-<div class="row">
-    <div class="col-6">
-        <table class="table table-responsive table-nowrap">
-            {% for k,v in status %}
-            <tr>
-                <td>{{ k }}</td>
-                <td>{{ v }}</td>
-            </tr>
-            {% endfor %}
-        </table>
+<div class="card">
+    <div class="ribbon ribbon-top">
+        <input class="form-check-input" type="checkbox" {% if bs.isEnabled(profile, bot.name) %} checked {% endif %}
+               data-url="{{ path('toggle_bot', {'profile': profile, 'bot': bot.name}) }}">
     </div>
-    <div class="col-6">
-        <table class="table table-responsive table-nowrap">
-            {% for k,v in run %}
-                <tr>
-                    <td>{{ k }}</td>
-                    <td>{{ v }}</td>
-                </tr>
-            {% endfor %}
-        </table>
+    <div class="card-body">
+
+        <p class="card-title">{{ title }}
+            {% set url = bs.botUrl(profile, bot.name) %}
+            {% if url %}
+                <a target="_blank" href="{{ url }}">
+                    <img alt="" src="{{ asset('img/external-link.svg') }}" style="width: 24px; top: -3px; position: relative" />
+                </a>
+            {% endif %}
+            {{ bs.botUrlUpdate(profile, bot.name) }}
+        </p>
+
+        <div class="row">
+            <div class="col-6">
+                <table class="table table-responsive table-nowrap">
+                    {% for k,v in status %}
+                        <tr>
+                            <td>{{ k }}</td>
+                            <td>{{ v }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <div class="col-6">
+                <table class="table table-responsive table-nowrap">
+                    {% for k,v in run %}
+                        <tr>
+                            <td>{{ k }}</td>
+                            <td>{{ v }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <div class="col-12">
+                {{ actionsTable | raw }}
+            </div>
+        </div>
+
     </div>
 </div>

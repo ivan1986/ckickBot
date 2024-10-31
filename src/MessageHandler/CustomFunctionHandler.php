@@ -4,6 +4,7 @@ namespace App\MessageHandler;
 
 use App\Bots\BaseBot;
 use App\Message\CustomFunctionUser;
+use App\Model\ActionState;
 use App\Service\BotSelector;
 use App\Service\CacheService;
 use Carbon\Carbon;
@@ -29,22 +30,17 @@ final class CustomFunctionHandler
             'bot' => $message->name,
             'callback' => $message->callback
         ]);
+        $bot->logAction($message->callback, ActionState::START);
         try {
-            $bot->{$message->callback}();
+            $result = $bot->{$message->callback}();
+            if ($result) {
+                $bot->logAction($message->callback, ActionState::CHANGE);
+            }
         } catch (Exception $e) {
-            $bot->cache->hSet(
-                $bot->userKey('run'),
-                'exception',
-                Carbon::now()->getTimestamp()
-            );
+            $bot->logAction($message->callback, ActionState::ERROR);
             $this->logger->error('Error for ' . $message->profile . ' in ' . $message->name . ' ' . $message->callback . ' :' . $e->getMessage());
             return;
         }
-
-        $bot->cache->hSet(
-            $bot->userKey('run'),
-            $message->callback,
-            Carbon::now()->getTimestamp()
-        );
+        $bot->logAction($message->callback, ActionState::FINISH);
     }
 }

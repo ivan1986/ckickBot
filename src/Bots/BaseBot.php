@@ -3,8 +3,11 @@
 namespace App\Bots;
 
 use App\Message\CustomFunction;
+use App\Model\ActionState;
+use App\Model\ActionStatusDto;
 use App\Service\CacheService;
 use App\Service\ProfileService;
+use Carbon\Carbon;
 use GuzzleHttp\Cookie\CookieJar as GuzzleCookieJar;
 use GuzzleHttp\Cookie\SetCookie;
 use Prometheus\CollectorRegistry;
@@ -110,4 +113,35 @@ class BaseBot
     {
         return $this->getName() . ':::' . $key;
     }
+
+    //<editor-fold desc="actions">
+    public function logAction(string $name, ActionState $status)
+    {
+        $key = $this->getName() . ':' . $this->curProfile . '::actions';
+        $this->cache->hSet(
+            $key,
+            $name . ':' . $status->value,
+            Carbon::now()->getTimestamp()
+        );
+    }
+
+    /**
+     * @return ActionStatusDto[]
+     * @throws \RedisException
+     */
+    public function getActions(): array
+    {
+        $key = $this->getName() . ':' . $this->curProfile . '::actions';
+        $actions = $this->cache->hGetAll($key);
+        $stat = [];
+        foreach ($actions as $record => $time) {
+            [$name, $status] = explode(':', $record);
+            $stat[$name][$status] = $time;
+        }
+        foreach ($stat as $k => $item) {
+            $stat[$k] = new ActionStatusDto($item);
+        }
+        return $stat;
+    }
+    //</editor-fold>
 }

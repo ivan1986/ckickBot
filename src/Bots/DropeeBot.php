@@ -56,7 +56,7 @@ class DropeeBot extends BaseBot implements BotInterface
         $config = json_decode($config, true);
         $config = $config['config'];
 
-        $sync = $apiClient->post('game/sync');
+        $sync = $apiClient->post('game/sync', ['json' => ['initialSync' => true]]);
         $sync = $sync->getBody()->getContents();
         $sync = json_decode($sync, true);
         $sync = $sync['playerStats'];
@@ -147,7 +147,7 @@ class DropeeBot extends BaseBot implements BotInterface
             return;
         }
 
-        $sync = $apiClient->post('game/sync');
+        $sync = $apiClient->post('game/sync', ['json' => ['initialSync' => true]]);
         $sync = $sync->getBody()->getContents();
         $sync = json_decode($sync, true);
         $sync = $sync['playerStats'];

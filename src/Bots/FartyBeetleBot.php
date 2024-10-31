@@ -2,6 +2,7 @@
 
 namespace App\Bots;
 
+use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunction;
 use App\Message\UpdateUrl;
 use App\Service\ProfileService;
@@ -11,11 +12,6 @@ use Symfony\Component\Scheduler\Schedule;
 class FartyBeetleBot extends BaseBot implements BotInterface
 {
     public function getTgBotName() { return 'fart_beetle_bot'; }
-
-    public function addSchedule(Schedule $schedule)
-    {
-        $schedule->add(RecurringMessage::every('2 hour', new CustomFunction($this->getName(), 'craft')));
-    }
 
     public function saveUrl($client, $url)
     {
@@ -29,6 +25,7 @@ class FartyBeetleBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
+    #[ScheduleCallback('2 hour')]
     public function craft()
     {
         if (!$apiClient = $this->getClient()) {
@@ -41,7 +38,7 @@ class FartyBeetleBot extends BaseBot implements BotInterface
             ]
         ]);
         $info = json_decode($resp->getBody()->getContents(), true);
-        $this->updateStat($info['burgers_count']);
+        $this->updateStatItem('balance', $info['burgers_count']);
 
         if (count($info['completed_tasks']) >= 40) {
             return;
@@ -70,18 +67,7 @@ class FartyBeetleBot extends BaseBot implements BotInterface
                 return;
             }
         }
-    }
-
-    protected function updateStat($balance)
-    {
-        $gauge = $this->collectionRegistry->getOrRegisterGauge(
-            $this->getName(),
-            'balance',
-            'Balance',
-            ['user']
-        );
-        $gauge->set($balance, [$this->curProfile]);
-        $this->cache->hSet($this->userKey('status'), 'balance', $balance);
+        return true;
     }
 
     protected function getClient(): ?\GuzzleHttp\Client

@@ -46,7 +46,7 @@ class FactoraBot extends BaseBot implements BotInterface
         $userInfo = $this->getuserInfo();
 
         if ($userInfo['currentEnergy'] > $userInfo['totalEnergyConsumptionPerHour'] * 1.5) {
-            return 0;
+            return;
         }
 
         $topUp = intval($userInfo['energyLimit'] * random_int(95,98) / 100);
@@ -62,6 +62,7 @@ class FactoraBot extends BaseBot implements BotInterface
 
             $userInfo = $this->getuserInfo();
         }
+        return true;
     }
 
     /**

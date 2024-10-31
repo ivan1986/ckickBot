@@ -2,6 +2,7 @@
 
 namespace App\Bots;
 
+use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunction;
 use App\Message\CustomFunctionUser;
 use App\Message\UpdateUrl;
@@ -62,6 +63,7 @@ class TonStationBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
+    #[ScheduleCallback('8 hour')]
     public function getBalance()
     {
         if (!$this->getUrl()) {
@@ -94,6 +96,7 @@ class TonStationBot extends BaseBot implements BotInterface
         }
     }
 
+    #[ScheduleCallback('2 hour')]
     public function claimAndReset()
     {
         if ($this->UCGet('lock')) {
@@ -125,11 +128,7 @@ class TonStationBot extends BaseBot implements BotInterface
                 new CustomFunctionUser($this->curProfile, $this->getName(), 'claimAndReset'),
                 [new DelayStamp((abs($secondsLeft) + 2) * 1000)]
             );
-            $this->cache->hSet(
-                $this->userKey('run'),
-                'check',
-                Carbon::now()->getTimestamp()
-            );
+            $this->markRun('check');
         } else {
             $apiClient->post('farming/api/v1/farming/claim', [
                 'json' => [
@@ -150,11 +149,7 @@ class TonStationBot extends BaseBot implements BotInterface
                 new CustomFunctionUser($this->curProfile, $this->getName(), 'claimAndReset'),
                 [new DelayStamp(($delay + 2) * 1000)]
             );
-            $this->cache->hSet(
-                $this->userKey('run'),
-                'restart',
-                Carbon::now()->getTimestamp()
-            );
+            return true;
         }
     }
 
@@ -190,6 +185,7 @@ class TonStationBot extends BaseBot implements BotInterface
         if (!$cookie) {
             $cookie = $this->scraper->getCookie('https://tonstation.app/app/', self::UA);
             $this->UCSet(self::CF_COOKIE, $cookie, 3600 * 24 * 180);
+            $this->markRun('getCF');
         }
         return $cookie;
     }

@@ -2,6 +2,7 @@
 
 namespace App\Bots;
 
+use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunction;
 use App\Message\UpdateUrl;
 use Carbon\Carbon;
@@ -12,11 +13,6 @@ use Symfony\Component\Scheduler\Schedule;
 class EasyWatchBot extends BaseBot implements BotInterface
 {
     public function getTgBotName() { return 'ESWatch_bot'; }
-
-    public function addSchedule(Schedule $schedule)
-    {
-        $schedule->add(RecurringMessage::every('30 min', new CustomFunction($this->getName(), 'checkStream')));
-    }
 
     public function runInTg(Client $client)
     {
@@ -31,6 +27,7 @@ class EasyWatchBot extends BaseBot implements BotInterface
         parent::runInTg($client);
     }
 
+    #[ScheduleCallback('30 min')]
     public function checkStream()
     {
         if (!$this->getUrl()) {
@@ -55,7 +52,7 @@ class EasyWatchBot extends BaseBot implements BotInterface
             return document.querySelector('[data-test-id="user-balance"]').dataset;
         JS);
         $balance = (float)str_replace(' ', '', $balance['title']);
-        $this->updateStat($balance);
+        $this->updateStatItem('balance', round($balance, 3));
         $client->executeScript(<<<JS
             document.querySelector('a[href="/streams"]').click();
         JS);
@@ -76,25 +73,7 @@ class EasyWatchBot extends BaseBot implements BotInterface
             $cookiesArray[] = $cookie->getName() . '=' . $cookie->getValue();
         }
         $this->UCSet('cookies', 'cookie: ' . join('; ', $cookiesArray));
-        $this->cache->hSet(
-            $this->userKey('run'),
-            'updateCookie',
-            Carbon::now()->getTimestamp()
-        );
-
         $this->cache->set($this->botKey('stream'), $stream);
-    }
-
-    protected function updateStat($balance)
-    {
-        $balance = round($balance, 3);
-        $gauge = $this->collectionRegistry->getOrRegisterGauge(
-            $this->getName(),
-            'balance',
-            'Balance',
-            ['user']
-        );
-        $gauge->set($balance, [$this->curProfile]);
-        $this->cache->hSet($this->userKey('status'), 'balance', $balance);
+        return true;
     }
 }

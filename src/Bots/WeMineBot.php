@@ -2,6 +2,7 @@
 
 namespace App\Bots;
 
+use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunction;
 use App\Message\UpdateUrl;
 use App\Service\ProfileService;
@@ -12,12 +13,6 @@ use Symfony\Contracts\Service\Attribute\Required;
 class WeMineBot extends BaseBot implements BotInterface
 {
     public function getTgBotName() { return 'WeMineBot'; }
-
-    public function addSchedule(Schedule $schedule)
-    {
-        $schedule->add(RecurringMessage::every('30 minutes', new CustomFunction($this->getName(), 'claimAndReset')));
-        $schedule->add(RecurringMessage::every('6 hour', new CustomFunction($this->getName(), 'convertAndUpgrade')));
-    }
 
     public function saveUrl($client, $url)
     {
@@ -31,6 +26,7 @@ class WeMineBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
+    #[ScheduleCallback('30 min')]
     public function claimAndReset()
     {
         if (!$apiClient = $this->getClient()) {
@@ -48,9 +44,11 @@ class WeMineBot extends BaseBot implements BotInterface
         $limitS = $limit->i * 60 + $limit->s;
         if ($deltaS > $limitS) {
             $apiClient->post('mining/wbtc/start-claim');
+            return true;
         }
     }
 
+    #[ScheduleCallback('6 hour')]
     public function convertAndUpgrade()
     {
         if (!$apiClient = $this->getClient()) {
@@ -65,6 +63,7 @@ class WeMineBot extends BaseBot implements BotInterface
         $deltaS = $delta->h * 3600 + $delta->i * 60 + $delta->s;
         if ($deltaS > 1800 && $profile['balance']['wBTC'] > 0.001) {
             $apiClient->post('exchange/btc-to-usd', ['json' => ['amount' => $profile['balance']['wBTC']]]);
+            $this->markRun('exchange');
         }
 
         $curAsicId = $profile['currentAsic'];
@@ -81,6 +80,7 @@ class WeMineBot extends BaseBot implements BotInterface
         }
         if ($nextAsic && $nextAsic['purchaseCost'] < $profile['balance']['wUSD']) {
             $apiClient->post('mining/purchase', ['json' => ['asicId' => $nextAsic['_id']]]);
+            return true;
         }
 
         $curLevelsCode = $curAsicLevel * 10;
@@ -104,7 +104,7 @@ class WeMineBot extends BaseBot implements BotInterface
                     if ($v['type'] === $upgrade) {
                         if ($v['levelCosts'][$curLevel + 1] < $profile['balance']['wUSD']) {
                             $apiClient->post('upgrades/upgrade', ['json' => ['upgradeType' => $upgrade]]);
-                            break;
+                            return true;
                         }
                     }
                 }

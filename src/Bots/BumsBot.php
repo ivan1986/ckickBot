@@ -2,6 +2,7 @@
 
 namespace App\Bots;
 
+use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunction;
 use App\Message\CustomFunctionUser;
 use App\Message\UpdateUrl;
@@ -16,12 +17,6 @@ use Symfony\Component\Scheduler\Schedule;
 class BumsBot extends BaseBot implements BotInterface
 {
     public function getTgBotName() { return 'bums_ton_bot'; }
-
-    public function addSchedule(Schedule $schedule)
-    {
-        $schedule->add(RecurringMessage::every('2 hour', new CustomFunction($this->getName(), 'update')));
-        $schedule->add(RecurringMessage::every('8 hour', new CustomFunction($this->getName(), 'daily')));
-    }
 
     public function saveUrl($client, $url)
     {
@@ -54,6 +49,7 @@ class BumsBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
+    #[ScheduleCallback('2 hour')]
     public function update()
     {
         if (!$apiClient = $this->getClient()) {
@@ -99,17 +95,14 @@ class BumsBot extends BaseBot implements BotInterface
                 ],
             ]
         ]);
-        $this->cache->hSet(
-            $this->userKey('run'),
-            'realUpgrade',
-            Carbon::now()->getTimestamp()
-        );
         $this->bus->dispatch(
             new CustomFunctionUser($this->curProfile, $this->getName(), 'update'),
             [new DelayStamp(10 * 1000)]
         );
+        return true;
     }
 
+    #[ScheduleCallback('8 hour')]
     public function daily()
     {
         if (!$apiClient = $this->getClient()) {
@@ -124,11 +117,7 @@ class BumsBot extends BaseBot implements BotInterface
             return;
         }
         $apiClient->post('miniapps/api/sign/sign');
-        $this->cache->hSet(
-            $this->userKey('run'),
-            'getDaily',
-            Carbon::now()->getTimestamp()
-        );
+        return true;
     }
 
     protected function getClient(): ?\GuzzleHttp\Client

@@ -2,6 +2,7 @@
 
 namespace App\Bots;
 
+use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunction;
 use App\Message\CustomFunctionUser;
 use App\Message\UpdateUrl;
@@ -14,13 +15,6 @@ use Symfony\Contracts\Service\Attribute\Required;
 class DogiatorsBot extends BaseBot implements BotInterface
 {
     public function getTgBotName() { return 'Dogiators_bot'; }
-
-    public function addSchedule(Schedule $schedule)
-    {
-        $schedule->add(RecurringMessage::every('1 hour', new CustomFunction($this->getName(), 'passiveIncome')));
-        $schedule->add(RecurringMessage::every('6 hour', new CustomFunction($this->getName(), 'dailyIncome')));
-        $schedule->add(RecurringMessage::every('3 hour', new CustomFunction($this->getName(), 'update')));
-    }
 
     public function saveUrl($client, $url)
     {
@@ -35,6 +29,7 @@ class DogiatorsBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
+    #[ScheduleCallback('1 hour')]
     public function passiveIncome()
     {
         if (!$apiClient = $this->getClient()) {
@@ -54,6 +49,7 @@ class DogiatorsBot extends BaseBot implements BotInterface
         $this->updateStat($balance);
     }
 
+    #[ScheduleCallback('6 hour')]
     public function dailyIncome()
     {
         if (!$apiClient = $this->getClient()) {
@@ -74,8 +70,10 @@ class DogiatorsBot extends BaseBot implements BotInterface
             return;
         }
         $apiClient->post('quests/daily-reward/claim');
+        return true;
     }
 
+    #[ScheduleCallback('4 hour')]
     public function update()
     {
         if (!$apiClient = $this->getClient()) {
@@ -187,6 +185,7 @@ class DogiatorsBot extends BaseBot implements BotInterface
             new CustomFunctionUser($this->curProfile, $this->getName(), 'update'),
             [new DelayStamp(10 * 1000)]
         );
+        return true;
     }
 
     protected function updateStat($balance)

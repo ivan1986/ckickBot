@@ -2,6 +2,7 @@
 
 namespace App\Bots;
 
+use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunction;
 use App\Message\UpdateUrl;
 use App\Service\ProfileService;
@@ -13,11 +14,6 @@ class CatsDogsBot extends BaseBot implements BotInterface
 {
     public function getTgBotName() { return 'catsdogs_game_bot'; }
 
-    public function addSchedule(Schedule $schedule)
-    {
-        $schedule->add(RecurringMessage::every('4 hour', new CustomFunction($this->getName(), 'claim')));
-    }
-
     public function saveUrl($client, $url)
     {
         parent::saveUrl($client, $url);
@@ -28,6 +24,7 @@ class CatsDogsBot extends BaseBot implements BotInterface
         $this->UCSet('auth', $auth);
     }
 
+    #[ScheduleCallback('4 hour')]
     public function claim()
     {
         if (!$apiClient = $this->getClient()) {
@@ -48,6 +45,7 @@ class CatsDogsBot extends BaseBot implements BotInterface
             $apiClient->post('game/claim', ['json' => ['claimed_amount' => $amount]]);
 
             $this->updateStat($apiClient);
+            return true;
         }
     }
 
@@ -60,14 +58,7 @@ class CatsDogsBot extends BaseBot implements BotInterface
             $balanceAll += $b;
         }
 
-        $gauge = $this->collectionRegistry->getOrRegisterGauge(
-            $this->getName(),
-            'balance',
-            'Balance',
-            ['user']
-        );
-        $gauge->set($balanceAll, [$this->curProfile]);
-        $this->cache->hSet($this->userKey('status'), 'balance', $balanceAll);
+        $this->updateStatItem('balance', $balanceAll);
     }
 
     protected function getClient(): ?\GuzzleHttp\Client

@@ -2,6 +2,7 @@
 
 namespace App\Bots;
 
+use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunction;
 use App\Message\UpdateUrl;
 use App\Service\ProfileService;
@@ -12,14 +13,6 @@ use Symfony\Contracts\Service\Attribute\Required;
 class CityHolderBot extends BaseBot implements BotInterface
 {
     public function getTgBotName() { return 'cityholder'; }
-
-    public function addSchedule(Schedule $schedule)
-    {
-//        $schedule->add(RecurringMessage::every('1 hour', new CustomFunction($this->getName(), 'passiveIncome')));
-//        $schedule->add(RecurringMessage::every('6 hour', new CustomFunction($this->getName(), 'dailyIncome')));
-        $schedule->add(RecurringMessage::every('2 hour', new CustomFunction($this->getName(), 'update')));
-        $schedule->add(RecurringMessage::every('24 hour', new CustomFunction($this->getName(), 'updateAll')));
-    }
 
     public function saveUrl($client, $url)
     {
@@ -47,6 +40,7 @@ class CityHolderBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
+    #[ScheduleCallback('2 hour')]
     public function update()
     {
         if (!$this->getUrl()) {
@@ -87,8 +81,9 @@ class CityHolderBot extends BaseBot implements BotInterface
         foreach ($result as $i => $item) {
             $items[$i] = str_replace(',', '', $item);
         }
-        $this->updateStat($items);
-
+        $this->updateStatItem('income', $items[0]);
+        $this->updateStatItem('population', $items[1]);
+        $this->updateStatItem('money', $items[2]);
 
         $client->executeScript(<<<JS
             $('a[href="/city"]')[0].click();
@@ -164,8 +159,10 @@ class CityHolderBot extends BaseBot implements BotInterface
         JS);
 
         sleep(5);
+        return true;
     }
 
+    #[ScheduleCallback('24 hour')]
     public function updateAll()
     {
         if (!$this->getUrl()) {
@@ -236,37 +233,7 @@ class CityHolderBot extends BaseBot implements BotInterface
                 await sleep(1000);
             }
         JS);
-    }
-
-    protected function updateStat($balance)
-    {
-        $income = $balance[0];
-        $population = $balance[1];
-        $money = $balance[2];
-        $gauge = $this->collectionRegistry->getOrRegisterGauge(
-            $this->getName(),
-            'income',
-            'Income',
-            ['user']
-        );
-        $gauge->set($income, [$this->curProfile]);
-        $gauge = $this->collectionRegistry->getOrRegisterGauge(
-            $this->getName(),
-            'population',
-            'Population',
-            ['user']
-        );
-        $gauge->set($population, [$this->curProfile]);
-        $gauge = $this->collectionRegistry->getOrRegisterGauge(
-            $this->getName(),
-            'money',
-            'Maney',
-            ['user']
-        );
-        $gauge->set($money, [$this->curProfile]);
-        $this->cache->hSet($this->userKey('status'), 'income', $income);
-        $this->cache->hSet($this->userKey('status'), 'population', $population);
-        $this->cache->hSet($this->userKey('status'), 'money', $money);
+        return true;
     }
 
     protected function getClient(): ?\GuzzleHttp\Client

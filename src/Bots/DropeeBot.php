@@ -36,12 +36,8 @@ class DropeeBot extends BaseBot implements BotInterface
             $this->UCSet('token', '');
             return;
         }
-        $this->cache->hSet(
-            $this->userKey('run'),
-            'updateToken',
-            Carbon::now()->getTimestamp()
-        );
         $this->UCSet('token', $auth['token']);
+        return true;
     }
 
     #[ScheduleCallback('2 hour', delta: 3600)]
@@ -103,11 +99,7 @@ class DropeeBot extends BaseBot implements BotInterface
         $apiClient->post('game/actions/upgrade', [
             'json' => ['upgradeId' => $upgrade['id']]
         ]);
-        $this->cache->hSet(
-            $this->userKey('run'),
-            'realUpgrade',
-            Carbon::now()->getTimestamp()
-        );
+        return true;
     }
 
     #[ScheduleCallback('1 hour', delta: 3600)]
@@ -131,12 +123,7 @@ class DropeeBot extends BaseBot implements BotInterface
             $result = $result->getBody()->getContents();
             $result = json_decode($result, true);
             $this->logger->info($this->getName() . ' for ' . $this->curProfile . ' spin bonus: {id}', $result['prize']);
-
-            $this->cache->hSet(
-                $this->userKey('run'),
-                'realSpin',
-                Carbon::now()->getTimestamp()
-            );
+            return true;
         }
     }
 
@@ -158,10 +145,12 @@ class DropeeBot extends BaseBot implements BotInterface
             sleep($s);
             $apiClient->post('game/actions/extra-spin-by-ad');
             $rest--;
+            $this->markRun('ad-spin');
         }
 
         if ($sync['tasks']['dailyCheckin']['lastCheckin'] != date('Y-m-d')) {
             $apiClient->post('game/actions/tasks/daily-checkin', ['json' => ['timezoneOffset' => -180]]);
+            return true;
         }
     }
 

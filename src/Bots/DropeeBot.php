@@ -130,8 +130,7 @@ class DropeeBot extends BaseBot implements BotInterface
             ]);
             $result = $result->getBody()->getContents();
             $result = json_decode($result, true);
-            $bonus = $result['prize']['id'];
-            $this->logger->info($this->getName() . ' for ' . $this->curProfile . ' spin bonus: {bonus}', ['bonus' => $bonus]);
+            $this->logger->info($this->getName() . ' for ' . $this->curProfile . ' spin bonus: {id}', $result['prize']);
 
             $this->cache->hSet(
                 $this->userKey('run'),

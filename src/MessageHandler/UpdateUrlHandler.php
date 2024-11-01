@@ -42,6 +42,7 @@ final class UpdateUrlHandler
         sleep(2);
         $client->waitFor('div', 5);;
         sleep(2);
+        $client->waitForVisibility('.new-message-bot-commands', 50);;
 
         // open miniapp
         $client->executeScript('document.getElementsByClassName("new-message-bot-commands-view")[0].click();');

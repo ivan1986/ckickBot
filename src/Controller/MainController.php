@@ -32,13 +32,36 @@ class MainController extends AbstractController
     #[Route('/user/{profile}', name: 'userIndex')]
     public function userIndex(string $profile)
     {
-
+        $items = [];
+        foreach ($this->botSelector->getNames() as $name)
+        {
+            $items[] = [
+                'title' => $name,
+                'bot' => $name,
+                'profile' => $profile,
+            ];
+        }
+        return $this->renderItems($profile, $items);
     }
 
     #[Route('/bot/{bot}', name: 'botIndex')]
     public function botIndex(string $bot)
     {
+        $items = [];
+        foreach ($this->profileService->list() as $profile)
+        {
+            $items[] = [
+                'title' => $profile,
+                'bot' => $bot,
+                'profile' => $profile,
+            ];
+        }
+        return $this->renderItems($bot, $items);
+    }
 
+    protected function renderItems(string $title, array $items)
+    {
+        return $this->render('main/list.html.twig', ['title' => $title, 'items' => $items]);
     }
 
     public function botBlock(string $title, string $profile, string $bot)

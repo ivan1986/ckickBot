@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block navbar_start %}
+    <div class="nav-item"><b>{{ title }}</b></div>
+{% endblock %}
+
+{% block page_content %}
+<div class="row row-deck row-cards">
+    {% for item in items %}
+        <div class="col-sm-6 col-lg-3">
+            {{ render(controller('App\\Controller\\MainController::botBlock', item)) }}
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.querySelectorAll('input[data-url]').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function(e) {
+                let data = new FormData();
+                data.append('value', e.target.checked ? 1 : 0);
+                fetch(e.target.dataset.url, {
+                    method:'POST',
+                    body: data
+                })
+            });
+        });
+    </script>
+{% endblock %}

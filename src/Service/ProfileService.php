@@ -23,17 +23,31 @@ class ProfileService
         $this->path = $path;
     }
 
-    public function getOrCreateBrowser(string $profile, bool $headless = true, string $ua = ''): Client
+    public function getOrCreateBrowser(
+        string $profile,
+        bool $headless = true,
+        string $ua = '',
+        string $proxy = ''
+    ): Client
     {
-        $options = ['--user-data-dir=' . $this->path . '/' . $profile, '--no-first-run', '--user-agent=' . ($ua ?: self::UA)];
+        $options = [
+            '--user-data-dir=' . $this->path . '/' . $profile,
+            '--no-first-run',
+            '--disable-gpu',
+            '--user-agent=' . ($ua ?: self::UA)
+        ];
 
         if ($headless) {
             $options[] = '--headless';
+        }
+        if ($proxy) {
+            $options[] = '--proxy-server=' . $proxy;
         }
 
         $client = Client::createChromeClient(
             null,
             $options,
+            ['request_timeout_in_ms' => 100 * 1000]
         );
 
         return $client;

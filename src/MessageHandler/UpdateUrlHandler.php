@@ -24,14 +24,18 @@ final class UpdateUrlHandler
 
     public function __invoke(UpdateUrlUser $message): void
     {
-        $client = $this->clientFactory->getOrCreateBrowser($message->profile, !$message->debug);
-
         $bot = $this->botSelector->getBot($message->name);
         $bot->setProfile($message->profile);
         $this->logger->info('Update url for {profile}: {bot}', [
             'profile' => $message->profile,
             'bot' => $message->name
         ]);
+
+        $client = $this->clientFactory->getOrCreateBrowser(
+            $message->profile,
+            headless: !$message->debug,
+            proxy: $bot->getProxy()
+        );
 
         // load bot chat
         $page = $client->request('GET', 'https://web.telegram.org/k/#@' . $bot->getTgBotName());

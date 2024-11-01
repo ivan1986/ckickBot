@@ -11,6 +11,9 @@ use Symfony\Component\Scheduler\Schedule;
 #[AutoconfigureTag('bot')]
 interface BotInterface
 {
+    public function getName();
+    public function getProxy();
+
     public function addSchedule(Schedule $schedule);
     public function setProfile(string $profile);
 
@@ -18,7 +21,6 @@ interface BotInterface
     public function runInTg(Client $client);
     public function saveUrl($client, $url);
     public function getUrl();
-    public function getName();
 
     /**
      * @return ActionStatusDto[]

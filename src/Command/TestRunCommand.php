@@ -37,12 +37,6 @@ class TestRunCommand extends Command
         $callback = $input->getArgument('callback');
         $bot->$callback();
 
-        $bot->cache->hSet(
-            $bot->userKey('run'),
-            $callback,
-            Carbon::now()->getTimestamp()
-        );
-
         return Command::SUCCESS;
     }
 }

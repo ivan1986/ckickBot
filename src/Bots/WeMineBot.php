@@ -6,6 +6,7 @@ use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunction;
 use App\Message\UpdateUrl;
 use App\Service\ProfileService;
+use GuzzleHttp\RequestOptions;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 use Symfony\Contracts\Service\Attribute\Required;
@@ -24,6 +25,11 @@ class WeMineBot extends BaseBot implements BotInterface
         $this->UCSet('token', $token);
 
         parent::saveUrl($client, $url);
+    }
+
+    public function getProxy()
+    {
+        return 'socks://127.0.0.1:2080/';
     }
 
     #[ScheduleCallback('30 min')]
@@ -129,8 +135,9 @@ class WeMineBot extends BaseBot implements BotInterface
         }
 
         return new \GuzzleHttp\Client([
-            'base_uri' => 'https://app.wemine.pro/api/v1/',
-            'headers' => [
+            'base_uri' => 'https://api.wemine.pro/api/v1/',
+            RequestOptions::PROXY => $this->getProxy(),
+            RequestOptions::HEADERS => [
                 'Authorization' => 'Bearer ' . $token,
                 'Content-Type' => 'application/json',
                 'User-Agent' => ProfileService::UA,

@@ -50,6 +50,11 @@ class BaseBot
         return $this->cache->get($this->userKey($key));
     }
 
+    public function getProxy()
+    {
+        return '';
+    }
+
     public function runInTg(Client $client)
     {
     }

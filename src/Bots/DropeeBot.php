@@ -81,16 +81,23 @@ class DropeeBot extends BaseBot implements BotInterface
             }
             if (!empty($i['requirements']['referrals'])) {
                 $u = $i['requirements']['referrals'];
-                if ($i['requirements']['referrals']['count'] > $sync['referrals']['count']) {
+                if ($u['count'] > $sync['referrals']['count']) {
                     return false;
                 }
             }
             if ($i['cooldownUntil'] > time() + 10) {
                 return false;
             }
+            if ($i['expiresOn'] && $i['expiresOn'] < time()) {
+                return false;
+            }
             return true;
         });
-        usort($upgrades, fn ($a, $b) => $b['profitDelta'] / $b['price'] <=> $a['profitDelta'] / $a['price']);
+        usort($upgrades, function ($a, $b) {
+            if ($a['expiresOn']) return -1;
+            if ($b['expiresOn']) return 1;
+            return $b['profitDelta'] / $b['price'] <=> $a['profitDelta'] / $a['price'];
+        });
 
         if (empty($upgrades)) {
             return;

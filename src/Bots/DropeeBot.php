@@ -95,10 +95,21 @@ class DropeeBot extends BaseBot implements BotInterface
         if (empty($upgrades)) {
             return;
         }
-        $upgrade = current($upgrades);
-        $apiClient->post('game/actions/upgrade', [
-            'json' => ['upgradeId' => $upgrade['id']]
-        ]);
+
+        // Обновляем лучшие 10 карточек пока есть деньги
+        $coins = $sync['coins'];
+        $upgrades = array_slice($upgrades, 0, 10);
+        foreach ($upgrades as $upgrade) {
+            if ($coins < $upgrade['price']) {
+                break;
+            }
+
+            $coins -= $upgrade['price'];
+            $apiClient->post('game/actions/upgrade', [
+                'json' => ['upgradeId' => $upgrade['id']]
+            ]);
+            sleep(random_int(8, 15));
+        }
         return true;
     }
 

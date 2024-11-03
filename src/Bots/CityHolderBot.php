@@ -40,7 +40,7 @@ class CityHolderBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
-    #[ScheduleCallback('2 hour')]
+    #[ScheduleCallback('2 hour', delta: 1800)]
     public function update()
     {
         if (!$this->getUrl()) {

@@ -43,7 +43,7 @@ class MeerkatBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
-    #[ScheduleCallback('15 min')]
+    #[ScheduleCallback('15 min', delta: 300)]
     public function claimAndReset()
     {
         if ($this->UCGet('lock')) {

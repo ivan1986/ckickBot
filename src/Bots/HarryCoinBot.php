@@ -59,7 +59,7 @@ class HarryCoinBot extends BaseBot implements BotInterface
         }
     }
 
-    #[ScheduleCallback('30 min')]
+    #[ScheduleCallback('1 hour', delta: 900)]
     public function watchAd()
     {
         if (!$this->getUrl()) {
@@ -109,7 +109,7 @@ class HarryCoinBot extends BaseBot implements BotInterface
         return true;
     }
 
-    #[ScheduleCallback('1 day')]
+    #[ScheduleCallback('1 day', delta: 7200)]
     public function claimRewards()
     {
         if (!$this->getUrl()) {

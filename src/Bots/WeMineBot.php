@@ -33,7 +33,7 @@ class WeMineBot extends BaseBot implements BotInterface
         //return 'socks://127.0.0.1:2080';
     }
 
-    #[ScheduleCallback('30 min')]
+    #[ScheduleCallback('30 min', delta: 900)]
     public function claimAndReset()
     {
         if (!$apiClient = $this->getClient()) {
@@ -55,7 +55,7 @@ class WeMineBot extends BaseBot implements BotInterface
         }
     }
 
-    #[ScheduleCallback('6 hour')]
+    #[ScheduleCallback('6 hour', delta: 3600)]
     public function convertAndUpgrade()
     {
         if (!$apiClient = $this->getClient()) {

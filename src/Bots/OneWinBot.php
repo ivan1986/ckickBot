@@ -34,7 +34,7 @@ class OneWinBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
-    #[ScheduleCallback('1 hour')]
+    #[ScheduleCallback('1 hour', delta: 600)]
     public function passiveIncome()
     {
         $client = $this->profileService->getOrCreateBrowser($this->curProfile);
@@ -43,7 +43,7 @@ class OneWinBot extends BaseBot implements BotInterface
         sleep(10);
     }
 
-    #[ScheduleCallback('6 hour')]
+    #[ScheduleCallback('9 hour', delta: 1800)]
     public function dailyIncome()
     {
         if (!$apiClient = $this->getClient()) {
@@ -66,7 +66,7 @@ class OneWinBot extends BaseBot implements BotInterface
         return true;
     }
 
-    #[ScheduleCallback('4 hour')]
+    #[ScheduleCallback('4 hour', delta: 900)]
     public function update()
     {
         if (!$apiClient = $this->getClient()) {

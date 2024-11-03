@@ -25,7 +25,7 @@ class FartyBeetleBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
-    #[ScheduleCallback('2 hour')]
+    #[ScheduleCallback('2 hour', delta: 3600)]
     public function craft()
     {
         if (!$apiClient = $this->getClient()) {

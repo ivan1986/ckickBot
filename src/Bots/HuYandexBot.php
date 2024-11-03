@@ -34,7 +34,7 @@ class HuYandexBot extends BaseBot implements BotInterface
     protected $auth;
 
 
-    #[ScheduleCallback('2 hour')]
+    #[ScheduleCallback('2 hour', delta: 3600)]
     public function claim()
     {
         if (!$auth = $this->startRequest()) {
@@ -66,7 +66,7 @@ class HuYandexBot extends BaseBot implements BotInterface
         }
     }
 
-    #[ScheduleCallback('4 hour')]
+    #[ScheduleCallback('5 hour', delta: 3600)]
     public function upgrade()
     {
         if (!$auth = $this->startRequest()) {

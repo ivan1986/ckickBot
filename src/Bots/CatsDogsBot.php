@@ -24,7 +24,7 @@ class CatsDogsBot extends BaseBot implements BotInterface
         $this->UCSet('auth', $auth);
     }
 
-    #[ScheduleCallback('4 hour')]
+    #[ScheduleCallback('4 hour', delta: 7200)]
     public function claim()
     {
         if (!$apiClient = $this->getClient()) {

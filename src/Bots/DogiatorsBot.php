@@ -29,7 +29,7 @@ class DogiatorsBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
-    #[ScheduleCallback('1 hour')]
+    #[ScheduleCallback('2 hour', delta: 1800)]
     public function passiveIncome()
     {
         if (!$apiClient = $this->getClient()) {
@@ -49,7 +49,7 @@ class DogiatorsBot extends BaseBot implements BotInterface
         $this->updateStat($balance);
     }
 
-    #[ScheduleCallback('6 hour')]
+    #[ScheduleCallback('6 hour', delta: 3600)]
     public function dailyIncome()
     {
         if (!$apiClient = $this->getClient()) {
@@ -73,7 +73,7 @@ class DogiatorsBot extends BaseBot implements BotInterface
         return true;
     }
 
-    #[ScheduleCallback('4 hour')]
+    #[ScheduleCallback('4 hour', delta: 1800)]
     public function update()
     {
         if (!$apiClient = $this->getClient()) {

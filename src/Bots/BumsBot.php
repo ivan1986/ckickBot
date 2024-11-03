@@ -49,7 +49,7 @@ class BumsBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
-    #[ScheduleCallback('2 hour')]
+    #[ScheduleCallback('3 hour', delta: 1800)]
     public function update()
     {
         if (!$apiClient = $this->getClient()) {
@@ -102,7 +102,7 @@ class BumsBot extends BaseBot implements BotInterface
         return true;
     }
 
-    #[ScheduleCallback('8 hour')]
+    #[ScheduleCallback('8 hour', delta: 7200)]
     public function daily()
     {
         if (!$apiClient = $this->getClient()) {

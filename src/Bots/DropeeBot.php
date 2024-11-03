@@ -133,6 +133,7 @@ class DropeeBot extends BaseBot implements BotInterface
         $whell = $whell['state'];
 
         $this->updateStatItem('usdt', $whell['usdtCentsBalance'] / 100);
+        $this->updateStatItem('spins', $whell['spins']['available']);
 
         if ($whell['spins']['available'] > 0) {
             $result = $apiClient->post('game/actions/fortune-wheel/spin', [

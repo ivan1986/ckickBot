@@ -29,7 +29,8 @@ class WeMineBot extends BaseBot implements BotInterface
 
     public function getProxy()
     {
-        return 'socks://127.0.0.1:2080';
+        return '';
+        //return 'socks://127.0.0.1:2080';
     }
 
     #[ScheduleCallback('30 min')]

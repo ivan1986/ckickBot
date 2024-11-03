@@ -12,6 +12,7 @@ final class CustomFunction
      public function __construct(
          public readonly string $name,
          public readonly string $callback,
+         public readonly int $delta = 0,
      ) {
      }
 }

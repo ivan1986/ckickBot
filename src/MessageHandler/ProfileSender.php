@@ -11,6 +11,7 @@ use App\Service\CacheService;
 use App\Service\ProfileService;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Contracts\Service\Attribute\Required;
 
 class ProfileSender
@@ -24,11 +25,15 @@ class ProfileSender
     public function urlHandler(UpdateUrl $message)
     {
         foreach($this->profiles($message->name) as $profile) {
+            $stamps = [];
+            if ($message->delta) {
+                $stamps[] = new DelayStamp(random_int(0, $message->delta) * 1000);
+            }
             $this->bus->dispatch(new UpdateUrlUser(
                 $profile,
                 $message->name,
                 $message->debug
-            ));
+            ), $stamps);
         }
     }
 
@@ -36,11 +41,15 @@ class ProfileSender
     public function customHandler(CustomFunction $message)
     {
         foreach($this->profiles($message->name) as $profile) {
+            $stamps = [];
+            if ($message->delta) {
+                $stamps[] = new DelayStamp(random_int(0, $message->delta) * 1000);
+            }
             $this->bus->dispatch(new CustomFunctionUser(
                 $profile,
                 $message->name,
                 $message->callback
-            ));
+            ), $stamps);
         }
     }
 

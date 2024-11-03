@@ -28,7 +28,7 @@ final class MainSchedule implements ScheduleProviderInterface
             // Default update url task
             $schedule->add(RecurringMessage::every(
                 '12 hour',
-                new UpdateUrl($bot->getName()))->withJitter(7200)
+                new UpdateUrl($bot->getName(), delta: 7200))->withJitter(7200)
             );
 
             $r = new \ReflectionClass($bot);
@@ -40,7 +40,7 @@ final class MainSchedule implements ScheduleProviderInterface
                 $attribute = $attrs[0];
                 $class = new \ReflectionClass(ScheduleCallback::class);
                 $info = $class->newInstanceArgs($attribute->getArguments());
-                $message = new CustomFunction($bot->getName(), $method->getShortName());
+                $message = new CustomFunction($bot->getName(), $method->getShortName(), $info->delta);
                 $message = RecurringMessage::every($info->frequency, $message);
                 if ($info->delta) {
                     $message->withJitter($info->delta);

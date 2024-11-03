@@ -1,0 +1,14 @@
+[Unit]
+Description=Click Bot Http
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory={{ dir }}
+ExecStart=symfony server:start --no-tls --listen-ip=0.0.0.0
+Restart=always
+User={{ user }}
+Group={{ group }}
+
+[Install]
+WantedBy=default.target

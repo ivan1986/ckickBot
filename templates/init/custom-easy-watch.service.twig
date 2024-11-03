@@ -1,0 +1,14 @@
+[Unit]
+Description=Click Bot Easy Watch
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory={{ dir }}
+ExecStart={{ dir }}/bin/console custom:easy-watch
+Restart=always
+User={{ user }}
+Group={{ group }}
+
+[Install]
+WantedBy=default.target

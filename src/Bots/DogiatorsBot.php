@@ -143,6 +143,7 @@ class DogiatorsBot extends BaseBot implements BotInterface
             }
             $reqMap = [
                 'min_rating' => 'rating',
+                'min_level' => 'level',
                 'min_fight_pvp_count' => 'battle_in_the_arena_count',
                 'min_fight_pve_count' => 'battle_in_the_dungeon_count',
                 'min_in_rest_count' => 'in_rest_count',

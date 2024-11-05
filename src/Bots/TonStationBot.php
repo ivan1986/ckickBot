@@ -155,16 +155,16 @@ class TonStationBot extends BaseBot implements BotInterface
             return null;
         }
 
-        $jar = new GuzzleCookieJar();
-        $jar->setCookie(new SetCookie([
-            'Domain' => 'tonstation.app',
-            'Name' => 'cf_clearance',
-            'Value' => $this->getCachedCFCookie(),
-        ]));
+//        $jar = new GuzzleCookieJar();
+//        $jar->setCookie(new SetCookie([
+//            'Domain' => 'tonstation.app',
+//            'Name' => 'cf_clearance',
+//            'Value' => $this->getCachedCFCookie(),
+//        ]));
 
         return new \GuzzleHttp\Client([
             'base_uri' => 'https://tonstation.app/',
-            'cookies' => $jar,
+            //'cookies' => $jar,
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
                 'Content-Type' => 'application/json',

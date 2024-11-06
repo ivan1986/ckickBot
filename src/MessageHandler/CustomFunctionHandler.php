@@ -39,6 +39,10 @@ final class CustomFunctionHandler
         } catch (Exception $e) {
             $bot->logAction($message->callback, ActionState::ERROR);
             $this->logger->error('Error for ' . $message->profile . ' in ' . $message->name . ' ' . $message->callback . ' :' . $e->getMessage());
+            if (str_contains($e->getMessage(), 'Chrome failed to start')) {
+                $this->logger->error('Restart worker - fail Webdriver');
+                exit(1);
+            }
             return;
         }
         $bot->logAction($message->callback, ActionState::FINISH);

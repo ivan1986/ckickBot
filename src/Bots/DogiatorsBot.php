@@ -107,79 +107,26 @@ class DogiatorsBot extends BaseBot implements BotInterface
         // оставляем только следующий номер для каждого инструмента
         $updates = [];
         foreach (array_merge($updateData['system_upgrades'], $updateData['special_upgrades'], $updateData['arena_upgrades']) as $v) {
-            $level = $exist[$v['id']] ?? 0;
-            foreach ($v['modifiers'] as $m) {
-                if ($m['level'] == $level + 1) {
-                    $v['next'] = $m;
-                    if (isset($v['requirements'][$m['level']])) {
-                        $v['reqn'] = $v['requirements'][$level];
-                    }
-                    break;
-                }
-            }
-            unset($v['modifiers']);
             $updates[$v['id']] = $v;
         }
 
         // оставляем только те у которых есть услови других зданий
-        $updates = array_filter($updates, function ($i) use ($exist, $profile, $arenaStat) {
-            if (empty($i['requirements'])) {
-                return true;
-            }
-            $req = $i['reqn'] ?? $i['requirements'][0];
-            if ($req['level'] > $profile['level']) {
+        $updates = array_filter($updates, function ($i) use ($exist, $profile, $coinsBalance) {
+            if ($i['status'] != 'active') {
                 return false;
             }
-            if ($req['min_referrals_count'] > $profile['referrals_count']) {
-                return false;
-            }
-            if ($req['reach_upgrade_id']) {
-                if (!isset($exist[$req['reach_upgrade_id']])) {
-                    return false;
-                }
-                if ($req['reach_upgrade_level'] > $exist[$req['reach_upgrade_id']]) {
-                    return false;
-                }
-            }
-            $reqMap = [
-                'min_rating' => 'rating',
-                'min_level' => 'level',
-                'min_fight_pvp_count' => 'battle_in_the_arena_count',
-                'min_fight_pve_count' => 'battle_in_the_dungeon_count',
-                'min_in_rest_count' => 'in_rest_count',
-                'min_in_planning_count' => 'in_planning_count',
-                'min_in_rage_count' => 'in_rage_count',
-                'min_chest_bronze_open_count' => 'chest_bronze_open_count',
-                'min_chest_silver_open_count' => 'chest_silver_open_count',
-                'min_chest_gold_open_count' => 'chest_gold_open_count',
-                'min_feed_count' => 'feed_count',
-                'min_durability_repair_count' => 'durability_repair_count',
-                'min_tokens_earned' => 'tokens_earned',
-            ];
-            foreach ($reqMap as $k => $v) {
-                if ($req[$k] > $arenaStat[$v]) {
-                    return false;
-                }
-            }
-            if ($req['min_player_item_upgrade_count'] > 0) {
-                return false;
-            }
-            return true;
+            return $i['next_modifier']['price'] < $coinsBalance;
         });
 
-        $updates = array_filter($updates, function ($i) use ($coinsBalance) {
-            if (empty($i['next'])) {
-                return false;
-            }
-            return $i['next']['price'] <= $coinsBalance;
-        });
-        usort($updates, fn ($a, $b) => $b['next']['profit_per_hour_relative'] / $b['next']['price'] <=> $a['next']['profit_per_hour_relative'] / $a['next']['price']);
+        usort($updates, fn ($a, $b) =>
+            $b['next_modifier']['profit_per_hour_relative'] / $b['next_modifier']['price'] <=>
+            $a['next_modifier']['profit_per_hour_relative'] / $a['next_modifier']['price']);
 
         if (empty($updates)) {
             return;
         }
         $updates = current($updates);
-        $apiClient->post('upgrade/buy', [
+        $r = $apiClient->post('upgrade/buy', [
             'json' => ['upgrade_id' => $updates['id']]
         ]);
         $this->bus->dispatch(

@@ -77,12 +77,14 @@ class TimeFarmBot extends BaseBot implements BotInterface
         $this->updateStatItem('balance', intval($status['balance']));
 
 
-        $lock = Carbon::createFromFormat('Y-m-d\\TH:i:s.vP', $status['activeFarmingStartedAt']);
-        $lock->add($status['farmingDurationInSec'], 'seconds');
-        $secondsLeft = $lock->diff(null, true)->totalSeconds;
-        $delay = intval(abs($secondsLeft));
-        var_dump($delay);
-        var_dump($secondsLeft);
+        if (isset($status['activeFarmingStartedAt'])) {
+            $lock = Carbon::createFromFormat('Y-m-d\\TH:i:s.vP', $status['activeFarmingStartedAt']);
+            $lock->add($status['farmingDurationInSec'], 'seconds');
+            $secondsLeft = $lock->diff(null, true)->totalSeconds;
+            $delay = intval(abs($secondsLeft));
+        } else {
+            $secondsLeft = 0;
+        }
 
         if ($secondsLeft < 0) {
             $this->bus->dispatch(

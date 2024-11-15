@@ -53,7 +53,7 @@ class WeMineBot extends BaseBot implements BotInterface
             $apiClient->post('mining/usdt/start-claim');
             sleep(10);
         }
-        if ($deltaS > $limitS) {'totalReferralEarnings'
+        if ($deltaS > $limitS) {
             $apiClient->post('mining/wbtc/start-claim');
             return true;
         }

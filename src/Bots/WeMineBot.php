@@ -49,6 +49,10 @@ class WeMineBot extends BaseBot implements BotInterface
         $limit = \DateInterval::createFromDateString('20 minutes');
         $deltaS = $delta->h * 3600 + $delta->i * 60 + $delta->s;
         $limitS = $limit->i * 60 + $limit->s;
+        if (isset($profile['balance']['usdt'])) {
+            $apiClient->post('mining/usdt/start-claim');
+            sleep(10);
+        }
         if ($deltaS > $limitS) {
             $apiClient->post('mining/wbtc/start-claim');
             return true;
@@ -122,6 +126,9 @@ class WeMineBot extends BaseBot implements BotInterface
 
     protected function updateStat($balance)
     {
+        if (isset($balance['balance']['usdt'])) {
+            $this->updateStatItem('USDT', round($balance['balance']['usdt'], 8));
+        }
         $this->updateStatItem('wUSD', round($balance['balance']['wUSD'], 2));
         $this->updateStatItem('wBTC', round($balance['balance']['wBTC'], 8));
         $this->updateStatItem('All', round($balance['allTimeBTC'], 8));

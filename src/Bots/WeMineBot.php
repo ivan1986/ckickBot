@@ -49,11 +49,11 @@ class WeMineBot extends BaseBot implements BotInterface
         $limit = \DateInterval::createFromDateString('20 minutes');
         $deltaS = $delta->h * 3600 + $delta->i * 60 + $delta->s;
         $limitS = $limit->i * 60 + $limit->s;
-        if (isset($profile['balance']['usdt'])) {
+        if (isset($profile['balance']['usdt']) && $profile['balance']['usdt'] > 0) {
             $apiClient->post('mining/usdt/start-claim');
             sleep(10);
         }
-        if ($deltaS > $limitS) {
+        if ($deltaS > $limitS) {'totalReferralEarnings'
             $apiClient->post('mining/wbtc/start-claim');
             return true;
         }

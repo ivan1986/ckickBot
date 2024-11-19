@@ -22,9 +22,9 @@ class OneWinBot extends BaseBot implements BotInterface
         $client->request('GET', $url);
         //$client->waitForElementToContain('#root', 'Не забудь собрать ежедневную награду');
         sleep(10);
-        $client->request('GET', 'https://cryptocklicker-frontend-rnd-prod.100hp.app/' . 'earnings');
+        $client->request('GET', 'https://cryptocklicker-frontend-rnd-prod.100hp.app/' . 'home');
         sleep(5);
-        $client->waitForElementToContain('#root', 'Ежедневные');
+        $client->waitForElementToContain('#root', 'Главная');
         $token = $client->executeScript('return window.localStorage.getItem("token");');
         $userId = $client->executeScript('return window.localStorage.getItem("tgId");');
 
@@ -64,6 +64,96 @@ class OneWinBot extends BaseBot implements BotInterface
         }
         $apiClient->post('/tasks/everydayreward');
         return true;
+    }
+
+    #[ScheduleCallback('4 hour', delta: 900)]
+    public function updateCity()
+    {
+        if (!$apiClient = $this->getClient()) {
+            return;
+        }
+
+        $resp = $apiClient->get('/city/config?lang=ru');
+        $config = json_decode($resp->getBody()->getContents(), true);
+        $profit = $config['cityBuildingsConfig'];
+
+        $resp = $apiClient->get('/city/launch');
+        $exist = json_decode($resp->getBody()->getContents(), true);
+        $existMap = [];
+        foreach ($exist['buildings'] as $k => $v) {
+            $existMap[$v['buildingName']] = $v['level'];
+            $existMap[$v['buildingName'] . '_time'] = $v['updatedAt'];
+        }
+
+        $resp = $apiClient->get('/minings');
+        $exist_pp = json_decode($resp->getBody()->getContents(), true);
+        foreach ($exist_pp as $k => $v) {
+            preg_match('#(\D+)(\d+)#', $v['id'], $matches);
+            $existMap[$matches[1]] = (int)$matches[2];
+        }
+        $coinsBalance = $exist['balance'];
+
+        // оставляем только следующий номер для каждого инструмента
+        $profit = array_filter($profit, function ($i) use (&$existMap) {
+            preg_match('#(\D+)(\d+)#', $i['id'], $matches);
+            if (isset($existMap[$i['name']])) {
+                preg_match('#(\D+)(\d+)#', $i['id'], $matches);
+                $existMap[$matches[1]] = $existMap[$i['name']];
+                $existMap[$matches[1] . '_time'] = $existMap[$i['name'] . '_time'];
+                return $i['level'] == $existMap[$i['name']] + 1;
+            }
+            return $i['level'] == 1;
+        });
+
+        // оставляем только те у которых есть услови других зданий
+        $profit = array_filter($profit, function ($i) use ($exist, $existMap) {
+            if ($i['requiredNewReferralsCount'] > 0) {
+                return false;
+            }
+            if ($i['requiredPopulation'] > $exist['population']) {
+                return false;
+            }
+            if ($i['requiredReferralsCount'] > 0) {
+                return false;
+            }
+            if (count($i['requiredQuests']) > 0) {
+                return false;
+            }
+            foreach (array_merge($i['requiredBuildings'], $i['requiredPassiveProfit']) as $id) {
+                preg_match('#(\D+)(\d+)#', $id, $matches);
+                if (empty($existMap[$matches[1]])) {
+                    return false;
+                }
+                if ($existMap[$matches[1]] < $matches[2]) {
+                    return false;
+                }
+                if (isset($existMap[$matches[1] . '_time'])) {
+                    $to = $existMap[$matches[1] . '_time'] + $i['time'];
+                    if ($to > time()) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        });
+        $profit = array_filter($profit, function ($i) use ($coinsBalance) {
+            return $i['cost'] <= $coinsBalance;
+        });
+        usort($profit, fn ($a, $b) => $b['profit'] / $b['cost'] <=> $a['profit'] / $a['cost']);
+
+        if (empty($profit)) {
+            return;
+        }
+        $profit = current($profit);
+        $apiClient->post('/city/building', [
+            'json' => ['buildingId' => $profit['id'], 'type' => $profit['type']]
+        ]);
+        $this->bus->dispatch(
+            new CustomFunctionUser($this->curProfile, $this->getName(), 'updateCity'),
+            [new DelayStamp(10 * 1000)]
+        );
+        return true;
+
     }
 
     #[ScheduleCallback('4 hour', delta: 900)]

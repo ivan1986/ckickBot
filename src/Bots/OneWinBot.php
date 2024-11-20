@@ -52,15 +52,10 @@ class OneWinBot extends BaseBot implements BotInterface
 
         $resp = $apiClient->get('/tasks/everydayreward');
         $exist = json_decode($resp->getBody()->getContents(), true);
-        $toCollect = null;
         foreach ($exist['days'] as $k => $v) {
-            if ($v['isCollected'] === false) {
-                $toCollect = $v['id'];
-                break;
+            if (!empty($v['isCollected'])) {
+                return;
             }
-        }
-        if (!$toCollect) {
-            return;
         }
         $apiClient->post('/tasks/everydayreward');
         return true;

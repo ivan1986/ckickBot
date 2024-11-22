@@ -32,7 +32,7 @@ class BlumBot extends BaseBot implements BotInterface
 
         try {
             $apiClient->get('daily-reward?offset=-180');
-            echo 1;
+            $this->logger->info($this->getName() . ' for ' . $this->curProfile . ' daily reward');
         } catch (\Exception $e) {}
 
         $resp = $apiClient->get('user/balance');

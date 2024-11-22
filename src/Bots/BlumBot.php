@@ -47,6 +47,7 @@ class BlumBot extends BaseBot implements BotInterface
             $apiClient->post('farming/claim');
             sleep(random_int(2,4));
             $apiClient->post('farming/start');
+            return true;
         }
         return false;
     }

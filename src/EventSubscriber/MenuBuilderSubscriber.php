@@ -27,13 +27,13 @@ class MenuBuilderSubscriber implements EventSubscriberInterface
             new MenuItemModel('homepage', '', 'home', [], 'fas fa-home')
         );
 
-        $forms = new MenuItemModel('profiles', 'Profiles', null, [], 'fas fa-users');
+        $profiles = new MenuItemModel('profiles', 'Profiles', null, [], 'fas fa-users');
         foreach ($this->profileService->list() as $profile) {
-            $forms->addChild(
+            $profiles->addChild(
                 new MenuItemModel('profile-' . $profile, $profile, 'userIndex', ['profile' => $profile], '')
             );
         }
-        $event->addItem($forms);
+        $event->addItem($profiles);
 
         $bots = new MenuItemModel('bots', 'Bots', null, [], 'fas fa-robot');
         foreach ($this->botSelector->getNames() as $bot) {
@@ -42,5 +42,10 @@ class MenuBuilderSubscriber implements EventSubscriberInterface
             );
         }
         $event->addItem($bots);
+
+        $admin = new MenuItemModel('admin', 'Admin', null, [], 'fas fa-cogs');
+        $admin->addChild(new MenuItemModel('admin-init-urls', 'Init URLs', 'admin-init-urls', [], ''));
+        $admin->addChild(new MenuItemModel('admin-clear-profile-cache', 'Clear profile cache', 'admin-clear-profile-cache', [], ''));
+        $event->addItem($admin);
     }
 }

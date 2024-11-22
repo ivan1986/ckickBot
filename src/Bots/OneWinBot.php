@@ -7,6 +7,7 @@ use App\Message\CustomFunction;
 use App\Message\CustomFunctionUser;
 use App\Message\UpdateUrl;
 use App\Service\ProfileService;
+use GuzzleHttp\Exception\ClientException;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
@@ -72,10 +73,19 @@ class OneWinBot extends BaseBot implements BotInterface
         $config = json_decode($resp->getBody()->getContents(), true);
         $profit = $config['cityBuildingsConfig'];
 
-        $resp = $apiClient->get('/city/launch');
-        $exist = json_decode($resp->getBody()->getContents(), true);
+        try {
+            $resp = $apiClient->get('/city/launch');
+            $exist = json_decode($resp->getBody()->getContents(), true);
+        } catch (ClientException $e) {
+            $names = ['Мухосранск', 'Зажопинск', 'Устьпердюйск', 'Дрочеподск'];
+            $name = $names[array_rand($names)];
+            $name.= '-' . random_int(10000, 99999);
+            $apiClient->post('/city/launch', ['json' => ['cityName' => $name]]);
+            $this->logger->info($this->getName() . ' for ' . $this->curProfile . ' created city: {city}', ['city' => $name]);
+            return true;
+        }
         $existMap = [];
-        foreach ($exist['buildings'] as $k => $v) {
+        foreach ($exist['buildings'] ?? [] as $k => $v) {
             $existMap[$v['buildingName']] = $v['level'];
             $existMap[$v['buildingName'] . '_time'] = $v['updatedAt'];
         }

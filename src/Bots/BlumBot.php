@@ -80,6 +80,7 @@ class BlumBot extends BaseBot implements BotInterface
                 $this->getName() . ' for ' . $this->curProfile . ' Broken game - not ok',
             );
         }
+        $this->logger->info($this->getName() . ' for ' . $this->curProfile . ' game: {msg}', ['msg' => $e->getMessage()]);
         return true;
     }
 

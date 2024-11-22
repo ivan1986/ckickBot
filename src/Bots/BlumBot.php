@@ -63,11 +63,15 @@ class BlumBot extends BaseBot implements BotInterface
         $tasks = json_decode($resp->getBody()->getContents(), true);
 
         try {
+            shuffle($tasks);
             foreach ($tasks as $section) {
+                shuffle($section['tasks']);
                 foreach ($section['tasks'] as $task) {
                     $this->processTask($task, $apiClient);
                 }
+                shuffle($section['subSections']);
                 foreach ($section['subSections'] as $tasks) {
+                    shuffle($tasks['tasks']);
                     foreach ($tasks['tasks'] as $task) {
                         $this->processTask($task, $apiClient);
                     }
@@ -89,7 +93,7 @@ class BlumBot extends BaseBot implements BotInterface
             return;
         }
 
-        $types = ['WALLET_CONNECTION', 'ONCHAIN_TRANSACTION', 'PROGRESS_TARGET'];
+        $types = ['WALLET_CONNECTION', 'ONCHAIN_TRANSACTION', 'PROGRESS_TARGET', 'INTERNAL'];
         if (in_array($task['type'], $types)) {
             return;
         }

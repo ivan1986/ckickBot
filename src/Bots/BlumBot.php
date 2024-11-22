@@ -4,10 +4,22 @@ namespace App\Bots;
 
 use App\Attributes\ScheduleCallback;
 use App\Service\ProfileService;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Process\Process;
 
 class BlumBot extends BaseBot implements BotInterface
 {
     const ANSWERS = 'https://raw.githubusercontent.com/boytegar/BlumBOT/master/verif.json';
+
+    protected string $path;
+
+    /**
+     * @param string $path
+     */
+    public function __construct(#[Autowire('%kernel.project_dir%')] string $path)
+    {
+        $this->path = $path;
+    }
 
     public function getTgBotName() { return 'BlumCryptoBot'; }
 
@@ -21,6 +33,54 @@ class BlumBot extends BaseBot implements BotInterface
         $this->UCSet('tgData', $tgData);
 
         parent::saveUrl($client, $url);
+    }
+
+    #[ScheduleCallback('8 hour', delta: 1800)]
+    public function game()
+    {
+        if (!$apiClient = $this->getClient('game-domain')) {
+            return false;
+        }
+
+        $resp = $apiClient->get('user/balance');
+        $balance = json_decode($resp->getBody()->getContents(), true);
+        $this->updateStatItem('tickets', $balance['playPasses']);
+
+        if ($balance['playPasses'] == 0) {
+            return false;
+        }
+
+        $resp = $apiClient->post('/api/v2/game/play');
+        $game = json_decode($resp->getBody()->getContents(), true);
+        if (empty($game['gameId'])) {
+            $this->logger->error(
+                $this->getName() . ' for ' . $this->curProfile . ' Broken game - no gameId',
+            );
+            return false;
+        }
+        $gameId = $game['gameId'];
+
+        $count = random_int(100, 140);
+        $freese_count = random_int(4, 8);
+        sleep(30 + $freese_count * 5);
+
+        $payloadProcess = new Process(['node', 'blum.mjs', $gameId, $count, $freese_count], $this->path . '/3part/blum');
+        $payloadProcess->run();
+        $payloadProcess->wait();
+        $payload = trim($payloadProcess->getOutput());
+
+        $resp = $apiClient->post('/api/v2/game/claim', [
+            'json' => [
+                'payload' => $payload,
+            ]
+        ]);
+        $claim = $resp->getBody()->getContents();
+        if ($claim != 'OK') {
+            $this->logger->error(
+                $this->getName() . ' for ' . $this->curProfile . ' Broken game - not ok',
+            );
+        }
+        return true;
     }
 
     #[ScheduleCallback('4 hour', delta: 1800)]

@@ -53,9 +53,10 @@ class BlumBot extends BaseBot implements BotInterface
         $resp = $apiClient->post('/api/v2/game/play');
         $game = json_decode($resp->getBody()->getContents(), true);
         if (empty($game['gameId'])) {
-            $this->logger->error(
-                $this->getName() . ' for ' . $this->curProfile . ' Broken game - no gameId',
-            );
+            $this->logger->error('{bot} for {profile}: Broken game - no gameId', [
+                'profile' => $this->curProfile,
+                'bot' => $this->getName(),
+            ]);
             return false;
         }
         $gameId = $game['gameId'];
@@ -76,11 +77,15 @@ class BlumBot extends BaseBot implements BotInterface
         ]);
         $claim = $resp->getBody()->getContents();
         if ($claim != 'OK') {
-            $this->logger->error(
-                $this->getName() . ' for ' . $this->curProfile . ' Broken game - not ok',
-            );
+            $this->logger->error('{bot} for {profile}: Broken game - not ok', [
+                'profile' => $this->curProfile,
+                'bot' => $this->getName(),
+            ]);
         }
-        $this->logger->info($this->getName() . ' for ' . $this->curProfile . ' game: {msg}', ['msg' => $e->getMessage()]);
+        $this->logger->info('{bot} for {profile}: game ok', [
+            'profile' => $this->curProfile,
+            'bot' => $this->getName(),
+        ]);
         return true;
     }
 
@@ -93,7 +98,12 @@ class BlumBot extends BaseBot implements BotInterface
 
         try {
             $apiClient->get('daily-reward?offset=-180');
-            $this->logger->info($this->getName() . ' for ' . $this->curProfile . ' daily reward');
+            sleep(1);
+            $apiClient->post('daily-reward?offset=-180');
+            $this->logger->info('{bot} for {profile}: daily reward', [
+                'profile' => $this->curProfile,
+                'bot' => $this->getName(),
+            ]);
         } catch (\Exception $e) {}
 
         $resp = $apiClient->get('user/balance');
@@ -139,7 +149,11 @@ class BlumBot extends BaseBot implements BotInterface
                 }
             }
         } catch (\Exception $e) {
-            $this->logger->info($this->getName() . ' for ' . $this->curProfile . ' task: {msg}', ['msg' => $e->getMessage()]);
+            $this->logger->info('{bot} for {profile}: task: {msg}', [
+                'profile' => $this->curProfile,
+                'bot' => $this->getName(),
+                'msg' => $e->getMessage(),
+            ]);
             return true;
         }
         return false;
@@ -172,10 +186,12 @@ class BlumBot extends BaseBot implements BotInterface
         if ($task['status'] == 'READY_FOR_VERIFY' && $task['validationType'] == 'KEYWORD') {
             $ans = $this->getAnswers();
             if (empty($ans[$task['id']])) {
-                $this->logger->error(
-                    $this->getName() . ' for ' . $this->curProfile . ' no answer for task: {title}',
-                    ['title' => $task['title']]
-                );
+                $this->logger->error('{bot} for {profile}: no answer for task {id}: {title}', [
+                    'profile' => $this->curProfile,
+                    'bot' => $this->getName(),
+                    'id' => $task['id'],
+                    'title' => $task['title'],
+                ]);
                 return;
             }
             $keyword = $ans[$task['id']];

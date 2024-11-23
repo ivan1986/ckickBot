@@ -42,6 +42,14 @@ final class UpdateUrlHandler
         sleep(2);
         $client->waitFor('div', 5);;
         sleep(2);
+
+        // click Start if exist
+        try {
+            $page->findElement(WebDriverBy::cssSelector('.chat-input-control'));
+            $client->executeScript('document.querySelector(".chat-input-control span").click();');
+        } catch (NoSuchElementException $e) {
+        }
+
         $client->waitForVisibility('.new-message-bot-commands', 50);;
 
         // open miniapp

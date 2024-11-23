@@ -9,7 +9,7 @@ class TinyVerseBot extends BaseBot implements BotInterface
 {
     const HOST = 'https://app.tonverse.app/';
 
-    public function getTgBotName() { return 'TVerseAppBot'; }
+    public function getTgBotName() { return 'tverse'; }
 
     public function saveUrl($client, $url)
     {

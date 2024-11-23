@@ -61,8 +61,8 @@ class BlumBot extends BaseBot implements BotInterface
         }
         $gameId = $game['gameId'];
 
-        $count = random_int(100, 140);
-        $freese_count = random_int(4, 8);
+        $count = random_int(100, 200);
+        $freese_count = random_int(3, 5);
         sleep(30 + $freese_count * 5);
 
         $payloadProcess = new Process(['node', 'blum.mjs', $gameId, $count, $freese_count], $this->path . '/3part/blum');

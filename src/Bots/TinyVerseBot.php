@@ -51,6 +51,9 @@ class TinyVerseBot extends BaseBot implements BotInterface
         $info = json_decode($resp->getBody()->getContents(), true);
         $info = $info['response'];
 
+        $this->updateStatItem('dust', $info['dust']);
+        $this->updateStatItem('stars', $info['stars']);
+
         if ($info['dust_progress'] > 0.5) {
             $resp = $apiClient->post('/galaxy/collect', [
                 'form_params' => [

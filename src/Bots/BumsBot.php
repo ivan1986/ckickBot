@@ -59,7 +59,10 @@ class BumsBot extends BaseBot implements BotInterface
         try {
             $resp = $apiClient->get('miniapps/api/user_game_level/getGameInfo');
         } catch (ClientException $e) {
-            $this->logger->error($this->getName() . ' for ' . $this->curProfile . ' auth error');
+            $this->logger->error('{bot} for {profile}: auth error', [
+                'profile' => $this->curProfile,
+                'bot' => $this->getName(),
+            ]);
             $this->bus->dispatch(
                 new UpdateUrlUser($this->curProfile, $this->getName()),
                 [new DelayStamp(10 * 1000)]

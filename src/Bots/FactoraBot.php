@@ -65,6 +65,123 @@ class FactoraBot extends BaseBot implements BotInterface
         return true;
     }
 
+    #[ScheduleCallback('6 hour', delta: 3600)]
+    public function upgradeBuildings()
+    {
+        $this->initClient();
+        if (!$this->auth) {
+            return;
+        }
+        $userInfo = $this->getuserInfo();
+
+        $resp = $this->client->get('GetUserBuildings?' . http_build_query([
+                'authData' => $this->auth,
+        ]));
+        $userBuildings = json_decode($resp->getBody()->getContents(), true);
+        $exist = [];
+        foreach ($userBuildings as $building) {
+            $exist[$building['buildingId']] = $building['level'];
+        }
+        $userBuildings = array_filter($userBuildings, function ($i) use ($userInfo, $exist) {
+            $cond = $i['buildingUpgrade']['upgradeCondition'];
+            if ($cond['referrals'] && $cond['referrals'] > $userInfo['inviteesCount']) {
+                return false;
+            }
+            if ($i['buildingUpgrade']['cost'] > $userInfo['balance']) {
+                return false;
+            }
+            if ($cond['building']) {
+                if (empty($exist[$cond['building']['buildingId']])) {
+                    return false;
+                }
+                if ($exist[$cond['building']['buildingId']] < $cond['building']['buildingLevel']) {
+                    return false;
+                }
+            }
+            // TODO: add other conditions
+            return true;
+        });
+        usort($userBuildings, function ($a, $b) {
+            $aDelta = $a['buildingUpgrade']['incomePerHour'] - $a['incomePerHour'];
+            $bDelta = $b['buildingUpgrade']['incomePerHour'] - $b['incomePerHour'];
+            return $bDelta / $b['buildingUpgrade']['cost'] <=> $aDelta / $a['buildingUpgrade']['cost'];
+        });
+
+        if (empty($userBuildings)) {
+            return $this->tryBuildNewBuilding($userInfo, $exist);
+        }
+        $building = current($userBuildings);
+        $this->logger->info('{bot} for {profile}: upgrade building {building}', [
+            'profile' => $this->curProfile,
+            'bot' => $this->getName(),
+            'building' => $building['buildingInfo']['nameEn'],
+        ]);
+        $resp = $this->client->post('BuildingUpgrade?' . http_build_query([
+                'buildingId' => $building['buildingId'],
+                'authData' => $this->auth,
+            ]), [
+            'headers' => [
+                'content-length' => '0',
+            ],
+        ]);
+        $status = $resp->getBody()->getContents();
+        return $status == 'ok';
+    }
+
+    protected function tryBuildNewBuilding($userInfo, $exist)
+    {
+        $resp = $this->client->get('GetBuildings?' . http_build_query([
+                'authData' => $this->auth,
+            ]));
+        $buildings = json_decode($resp->getBody()->getContents(), true);
+        $buildings = array_filter($buildings, function ($i) use ($userInfo, $exist) {
+            if (isset($exist[$i['buildingId']])) {
+                return false;
+            }
+            $cond = $i['buyCondition'];
+            if ($cond['referrals'] && $cond['referrals'] > $userInfo['inviteesCount']) {
+                return false;
+            }
+            if ($cond['rank'] && $cond['rank'] > $userInfo['rank']) {
+                return false;
+            }
+            if ($cond['building']) {
+                if (empty($exist[$cond['building']['buildingId']])) {
+                    return false;
+                }
+                if ($exist[$cond['building']['buildingId']] < $cond['building']['buildingLevel']) {
+                    return false;
+                }
+            }
+            if ($i['cost'] > $userInfo['balance']) {
+                return false;
+            }
+            // TODO: add other conditions
+            return true;
+        });
+        usort($buildings, fn ($a, $b) => $b['incomePerHour'] / $b['cost'] <=> $a['incomePerHour'] / $a['cost']);
+
+        if (empty($buildings)) {
+            return false;
+        }
+        $building = current($buildings);
+        $this->logger->info('{bot} for {profile}: build new building {building}', [
+            'profile' => $this->curProfile,
+            'bot' => $this->getName(),
+            'building' => $building['buildingInfo']['nameEn'],
+        ]);
+        $resp = $this->client->post('BuildingUpgrade?' . http_build_query([
+                'buildingId' => $building['buildingId'],
+                'authData' => $this->auth,
+            ]), [
+            'headers' => [
+                'content-length' => '0',
+            ],
+        ]);
+        $status = $resp->getBody()->getContents();
+        return $status == 'ok';
+    }
+
     /**
      * @return array
      * @throws \Exception

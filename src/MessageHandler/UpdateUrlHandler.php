@@ -45,12 +45,11 @@ final class UpdateUrlHandler
 
         // click Start if exist
         try {
-            $page->findElement(WebDriverBy::cssSelector('.chat-input-control'));
-            $client->executeScript('document.querySelector(".chat-input-control span").click();');
+            $client->waitForVisibility('.new-message-bot-commands', 10);;
         } catch (NoSuchElementException $e) {
+            $client->executeScript('document.querySelector(".chat-input-control span")?.click();');
+            sleep(2);
         }
-
-        $client->waitForVisibility('.new-message-bot-commands', 50);;
 
         // open miniapp
         $client->executeScript('document.getElementsByClassName("new-message-bot-commands-view")[0].click();');

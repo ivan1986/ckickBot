@@ -98,7 +98,7 @@ class DogiatorsBot extends BaseBot implements BotInterface
         $updateData = $updateData['result'];
 
         $exist = [];
-        foreach ($updateData['profile_upgrades'] as $k => $v) {
+        foreach ($updateData['profile_upgrades'] ?? [] as $k => $v) {
             preg_match('#(\D+)(\d+)#', $v['id'], $matches);
             $exist[$v['upgrade_id']] = $v['level'];
         }

@@ -65,6 +65,78 @@ class FactoraBot extends BaseBot implements BotInterface
         return true;
     }
 
+    #[ScheduleCallback('12 hour', delta: 3600)]
+    public function upgradeMain()
+    {
+        $this->initClient();
+        if (!$this->auth) {
+            return;
+        }
+        $userInfo = $this->getuserInfo();
+
+        if ($userInfo['nextRank'] && $userInfo['nextRank']['cost'] <= $userInfo['balance']) {
+            $this->logger->info('{bot} for {profile}: reactor update to {level}', [
+                'profile' => $this->curProfile,
+                'bot' => $this->getName(),
+                'level' => $userInfo['nextRank']['level'],
+            ]);
+            $resp = $this->client->post('RankUpgrade?' . http_build_query([
+                    'authData' => $this->auth,
+                ]), [
+                'headers' => [
+                    'content-length' => '0',
+                ],
+            ]);
+            return true;
+        }
+
+        if ($userInfo['energyLimitUpgradeToNextLevel'] && $this->checkUpgradeBust($userInfo['energyLimitUpgradeToNextLevel'], $userInfo)) {
+            $this->logger->info('{bot} for {profile}: energy limit update to {level}', [
+                'profile' => $this->curProfile,
+                'bot' => $this->getName(),
+                'level' => $userInfo['energyLimitUpgradeToNextLevel']['level'],
+            ]);
+            $resp = $this->client->post('EnergyLimitUpgrade?' . http_build_query([
+                    'authData' => $this->auth,
+                ]), [
+                'headers' => [
+                    'content-length' => '0',
+                ],
+            ]);
+            return true;
+        }
+        if ($userInfo['tapPowerUpgradeToNextLevel'] && $this->checkUpgradeBust($userInfo['tapPowerUpgradeToNextLevel'], $userInfo)) {
+            $this->logger->info('{bot} for {profile}: tap power update to {level}', [
+                'profile' => $this->curProfile,
+                'bot' => $this->getName(),
+                'level' => $userInfo['tapPowerUpgradeToNextLevel']['level'],
+            ]);
+            $resp = $this->client->post('TapPowerUpgrade?' . http_build_query([
+                    'authData' => $this->auth,
+                ]), [
+                'headers' => [
+                    'content-length' => '0',
+                ],
+            ]);
+            return true;
+        }
+    }
+
+    protected function checkUpgradeBust($bust, $userInfo)
+    {
+        if ($bust['cost'] > $userInfo['balance']) {
+            return false;
+        }
+        $cond = $bust['condition'];
+        if ($cond['referrals'] && $cond['referrals'] > $userInfo['inviteesCount']) {
+            return false;
+        }
+        if ($cond['rank'] && $cond['rank'] > $userInfo['rank']) {
+            return false;
+        }
+        return true;
+    }
+
     #[ScheduleCallback('6 hour', delta: 3600)]
     public function upgradeBuildings()
     {

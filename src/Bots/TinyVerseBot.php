@@ -64,7 +64,6 @@ class TinyVerseBot extends BaseBot implements BotInterface
                 ]
             ]);
             $result = $resp->getBody()->getContents();
-            var_dump($result);
             return true;
         }
     }
@@ -110,6 +109,7 @@ class TinyVerseBot extends BaseBot implements BotInterface
                     'X-Api-Request-Id' => $this->getApiReqId(),
                 ]
             ]);
+            return true;
         }
         return false;
     }

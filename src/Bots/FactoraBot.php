@@ -73,6 +73,7 @@ class FactoraBot extends BaseBot implements BotInterface
             return;
         }
         $userInfo = $this->getuserInfo();
+        $this->updateStatItem('main', $userInfo['rank'] . ':' . $userInfo['energyLevel'] . ':' . $userInfo['tapLevel']);
 
         if ($userInfo['nextRank'] && $userInfo['nextRank']['cost'] <= $userInfo['balance']) {
             $this->logger->info('{bot} for {profile}: reactor update to {level}', [
@@ -145,6 +146,8 @@ class FactoraBot extends BaseBot implements BotInterface
             return;
         }
         $userInfo = $this->getuserInfo();
+        $this->updateStatItem('energy', $userInfo['currentEnergy']);
+        $this->updateStatItem('balance', $userInfo['balance']);
 
         $resp = $this->client->get('GetUserBuildings?' . http_build_query([
                 'authData' => $this->auth,

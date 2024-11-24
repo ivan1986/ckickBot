@@ -73,7 +73,6 @@ class FactoraBot extends BaseBot implements BotInterface
             return;
         }
         $userInfo = $this->getuserInfo();
-        $this->updateStatItem('main', $userInfo['rank'] . ':' . $userInfo['energyLevel'] . ':' . $userInfo['tapLevel']);
 
         if ($userInfo['nextRank'] && $userInfo['nextRank']['cost'] <= $userInfo['balance']) {
             $this->logger->info('{bot} for {profile}: reactor update to {level}', [
@@ -146,8 +145,6 @@ class FactoraBot extends BaseBot implements BotInterface
             return;
         }
         $userInfo = $this->getuserInfo();
-        $this->updateStatItem('energy', $userInfo['currentEnergy']);
-        $this->updateStatItem('balance', $userInfo['balance']);
 
         $resp = $this->client->get('GetUserBuildings?' . http_build_query([
                 'authData' => $this->auth,
@@ -271,7 +268,11 @@ class FactoraBot extends BaseBot implements BotInterface
             throw new \Exception('Incorrect status code ' . $userInfoResp->getStatusCode());
         };
         $userInfo = $userInfoResp->getBody()->getContents();
-        return json_decode($userInfo, true);
+        $userInfo = json_decode($userInfo, true);
+        $this->updateStatItem('main', $userInfo['rank'] . ':' . $userInfo['energyLevel'] . ':' . $userInfo['tapLevel']);
+        $this->updateStatItem('energy', $userInfo['currentEnergy']);
+        $this->updateStatItem('balance', $userInfo['balance']);
+        return $userInfo;
     }
 
     /**

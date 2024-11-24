@@ -78,7 +78,7 @@ class FactoraBot extends BaseBot implements BotInterface
             $this->logger->info('{bot} for {profile}: reactor update to {level}', [
                 'profile' => $this->curProfile,
                 'bot' => $this->getName(),
-                'level' => $userInfo['nextRank']['level'],
+                'level' => $userInfo['nextRank']['rankNumber'],
             ]);
             $resp = $this->client->post('RankUpgrade?' . http_build_query([
                     'authData' => $this->auth,

@@ -26,7 +26,7 @@ class HeartBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
-    #[ScheduleCallback('10 hour', delta: 7200)]
+    #[ScheduleCallback('4 hour', delta: 7200)]
     public function tasks()
     {
         $apiClient = $this->getClient();
@@ -50,6 +50,34 @@ class HeartBot extends BaseBot implements BotInterface
                 case 'channel':
                     // todo: subscribe channel
                     break;
+                case 'daily':
+                    $apiClient->get('promotions/' . $promotion['id'], [
+                        'headers' => [
+                            'Auth-Token' => $this->UCGet('hash')
+                        ]
+                    ]);
+                    return true;
+                case 'lucky':
+                    $map = [];
+                    foreach ($promotion['lucky'] as $n => $f) {
+                        $map[$f['type']][] = $n;
+                    }
+                    shuffle($map['prize']);
+                    shuffle($map['empty']);
+                    shuffle($map['bomb']);
+                    $map['prize'] = array_slice($map['prize'], 0, random_int(0,100) < 20 ? 3 : 4);
+                    $map['empty'] = array_slice($map['empty'], 0, random_int(1,5));
+                    $map['bomb'] = array_slice($map['bomb'], 0, random_int(0,100) < 1 ? 1 : 0);
+                    $result = array_merge($map['prize'], $map['empty'], $map['bomb']);
+                    $apiClient->get('promotions/' . $promotion['id'], [
+                        'query' => [
+                            'promotion_data' => json_encode($result)
+                        ],
+                        'headers' => [
+                            'Auth-Token' => $this->UCGet('hash')
+                        ]
+                    ]);
+                    return true;
                 case 'telegram':
                 case 'website':
                     $apiClient->get('https://app.heartgame.fun/api/promotions/' . $auth['id'] . '/' . $promotion['id'], ['allow_redirects' => false]);

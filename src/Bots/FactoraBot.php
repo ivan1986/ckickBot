@@ -269,7 +269,7 @@ class FactoraBot extends BaseBot implements BotInterface
         };
         $userInfo = $userInfoResp->getBody()->getContents();
         $userInfo = json_decode($userInfo, true);
-        $this->updateStatItem('main', $userInfo['rank'] . ':' . $userInfo['energyLevel'] . ':' . $userInfo['tapLevel']);
+        $this->updateStatItem('lavels', $userInfo['rank'] . $userInfo['energyLevel'] . $userInfo['tapLevel']);
         $this->updateStatItem('energy', $userInfo['currentEnergy']);
         $this->updateStatItem('balance', $userInfo['balance']);
         return $userInfo;

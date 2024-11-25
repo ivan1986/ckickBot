@@ -8,6 +8,7 @@ use App\Service\BotSelector;
 use App\Service\ProfileService;
 use Carbon\Carbon;
 use Facebook\WebDriver\Exception\NoSuchElementException;
+use Facebook\WebDriver\Exception\TimeoutException;
 use Facebook\WebDriver\WebDriverBy;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Log\LoggerInterface;
@@ -46,7 +47,7 @@ final class UpdateUrlHandler
         // click Start if exist
         try {
             $client->waitForVisibility('.new-message-bot-commands', 10);;
-        } catch (NoSuchElementException $e) {
+        } catch (NoSuchElementException | TimeoutException $e) {
             $client->executeScript('document.querySelector(".chat-input-control span")?.click();');
             sleep(2);
         }

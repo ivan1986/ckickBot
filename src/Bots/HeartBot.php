@@ -29,6 +29,10 @@ class HeartBot extends BaseBot implements BotInterface
     #[ScheduleCallback('4 hour', delta: 7200)]
     public function tasks()
     {
+        $hash = $this->UCGet('hash');
+        if (!$hash) {
+            return false;
+        }
         $apiClient = $this->getClient();
         $resp = $apiClient->post('auth', [
             'json' => [
@@ -53,7 +57,7 @@ class HeartBot extends BaseBot implements BotInterface
                 case 'daily':
                     $apiClient->get('promotions/' . $promotion['id'], [
                         'headers' => [
-                            'Auth-Token' => $this->UCGet('hash')
+                            'Auth-Token' => $hash
                         ]
                     ]);
                     return true;
@@ -74,7 +78,7 @@ class HeartBot extends BaseBot implements BotInterface
                             'promotion_data' => json_encode($result)
                         ],
                         'headers' => [
-                            'Auth-Token' => $this->UCGet('hash')
+                            'Auth-Token' => $hash
                         ]
                     ]);
                     return true;
@@ -84,7 +88,7 @@ class HeartBot extends BaseBot implements BotInterface
                     sleep(4);
                     $apiClient->get('promotions/' . $promotion['id'], [
                         'headers' => [
-                            'Auth-Token' => $this->UCGet('hash')
+                            'Auth-Token' => $hash
                         ]
                     ]);
                     return true;
@@ -98,10 +102,14 @@ class HeartBot extends BaseBot implements BotInterface
     #[ScheduleCallback('1 hour', delta: 900)]
     public function watchAd()
     {
+        $tgData = $this->UCGet('tgData');
+        if (!$tgData) {
+            return false;
+        }
         $apiClient = $this->getClient();
         $resp = $apiClient->post('auth', [
             'json' => [
-                'data' => $this->UCGet('tgData')
+                'data' => $tgData
             ]
         ]);
         $auth = json_decode($resp->getBody()->getContents(), true);

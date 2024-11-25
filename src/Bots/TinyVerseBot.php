@@ -3,7 +3,9 @@
 namespace App\Bots;
 
 use App\Attributes\ScheduleCallback;
+use App\Message\UpdateUrlUser;
 use App\Service\ProfileService;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 
 class TinyVerseBot extends BaseBot implements BotInterface
 {
@@ -119,6 +121,10 @@ class TinyVerseBot extends BaseBot implements BotInterface
         $token = $this->UCGet('token');
 
         if (!$token) {
+            $this->bus->dispatch(
+                new UpdateUrlUser($this->curProfile, $this->getName()),
+                [new DelayStamp(10 * 1000)]
+            );
             return null;
         }
 

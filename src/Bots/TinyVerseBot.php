@@ -88,32 +88,42 @@ class TinyVerseBot extends BaseBot implements BotInterface
         $info = json_decode($resp->getBody()->getContents(), true);
         $info = $info['response'];
 
-        $need = $this->calcFreeStart(100, $info['stars']);
-        if ($need < $info['dust']) {
-            $resp = $apiClient->post('/galaxy/get', [
-                'form_params' => [
-                    'session' => $this->UCGet('token'),
-                ],
-                'headers' => [
-                    'X-Api-Request-Id' => $this->getApiReqId(),
-                ]
-            ]);
-            $info = json_decode($resp->getBody()->getContents(), true);
-            $info = $info['response'];
-            sleep(1);
-            $resp = $apiClient->post('/stars/create', [
-                'form_params' => [
-                    'session' => $this->UCGet('token'),
-                    'galaxy_id' => $info['id'],
-                    'stars' => 100,
-                ],
-                'headers' => [
-                    'X-Api-Request-Id' => $this->getApiReqId(),
-                ]
-            ]);
-            return true;
+        $starsList = [1000, 500, 100];
+        $stars = 0;
+        foreach ($starsList as $count) {
+            $need = $this->calcFreeStart($count, $info['stars']);
+            if ($need < $info['dust']) {
+                $stars = $count;
+                break;
+            }
         }
-        return false;
+        if (!$stars) {
+            return false;
+        }
+        var_dump($stars);
+
+        $resp = $apiClient->post('/galaxy/get', [
+            'form_params' => [
+                'session' => $this->UCGet('token'),
+            ],
+            'headers' => [
+                'X-Api-Request-Id' => $this->getApiReqId(),
+            ]
+        ]);
+        $info = json_decode($resp->getBody()->getContents(), true);
+        $info = $info['response'];
+        sleep(1);
+        $resp = $apiClient->post('/stars/create', [
+            'form_params' => [
+                'session' => $this->UCGet('token'),
+                'galaxy_id' => $info['id'],
+                'stars' => $stars,
+            ],
+            'headers' => [
+                'X-Api-Request-Id' => $this->getApiReqId(),
+            ]
+        ]);
+        return true;
     }
 
     protected function getClient(): ?\GuzzleHttp\Client

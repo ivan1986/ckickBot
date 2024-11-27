@@ -35,7 +35,7 @@ class BlumBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
-    #[ScheduleCallback('8 hour', delta: 1800)]
+    #[ScheduleCallback('4 hour', delta: 1800)]
     public function game()
     {
         if (!$apiClient = $this->getClient('game-domain')) {

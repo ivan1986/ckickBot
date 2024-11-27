@@ -33,9 +33,7 @@ final class CustomFunctionHandler
         $bot->logAction($message->callback, ActionState::START);
         try {
             $result = $bot->{$message->callback}();
-            if ($result) {
-                $bot->logAction($message->callback, ActionState::CHANGE);
-            }
+            $bot->logAction($message->callback, $result ? ActionState::CHANGE : ActionState::FINISH);
         } catch (Exception $e) {
             $bot->logAction($message->callback, ActionState::ERROR);
             $this->logger->error('Error for ' . $message->profile . ' in ' . $message->name . ' ' . $message->callback . ' :' . $e->getMessage());
@@ -45,6 +43,5 @@ final class CustomFunctionHandler
             }
             return;
         }
-        $bot->logAction($message->callback, ActionState::FINISH);
     }
 }

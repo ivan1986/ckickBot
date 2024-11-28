@@ -134,25 +134,28 @@ class DropeeBot extends BaseBot implements BotInterface
 
         $this->updateStatItem('usdt', $whell['usdtCentsBalance'] / 100);
         $this->updateStatItem('spins', $whell['spins']['available']);
+        var_dump($whell['spins']);
 
         if ($whell['spins']['available'] > 20) {
-            $result = $apiClient->post('game/actions/fortune-wheel/spin', [
-                'json' => ['version' => 2]
-            ]);
-            $result = $result->getBody()->getContents();
-            $result = json_decode($result, true);
-            $this->logger->info($this->getName() . ' for ' . $this->curProfile . ' spin bonus: {id}', $result['prize']);
-            sleep(5);
+            for ($i=0; $i < 10; $i++) {
+                $this->oneSpin($apiClient);
+                sleep(5);
+            }
         }
         if ($whell['spins']['available'] > 0) {
-            $result = $apiClient->post('game/actions/fortune-wheel/spin', [
-                'json' => ['version' => 2]
-            ]);
-            $result = $result->getBody()->getContents();
-            $result = json_decode($result, true);
-            $this->logger->info($this->getName() . ' for ' . $this->curProfile . ' spin bonus: {id}', $result['prize']);
+            $this->oneSpin($apiClient);
             return true;
         }
+    }
+
+    protected function oneSpin($apiClient)
+    {
+        $result = $apiClient->post('game/actions/fortune-wheel/spin', [
+            'json' => ['version' => 2]
+        ]);
+        $result = $result->getBody()->getContents();
+        $result = json_decode($result, true);
+        $this->logger->info($this->getName() . ' for ' . $this->curProfile . ' spin bonus: {id}', $result['prize']);
     }
 
     #[ScheduleCallback('6 hour', delta: 3600)]

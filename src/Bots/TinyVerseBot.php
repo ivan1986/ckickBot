@@ -100,7 +100,6 @@ class TinyVerseBot extends BaseBot implements BotInterface
         if (!$stars) {
             return false;
         }
-        var_dump($stars);
 
         $resp = $apiClient->post('/galaxy/get', [
             'form_params' => [
@@ -122,6 +121,11 @@ class TinyVerseBot extends BaseBot implements BotInterface
             'headers' => [
                 'X-Api-Request-Id' => $this->getApiReqId(),
             ]
+        ]);
+        $this->logger->info('{bot} for {profile}: create {stars} stars', [
+            'profile' => $this->curProfile,
+            'bot' => $this->getName(),
+            'stars' => $stars
         ]);
         return true;
     }

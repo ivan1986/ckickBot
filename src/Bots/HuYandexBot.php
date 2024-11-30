@@ -129,6 +129,7 @@ class HuYandexBot extends BaseBot implements BotInterface
             'base_uri' => 'https://qlyuker.io/api/',
             'cookies' => $jar,
             'headers' => [
+                'Klyuk' => '0110101101101100011011110110111101101011',
                 'Content-Type' => 'application/json',
                 'User-Agent' => ProfileService::UA,
             ]

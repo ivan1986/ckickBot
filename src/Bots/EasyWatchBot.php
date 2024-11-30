@@ -43,15 +43,15 @@ class EasyWatchBot extends BaseBot implements BotInterface
             return;
         }
 
-        $client = $this->profileService->getOrCreateBrowser($this->curProfile);
+        $client = $this->profileService->getOrCreateBrowser($this->curProfile, false);
         $client->request('GET', $this->getUrl());
         sleep(2);
         $cookies = $client->getCookieJar();
         $client->waitForVisibility('[data-test-id="user-balance"]');
         $balance = $client->executeScript(<<<JS
-            return document.querySelector('[data-test-id="user-balance"]').dataset;
+            return document.querySelector('[data-test-id="user-balance"] > span > span').innerHTML;
         JS);
-        $balance = (float)str_replace(' ', '', $balance['title']);
+        $balance = (float)str_replace(' ', '', $balance);
         $this->updateStatItem('balance', round($balance, 3));
         $client->executeScript(<<<JS
             document.querySelector('a[href="/streams"]').click();

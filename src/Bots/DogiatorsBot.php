@@ -102,7 +102,6 @@ class DogiatorsBot extends BaseBot implements BotInterface
             preg_match('#(\D+)(\d+)#', $v['id'], $matches);
             $exist[$v['upgrade_id']] = $v['level'];
         }
-        $arenaStat = $updateData['arena_stats'];
 
         // оставляем только следующий номер для каждого инструмента
         $updates = [];
@@ -112,7 +111,7 @@ class DogiatorsBot extends BaseBot implements BotInterface
 
         // оставляем только те у которых есть услови других зданий
         $updates = array_filter($updates, function ($i) use ($exist, $profile, $coinsBalance) {
-            if ($i['status'] != 'active') {
+            if (!in_array($i['status'], ['active', 'inactive'])) {
                 return false;
             }
             return $i['next_modifier']['price'] < $coinsBalance;

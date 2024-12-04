@@ -47,7 +47,7 @@ class EasyWatchBot extends BaseBot implements BotInterface
         $client->request('GET', $this->getUrl());
         sleep(2);
         $cookies = $client->getCookieJar();
-        $client->waitForVisibility('[data-test-id="user-balance"]');
+        $client->waitForVisibility('[data-test-id="user-balance"]', 60);
         $balance = $client->executeScript(<<<JS
             return document.querySelector('[data-test-id="user-balance"] > span > span').innerHTML;
         JS);

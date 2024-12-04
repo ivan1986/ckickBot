@@ -129,6 +129,7 @@ class DogiatorsBot extends BaseBot implements BotInterface
         $r = $apiClient->post('upgrade/buy', [
             'json' => ['upgrade_id' => $updates['id']]
         ]);
+        $this->logger->info($this->getName() . ' for ' . $this->curProfile . ' update: {title}', ['title' => $updates['title']]);
         $this->bus->dispatch(
             new CustomFunctionUser($this->curProfile, $this->getName(), 'update'),
             [new DelayStamp(10 * 1000)]

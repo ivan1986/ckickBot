@@ -134,7 +134,6 @@ class DropeeBot extends BaseBot implements BotInterface
 
         $this->updateStatItem('usdt', $whell['usdtCentsBalance'] / 100);
         $this->updateStatItem('spins', $whell['spins']['available']);
-        var_dump($whell['spins']);
 
         if ($whell['spins']['available'] > 20) {
             for ($i=0; $i < 10; $i++) {

@@ -106,6 +106,80 @@ class BumsBot extends BaseBot implements BotInterface
     }
 
     #[ScheduleCallback('8 hour', delta: 7200)]
+    public function bonus()
+    {
+        if (!$apiClient = $this->getClient()) {
+            return;
+        }
+
+        $resp = $apiClient->get('miniapps/api/prop_shop/Lists', [
+            'query' => [
+                'showPages' => 'expedition',
+                'page' => 1,
+                'pageSize' => 10,
+            ]
+        ]);
+        $info = json_decode($resp->getBody()->getContents(), true);
+        $expeditions = $info['data'];
+        foreach ($expeditions as $expedition) {
+            if (empty($expedition['sellLists'])) {
+                continue;
+            }
+            foreach ($expedition['sellLists'] as $sellList) {
+                if ($sellList['oldAmount'] > 0 || $sellList['newAmount'] > 0) {
+                    continue 2;
+                }
+            }
+            if ($expedition['toDayUse']) {
+                continue;
+            }
+            $apiClient->post('miniapps/api/user_prop/UseProp', [
+                'multipart' => [
+                    [
+                        'name' => 'propId',
+                        'contents' => $expedition['propId'],
+                    ],
+                ]
+            ]);
+            return true;
+        }
+
+        $resp = $apiClient->get('miniapps/api/prop_shop/Lists', [
+            'query' => [
+                'showPages' => 'spin',
+                'page' => 1,
+                'pageSize' => 10,
+            ]
+        ]);
+        $info = json_decode($resp->getBody()->getContents(), true);
+        $expeditions = $info['data'];
+        foreach ($expeditions as $expedition) {
+            if (empty($expedition['sellLists'])) {
+                continue;
+            }
+            foreach ($expedition['sellLists'] as $sellList) {
+                if ($sellList['oldAmount'] > 0 || $sellList['newAmount'] > 0) {
+                    continue 2;
+                }
+            }
+            if ($expedition['toDayUse']) {
+                continue;
+            }
+            $apiClient->post('miniapps/api/game_spin/Start', [
+                'multipart' => [
+                    [
+                        'count' => 1,
+                        'contents' => $expedition['propId'],
+                    ],
+                ]
+            ]);
+            return true;
+        }
+
+        return false;
+    }
+
+    #[ScheduleCallback('8 hour', delta: 7200)]
     public function daily()
     {
         if (!$apiClient = $this->getClient()) {

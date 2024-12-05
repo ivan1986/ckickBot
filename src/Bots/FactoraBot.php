@@ -4,6 +4,8 @@ namespace App\Bots;
 
 use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunction;
+use App\Message\CustomFunctionUser;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 
@@ -197,6 +199,10 @@ class FactoraBot extends BaseBot implements BotInterface
             ],
         ]);
         $status = $resp->getBody()->getContents();
+        $this->bus->dispatch(
+            new CustomFunctionUser($this->curProfile, $this->getName(), 'upgradeBuildings'),
+            [new DelayStamp((rand(5, 10) + 10) * 1000)]
+        );
         return $status == 'ok';
     }
 

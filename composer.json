@@ -12,6 +12,7 @@
         "guzzlehttp/guzzle": "^7.9",
         "kevinpapst/tabler-bundle": "^1.5",
         "nesbot/carbon": "^3.8",
+        "phrity/websocket": "^3.2",
         "symfony/cache": "7.1.*",
         "symfony/console": "7.1.*",
         "symfony/dotenv": "7.1.*",

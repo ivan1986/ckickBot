@@ -98,6 +98,10 @@ class BumsBot extends BaseBot implements BotInterface
                 ],
             ]
         ]);
+        $this->logger->info('{bot} for {profile}: update', [
+            'profile' => $this->curProfile,
+            'bot' => $this->getName(),
+        ]);
         $this->bus->dispatch(
             new CustomFunctionUser($this->curProfile, $this->getName(), 'update'),
             [new DelayStamp(10 * 1000)]
@@ -141,6 +145,10 @@ class BumsBot extends BaseBot implements BotInterface
                     ],
                 ]
             ]);
+            $this->logger->info('{bot} for {profile}: get free expedition', [
+                'profile' => $this->curProfile,
+                'bot' => $this->getName(),
+            ]);
             return true;
         }
 
@@ -172,6 +180,10 @@ class BumsBot extends BaseBot implements BotInterface
                         'contents' => $expedition['propId'],
                     ],
                 ]
+            ]);
+            $this->logger->info('{bot} for {profile}: get free box', [
+                'profile' => $this->curProfile,
+                'bot' => $this->getName(),
             ]);
             return true;
         }

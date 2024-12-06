@@ -85,12 +85,22 @@ class Mine2Bot extends BaseBot implements BotInterface
 
         while ($message['tap_info']['station_energy'] > 0.1) {
             $client->text('tap');
-            $message = json_decode($client->receive()->getContent(), true);
             usleep(random_int(5, 10));
+            $message = json_decode($client->receive()->getContent(), true);
+            if (empty($message['tap_info'])) {
+                break;
+            }
         }
         $client->text('status');
         $message = json_decode($client->receive()->getContent(), true);
         $this->updateStatItem('energy', $message['tap_info']['user_energy']);
+        $this->logger->info('{bot} for {profile}: energy: {energy} - {mined} - {rest}', [
+            'profile' => $this->curProfile,
+            'bot' => $this->getName(),
+            'energy' => $message['tap_info']['user_energy'],
+            'mined' => $message['tap_info']['user_mined_energy'],
+            'rest' => $message['tap_info']['station_energy'],
+        ]);
 
         $client->close();
         return true;

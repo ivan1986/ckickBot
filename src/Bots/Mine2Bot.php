@@ -49,7 +49,6 @@ class Mine2Bot extends BaseBot implements BotInterface
 
         $resp = json_decode($resp->getBody()->getContents(), true);
         $this->UCSet('token', $resp['token']);
-        var_dump($resp['token']);
 
         $resp = $client->get('user/profile', [
             'headers' => [
@@ -57,7 +56,6 @@ class Mine2Bot extends BaseBot implements BotInterface
             ]
         ]);
         $resp = json_decode($resp->getBody()->getContents(), true);
-        var_dump($resp['uuid']);
         $this->UCSet('uuid', $resp['uuid']);
 
         parent::saveUrl($client, $url);

@@ -63,7 +63,7 @@ class Mine2Bot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
-    #[ScheduleCallback('2 hour', delta: 3600)]
+    #[ScheduleCallback('1 hour', delta: 1800)]
     public function energy()
     {
         $uuid = $this->UCGet('uuid');

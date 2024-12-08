@@ -4,15 +4,19 @@ namespace App\Bots;
 
 use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunction;
+use App\Message\CustomFunctionUser;
 use App\Message\UpdateUrl;
 use App\Service\ProfileService;
 use GuzzleHttp\RequestOptions;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
+use Symfony\Component\Scheduler\Trigger\CronExpressionTrigger;
 use Symfony\Contracts\Service\Attribute\Required;
 
 class WeMineBot extends BaseBot implements BotInterface
 {
+    use MultiUser;
+
     public function getTgBotName() { return 'WeMineBot'; }
 
     public function saveUrl($client, $url)
@@ -123,6 +127,130 @@ class WeMineBot extends BaseBot implements BotInterface
         }
         $this->updateStatItem('level', $curLevelsCode);
     }
+
+    public function addSchedule(Schedule $schedule): void
+    {
+        $profiles = $this->getEnabledProfiles();
+        if (count($profiles) < 3) {
+            return;
+        }
+
+        $schedule->add(RecurringMessage::cron('0 20 * * *',
+            new CustomFunctionUser($profiles[0], $this->getName(), 'findKey'),
+            new \DateTimeZone('Europe/Moscow')
+        ));
+    }
+
+    //region Crack daily case
+    public function findKey()
+    {
+        $profiles = $this->getEnabledProfiles();
+        if (count($profiles) < 3) {
+            //TODO: Не хватает профилей
+            return false;
+        }
+        $findDigits = [];
+
+        $check = [
+            0 => [0,1,2,3,4],
+            1 => [5,6,7,8,9],
+        ];
+        foreach ($check as $num => $digits) {
+            $this->curProfile = $profiles[$num];
+            $apiClient = $this->getClient();
+            foreach ($digits as $d) {
+                if (count($findDigits) == 3) {
+                    break 2;
+                }
+                $key = $d . $d . $d;
+                $result = $this->enterKey($apiClient, $key);
+                if ($result == 1) {
+                    $findDigits[] = $d;
+                }
+                if ($result == 2) {
+                    $findDigits[] = $d;
+                    $findDigits[] = $d;
+                }
+                if ($result == 3) {
+                    // Мы его нашли
+                    $this->logger->info('{bot}: find key: {key}', [
+                        'bot' => $this->getName(),
+                        'key' => $key,
+                    ]);
+                    $this->enterKeyForAll($key);
+                    return true;
+                }
+            }
+        }
+
+        $this->logger->info('{bot}: find digits: {digits}', [
+            'bot' => $this->getName(),
+            'digits' => join(', ', $findDigits),
+        ]);
+
+        // генерим перестановки
+        $needCheck = [
+            $findDigits[0] . $findDigits[1] . $findDigits[2],
+            $findDigits[0] . $findDigits[2] . $findDigits[1],
+            $findDigits[1] . $findDigits[0] . $findDigits[2],
+            $findDigits[1] . $findDigits[2] . $findDigits[0],
+            $findDigits[2] . $findDigits[0] . $findDigits[1],
+            $findDigits[2] . $findDigits[1] . $findDigits[0],
+        ];
+        // для повторяющихся цифр
+        $needCheck = array_unique($needCheck);
+
+        $this->curProfile = $profiles[2];
+        $apiClient = $this->getClient();
+
+        foreach ($needCheck as $key) {
+            $result = $this->enterKey($apiClient, $key);
+            if ($result == 3) {
+                // Мы его нашли
+                $this->logger->info('{bot}: find key: {key}', [
+                    'bot' => $this->getName(),
+                    'key' => $key,
+                ]);
+                $this->enterKeyForAll($key);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function enterKeyForAll($key)
+    {
+        $profiles = $this->getEnabledProfiles();
+        $other = array_filter($profiles, fn ($profile) => $profile !== $this->curProfile);
+        foreach ($other as $profile) {
+            $this->curProfile = $profile;
+            $apiClient = $this->getClient();
+            try {
+                $this->enterKey($apiClient, $key);
+            } catch (\Exception $e) {
+                $this->logger->error('{bot} enter key for {profile}: {error}', [
+                    'bot' => $this->getName(),
+                    'profile' => $this->curProfile,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+    }
+
+    protected function enterKey($apiClient, $key)
+    {
+        $resp = $apiClient->post('roulette/check/' . $key);
+        $content = $resp->getBody()->getContents();
+        $this->logger->debug('{bot} roulette/check for {profile}: {result}', [
+            'bot' => $this->getName(),
+            'profile' => $this->curProfile,
+            'result' => $content,
+        ]);
+        $info = json_decode($content, true);
+        return $info['matchCount'];
+    }
+    //endregion
 
     protected function updateStat($balance)
     {

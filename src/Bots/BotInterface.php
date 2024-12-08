@@ -14,7 +14,7 @@ interface BotInterface
     public function getName();
     public function getProxy();
 
-    public function addSchedule(Schedule $schedule);
+    public function addSchedule(Schedule $schedule): void;
     public function setProfile(string $profile);
 
     public function getTgBotName();

@@ -74,7 +74,7 @@ class BaseBot
         return str_replace('tgWebAppPlatform=web', 'tgWebAppPlatform=android', $url);
     }
 
-    public function addSchedule(Schedule $schedule)
+    public function addSchedule(Schedule $schedule): void
     {
     }
 
@@ -158,4 +158,5 @@ class BaseBot
             Carbon::now()->getTimestamp()
         );
     }
+
 }

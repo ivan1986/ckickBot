@@ -150,6 +150,7 @@ class WeMineBot extends BaseBot implements BotInterface
             return false;
         }
         $findDigits = [];
+        sleep(10);
 
         $check = [
             0 => [0,1,2,3,4],
@@ -200,7 +201,7 @@ class WeMineBot extends BaseBot implements BotInterface
         // для повторяющихся цифр
         $needCheck = array_unique($needCheck);
 
-        $this->curProfile = $profiles[2];
+        $this->curProfile = $profiles[3];
         $apiClient = $this->getClient();
 
         foreach ($needCheck as $key) {
@@ -242,9 +243,10 @@ class WeMineBot extends BaseBot implements BotInterface
     {
         $resp = $apiClient->post('roulette/check/' . $key);
         $content = $resp->getBody()->getContents();
-        $this->logger->debug('{bot} roulette/check for {profile}: {result}', [
+        $this->logger->debug('{bot} roulette/check for {profile} key {key}: {result}', [
             'bot' => $this->getName(),
             'profile' => $this->curProfile,
+            'key' => $key,
             'result' => $content,
         ]);
         $info = json_decode($content, true);

@@ -9,9 +9,9 @@ const uuidChallenge = Blum.getUUID();
 const payload = Blum.getPayload(
     gameId,
     {
-        hash: challenge.hash,
         id: uuidChallenge,
         nonce: challenge.nonce,
+        hash: challenge.hash,
     },
     {
         BP: {
@@ -19,14 +19,14 @@ const payload = Blum.getPayload(
         }
     },
     {
-        BOMB: {
-            clicks: 0
-        },
         CLOVER: {
             clicks: points
         },
         FREEZE: {
             clicks: freeze
+        },
+        BOMB: {
+            clicks: 0
         }
     }
 );

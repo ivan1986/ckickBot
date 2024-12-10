@@ -4,68 +4,86 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const self = global;
 
+
     "use strict";
-    const j = globalThis || void 0 || self;
-    let c, b = 0, w = null;
-    function m() {
-        return (w === null || w.byteLength === 0) && (w = new Uint8Array(c.memory.buffer)),
-        w
+    const v = globalThis || void 0 || self;
+    let _;
+    const g = new Array(128).fill(void 0);
+    g.push(void 0, null, !0, !1);
+    function i(e) {
+        return g[e]
     }
-    const h = typeof TextEncoder < "u" ? new TextEncoder("utf-8") : {
+    let w = 0
+      , m = null;
+    function S() {
+        return (m === null || m.byteLength === 0) && (m = new Uint8Array(_.memory.buffer)),
+        m
+    }
+    const O = typeof TextEncoder < "u" ? new TextEncoder("utf-8") : {
         encode: () => {
             throw Error("TextEncoder not available")
         }
     }
-      , E = typeof h.encodeInto == "function" ? function(n, e) {
-        return h.encodeInto(n, e)
+      , M = typeof O.encodeInto == "function" ? function(e, n) {
+        return O.encodeInto(e, n)
     }
-    : function(n, e) {
-        const t = h.encode(n);
-        return e.set(t),
+    : function(e, n) {
+        const t = O.encode(e);
+        return n.set(t),
         {
-            read: n.length,
+            read: e.length,
             written: t.length
         }
     }
     ;
-    function d(n, e, t) {
+    function p(e, n, t) {
         if (t === void 0) {
-            const _ = h.encode(n)
-              , g = e(_.length, 1) >>> 0;
-            return m().subarray(g, g + _.length).set(_),
-            b = _.length,
-            g
+            const a = O.encode(e)
+              , y = n(a.length, 1) >>> 0;
+            return S().subarray(y, y + a.length).set(a),
+            w = a.length,
+            y
         }
-        let r = n.length
-          , o = e(r, 1) >>> 0;
-        const s = m();
-        let i = 0;
-        for (; i < r; i++) {
-            const _ = n.charCodeAt(i);
-            if (_ > 127)
+        let r = e.length
+          , o = n(r, 1) >>> 0;
+        const f = S();
+        let s = 0;
+        for (; s < r; s++) {
+            const a = e.charCodeAt(s);
+            if (a > 127)
                 break;
-            s[o + i] = _
+            f[o + s] = a
         }
-        if (i !== r) {
-            i !== 0 && (n = n.slice(i)),
-            o = t(o, r, r = i + n.length * 3, 1) >>> 0;
-            const _ = m().subarray(o + i, o + r)
-              , g = E(n, _);
-            i += g.written,
-            o = t(o, r, i, 1) >>> 0
+        if (s !== r) {
+            s !== 0 && (e = e.slice(s)),
+            o = t(o, r, r = s + e.length * 3, 1) >>> 0;
+            const a = S().subarray(o + s, o + r)
+              , y = M(e, a);
+            s += y.written,
+            o = t(o, r, s, 1) >>> 0
         }
-        return b = i,
+        return w = s,
         o
     }
-    function l(n) {
-        return n == null
+    function h(e) {
+        return e == null
     }
-    let a = null;
+    let d = null;
     function u() {
-        return (a === null || a.buffer.detached === !0 || a.buffer.detached === void 0 && a.buffer !== c.memory.buffer) && (a = new DataView(c.memory.buffer)),
-        a
+        return (d === null || d.buffer.detached === !0 || d.buffer.detached === void 0 && d.buffer !== _.memory.buffer) && (d = new DataView(_.memory.buffer)),
+        d
     }
-    const I = typeof TextDecoder < "u" ? new TextDecoder("utf-8",{
+    let I = g.length;
+    function W(e) {
+        e < 132 || (g[e] = I,
+        I = e)
+    }
+    function l(e) {
+        const n = i(e);
+        return W(e),
+        n
+    }
+    const E = typeof TextDecoder < "u" ? new TextDecoder("utf-8",{
         ignoreBOM: !0,
         fatal: !0
     }) : {
@@ -73,463 +91,496 @@ const self = global;
             throw Error("TextDecoder not available")
         }
     };
-    typeof TextDecoder < "u" && I.decode();
-    function y(n, e) {
-        return n = n >>> 0,
-        I.decode(m().subarray(n, n + e))
+    typeof TextDecoder < "u" && E.decode();
+    function A(e, n) {
+        return e = e >>> 0,
+        E.decode(S().subarray(e, e + n))
     }
-    function x(n) {
-        const e = typeof n;
-        if (e == "number" || e == "boolean" || n == null)
-            return `${n}`;
-        if (e == "string")
-            return `"${n}"`;
-        if (e == "symbol") {
-            const o = n.description;
+    function c(e) {
+        I === g.length && g.push(g.length + 1);
+        const n = I;
+        return I = g[n],
+        g[n] = e,
+        n
+    }
+    function T(e) {
+        const n = typeof e;
+        if (n == "number" || n == "boolean" || e == null)
+            return `${e}`;
+        if (n == "string")
+            return `"${e}"`;
+        if (n == "symbol") {
+            const o = e.description;
             return o == null ? "Symbol" : `Symbol(${o})`
         }
-        if (e == "function") {
-            const o = n.name;
+        if (n == "function") {
+            const o = e.name;
             return typeof o == "string" && o.length > 0 ? `Function(${o})` : "Function"
         }
-        if (Array.isArray(n)) {
-            const o = n.length;
-            let s = "[";
-            o > 0 && (s += x(n[0]));
-            for (let i = 1; i < o; i++)
-                s += ", " + x(n[i]);
-            return s += "]",
-            s
+        if (Array.isArray(e)) {
+            const o = e.length;
+            let f = "[";
+            o > 0 && (f += T(e[0]));
+            for (let s = 1; s < o; s++)
+                f += ", " + T(e[s]);
+            return f += "]",
+            f
         }
-        const t = /\[object ([^\]]+)\]/.exec(toString.call(n));
+        const t = /\[object ([^\]]+)\]/.exec(toString.call(e));
         let r;
         if (t.length > 1)
             r = t[1];
         else
-            return toString.call(n);
+            return toString.call(e);
         if (r == "Object")
             try {
-                return "Object(" + JSON.stringify(n) + ")"
+                return "Object(" + JSON.stringify(e) + ")"
             } catch {
                 return "Object"
             }
-        return n instanceof Error ? `${n.name}: ${n.message}
-${n.stack}` : r
+        return e instanceof Error ? `${e.name}: ${e.message}
+${e.stack}` : r
     }
-    function A(n) {
-        const e = c.__wbindgen_export_2.get(n);
-        return c.__externref_table_dealloc(n),
-        e
-    }
-    function U(n) {
-        const e = d(n, c.__wbindgen_malloc, c.__wbindgen_realloc)
-          , t = b
-          , r = c.proof(e, t);
-        if (r[2])
-            throw A(r[1]);
-        return A(r[0])
-    }
-    function R(n, e, t, r) {
-        let o, s;
+    function D(e) {
         try {
-            const g = d(n, c.__wbindgen_malloc, c.__wbindgen_realloc)
-              , B = b
-              , p = c.pack(g, B, e, t, r);
-            var i = p[0]
-              , _ = p[1];
-            if (p[3])
-                throw i = 0,
-                _ = 0,
-                A(p[2]);
-            return o = i,
-            s = _,
-            y(i, _)
+            const o = _.__wbindgen_add_to_stack_pointer(-16)
+              , f = p(e, _.__wbindgen_malloc, _.__wbindgen_realloc)
+              , s = w;
+            _.proof(o, f, s);
+            var n = u().getInt32(o + 4 * 0, !0)
+              , t = u().getInt32(o + 4 * 1, !0)
+              , r = u().getInt32(o + 4 * 2, !0);
+            if (r)
+                throw l(t);
+            return l(n)
         } finally {
-            c.__wbindgen_free(o, s, 1)
+            _.__wbindgen_add_to_stack_pointer(16)
         }
     }
-    function O(n) {
-        const e = c.__externref_table_alloc();
-        return c.__wbindgen_export_2.set(e, n),
-        e
-    }
-    function f(n, e) {
+    function F(e, n, t, r) {
+        let o, f;
         try {
-            return n.apply(this, e)
-        } catch (t) {
-            const r = O(t);
-            c.__wbindgen_exn_store(r)
+            const j = _.__wbindgen_add_to_stack_pointer(-16)
+              , N = p(e, _.__wbindgen_malloc, _.__wbindgen_realloc)
+              , V = w;
+            _.pack(j, N, V, c(n), c(t), c(r));
+            var s = u().getInt32(j + 4 * 0, !0)
+              , a = u().getInt32(j + 4 * 1, !0)
+              , y = u().getInt32(j + 4 * 2, !0)
+              , C = u().getInt32(j + 4 * 3, !0)
+              , x = s
+              , U = a;
+            if (C)
+                throw x = 0,
+                U = 0,
+                l(y);
+            return o = x,
+            f = U,
+            A(x, U)
+        } finally {
+            _.__wbindgen_add_to_stack_pointer(16),
+            _.__wbindgen_free(o, f, 1)
         }
     }
-    async function W(n, e) {
-        if (typeof Response == "function" && n instanceof Response) {
+    function b(e, n) {
+        try {
+            return e.apply(this, n)
+        } catch (t) {
+            _.__wbindgen_exn_store(c(t))
+        }
+    }
+    async function $(e, n) {
+        if (typeof Response == "function" && e instanceof Response) {
             if (typeof WebAssembly.instantiateStreaming == "function")
                 try {
-                    return await WebAssembly.instantiateStreaming(n, e)
+                    return await WebAssembly.instantiateStreaming(e, n)
                 } catch (r) {
-                    if (n.headers.get("Content-Type") != "application/wasm")
-                        console.warn("`WebAssembly.instantiateStreaming` failed because your server does not serve Wasm with `application/wasm` MIME type. Falling back to `WebAssembly.instantiate` which is slower. Original error:\n", r);
+                    if (e.headers.get("Content-Type") != "application/wasm")
+                        console.warn("`WebAssembly.instantiateStreaming` failed because your server does not serve wasm with `application/wasm` MIME type. Falling back to `WebAssembly.instantiate` which is slower. Original error:\n", r);
                     else
                         throw r
                 }
-            const t = await n.arrayBuffer();
-            return await WebAssembly.instantiate(t, e)
+            const t = await e.arrayBuffer();
+            return await WebAssembly.instantiate(t, n)
         } else {
-            const t = await WebAssembly.instantiate(n, e);
+            const t = await WebAssembly.instantiate(e, n);
             return t instanceof WebAssembly.Instance ? {
                 instance: t,
-                module: n
+                module: e
             } : t
         }
     }
-    function k() {
-        const n = {};
-        return n.wbg = {},
-        n.wbg.__wbindgen_string_get = function(e, t) {
-            const r = t
+    function B() {
+        const e = {};
+        return e.wbg = {},
+        e.wbg.__wbindgen_string_get = function(n, t) {
+            const r = i(t)
               , o = typeof r == "string" ? r : void 0;
-            var s = l(o) ? 0 : d(o, c.__wbindgen_malloc, c.__wbindgen_realloc)
-              , i = b;
-            u().setInt32(e + 4 * 1, i, !0),
-            u().setInt32(e + 4 * 0, s, !0)
+            var f = h(o) ? 0 : p(o, _.__wbindgen_malloc, _.__wbindgen_realloc)
+              , s = w;
+            u().setInt32(n + 4 * 1, s, !0),
+            u().setInt32(n + 4 * 0, f, !0)
         }
         ,
-        n.wbg.__wbindgen_error_new = function(e, t) {
-            return new Error(y(e, t))
+        e.wbg.__wbindgen_object_drop_ref = function(n) {
+            l(n)
         }
         ,
-        n.wbg.__wbindgen_string_new = function(e, t) {
-            return y(e, t)
+        e.wbg.__wbindgen_error_new = function(n, t) {
+            const r = new Error(A(n, t));
+            return c(r)
         }
         ,
-        n.wbg.__wbindgen_is_object = function(e) {
-            const t = e;
+        e.wbg.__wbindgen_is_bigint = function(n) {
+            return typeof i(n) == "bigint"
+        }
+        ,
+        e.wbg.__wbindgen_bigint_from_u64 = function(n) {
+            const t = BigInt.asUintN(64, n);
+            return c(t)
+        }
+        ,
+        e.wbg.__wbindgen_jsval_eq = function(n, t) {
+            return i(n) === i(t)
+        }
+        ,
+        e.wbg.__wbindgen_is_object = function(n) {
+            const t = i(n);
             return typeof t == "object" && t !== null
         }
         ,
-        n.wbg.__wbindgen_is_string = function(e) {
-            return typeof e == "string"
+        e.wbg.__wbindgen_is_undefined = function(n) {
+            return i(n) === void 0
         }
         ,
-        n.wbg.__wbindgen_is_bigint = function(e) {
-            return typeof e == "bigint"
+        e.wbg.__wbindgen_in = function(n, t) {
+            return i(n)in i(t)
         }
         ,
-        n.wbg.__wbindgen_bigint_from_u64 = function(e) {
-            return BigInt.asUintN(64, e)
+        e.wbg.__wbg_crypto_1d1f22824a6a080c = function(n) {
+            const t = i(n).crypto;
+            return c(t)
         }
         ,
-        n.wbg.__wbindgen_jsval_eq = function(e, t) {
-            return e === t
+        e.wbg.__wbg_process_4a72847cc503995b = function(n) {
+            const t = i(n).process;
+            return c(t)
         }
         ,
-        n.wbg.__wbindgen_is_undefined = function(e) {
-            return e === void 0
+        e.wbg.__wbg_versions_f686565e586dd935 = function(n) {
+            const t = i(n).versions;
+            return c(t)
         }
         ,
-        n.wbg.__wbindgen_in = function(e, t) {
-            return e in t
+        e.wbg.__wbg_node_104a2ff8d6ea03a2 = function(n) {
+            const t = i(n).node;
+            return c(t)
         }
         ,
-        n.wbg.__wbg_crypto_1d1f22824a6a080c = function(e) {
-            return e.crypto
+        e.wbg.__wbindgen_is_string = function(n) {
+            return typeof i(n) == "string"
         }
         ,
-        n.wbg.__wbg_process_4a72847cc503995b = function(e) {
-            return e.process
-        }
-        ,
-        n.wbg.__wbg_versions_f686565e586dd935 = function(e) {
-            return e.versions
-        }
-        ,
-        n.wbg.__wbg_node_104a2ff8d6ea03a2 = function(e) {
-            return e.node
-        }
-        ,
-        n.wbg.__wbg_require_cca90b1a94a0255b = function() {
-            return f(function() {
-                return module.require
+        e.wbg.__wbg_require_cca90b1a94a0255b = function() {
+            return b(function() {
+                const n = module.require;
+                return c(n)
             }, arguments)
         }
         ,
-        n.wbg.__wbindgen_is_function = function(e) {
-            return typeof e == "function"
+        e.wbg.__wbindgen_is_function = function(n) {
+            return typeof i(n) == "function"
         }
         ,
-        n.wbg.__wbg_msCrypto_eb05e62b530a1508 = function(e) {
-            return e.msCrypto
+        e.wbg.__wbindgen_string_new = function(n, t) {
+            const r = A(n, t);
+            return c(r)
         }
         ,
-        n.wbg.__wbg_randomFillSync_5c9c955aa56b6049 = function() {
-            return f(function(e, t) {
-                e.randomFillSync(t)
+        e.wbg.__wbg_msCrypto_eb05e62b530a1508 = function(n) {
+            const t = i(n).msCrypto;
+            return c(t)
+        }
+        ,
+        e.wbg.__wbg_randomFillSync_5c9c955aa56b6049 = function() {
+            return b(function(n, t) {
+                i(n).randomFillSync(l(t))
             }, arguments)
         }
         ,
-        n.wbg.__wbg_getRandomValues_3aa56aa6edec874c = function() {
-            return f(function(e, t) {
-                e.getRandomValues(t)
+        e.wbg.__wbg_getRandomValues_3aa56aa6edec874c = function() {
+            return b(function(n, t) {
+                i(n).getRandomValues(i(t))
             }, arguments)
         }
         ,
-        n.wbg.__wbindgen_jsval_loose_eq = function(e, t) {
-            return e == t
+        e.wbg.__wbindgen_jsval_loose_eq = function(n, t) {
+            return i(n) == i(t)
         }
         ,
-        n.wbg.__wbindgen_boolean_get = function(e) {
-            const t = e;
+        e.wbg.__wbindgen_boolean_get = function(n) {
+            const t = i(n);
             return typeof t == "boolean" ? t ? 1 : 0 : 2
         }
         ,
-        n.wbg.__wbindgen_number_get = function(e, t) {
-            const r = t
+        e.wbg.__wbindgen_number_get = function(n, t) {
+            const r = i(t)
               , o = typeof r == "number" ? r : void 0;
-            u().setFloat64(e + 8 * 1, l(o) ? 0 : o, !0),
-            u().setInt32(e + 4 * 0, !l(o), !0)
+            u().setFloat64(n + 8 * 1, h(o) ? 0 : o, !0),
+            u().setInt32(n + 4 * 0, !h(o), !0)
         }
         ,
-        n.wbg.__wbindgen_as_number = function(e) {
-            return +e
+        e.wbg.__wbindgen_as_number = function(n) {
+            return +i(n)
         }
         ,
-        n.wbg.__wbg_String_b9412f8799faab3e = function(e, t) {
-            const r = String(t)
-              , o = d(r, c.__wbindgen_malloc, c.__wbindgen_realloc)
-              , s = b;
-            u().setInt32(e + 4 * 1, s, !0),
-            u().setInt32(e + 4 * 0, o, !0)
+        e.wbg.__wbindgen_number_new = function(n) {
+            return c(n)
         }
         ,
-        n.wbg.__wbindgen_number_new = function(e) {
-            return e
+        e.wbg.__wbindgen_object_clone_ref = function(n) {
+            const t = i(n);
+            return c(t)
         }
         ,
-        n.wbg.__wbg_getwithrefkey_edc2c8960f0f1191 = function(e, t) {
-            return e[t]
+        e.wbg.__wbg_getwithrefkey_edc2c8960f0f1191 = function(n, t) {
+            const r = i(n)[i(t)];
+            return c(r)
         }
         ,
-        n.wbg.__wbg_set_f975102236d3c502 = function(e, t, r) {
-            e[t] = r
+        e.wbg.__wbg_set_f975102236d3c502 = function(n, t, r) {
+            i(n)[l(t)] = l(r)
         }
         ,
-        n.wbg.__wbg_get_5419cf6b954aa11d = function(e, t) {
-            return e[t >>> 0]
+        e.wbg.__wbg_String_b9412f8799faab3e = function(n, t) {
+            const r = String(i(t))
+              , o = p(r, _.__wbindgen_malloc, _.__wbindgen_realloc)
+              , f = w;
+            u().setInt32(n + 4 * 1, f, !0),
+            u().setInt32(n + 4 * 0, o, !0)
         }
         ,
-        n.wbg.__wbg_length_f217bbbf7e8e4df4 = function(e) {
-            return e.length
+        e.wbg.__wbg_get_3baa728f9d58d3f6 = function(n, t) {
+            const r = i(n)[t >>> 0];
+            return c(r)
         }
         ,
-        n.wbg.__wbg_newnoargs_1ede4bf2ebbaaf43 = function(e, t) {
-            return new Function(y(e, t))
+        e.wbg.__wbg_length_ae22078168b726f5 = function(n) {
+            return i(n).length
         }
         ,
-        n.wbg.__wbg_next_13b477da1eaa3897 = function(e) {
-            return e.next
+        e.wbg.__wbg_newnoargs_76313bd6ff35d0f2 = function(n, t) {
+            const r = new Function(A(n, t));
+            return c(r)
         }
         ,
-        n.wbg.__wbg_next_b06e115d1b01e10b = function() {
-            return f(function(e) {
-                return e.next()
+        e.wbg.__wbg_next_de3e9db4440638b2 = function(n) {
+            const t = i(n).next;
+            return c(t)
+        }
+        ,
+        e.wbg.__wbg_next_f9cb570345655b9a = function() {
+            return b(function(n) {
+                const t = i(n).next();
+                return c(t)
             }, arguments)
         }
         ,
-        n.wbg.__wbg_done_983b5ffcaec8c583 = function(e) {
-            return e.done
+        e.wbg.__wbg_done_bfda7aa8f252b39f = function(n) {
+            return i(n).done
         }
         ,
-        n.wbg.__wbg_value_2ab8a198c834c26a = function(e) {
-            return e.value
+        e.wbg.__wbg_value_6d39332ab4788d86 = function(n) {
+            const t = i(n).value;
+            return c(t)
         }
         ,
-        n.wbg.__wbg_iterator_695d699a44d6234c = function() {
-            return Symbol.iterator
+        e.wbg.__wbg_iterator_888179a48810a9fe = function() {
+            return c(Symbol.iterator)
         }
         ,
-        n.wbg.__wbg_get_ef828680c64da212 = function() {
-            return f(function(e, t) {
-                return Reflect.get(e, t)
+        e.wbg.__wbg_get_224d16597dbbfd96 = function() {
+            return b(function(n, t) {
+                const r = Reflect.get(i(n), i(t));
+                return c(r)
             }, arguments)
         }
         ,
-        n.wbg.__wbg_call_a9ef466721e824f2 = function() {
-            return f(function(e, t) {
-                return e.call(t)
+        e.wbg.__wbg_call_1084a111329e68ce = function() {
+            return b(function(n, t) {
+                const r = i(n).call(i(t));
+                return c(r)
             }, arguments)
         }
         ,
-        n.wbg.__wbg_new_e69b5f66fda8f13c = function() {
-            return new Object
+        e.wbg.__wbg_new_525245e2b9901204 = function() {
+            const n = new Object;
+            return c(n)
         }
         ,
-        n.wbg.__wbg_self_bf91bf94d9e04084 = function() {
-            return f(function() {
-                return self.self
+        e.wbg.__wbg_self_3093d5d1f7bcb682 = function() {
+            return b(function() {
+                const n = self.self;
+                return c(n)
             }, arguments)
         }
         ,
-        n.wbg.__wbg_window_52dd9f07d03fd5f8 = function() {
-            return f(function() {
-                return window.window
+        e.wbg.__wbg_window_3bcfc4d31bc012f8 = function() {
+            return b(function() {
+                const n = window.window;
+                return c(n)
             }, arguments)
         }
         ,
-        n.wbg.__wbg_globalThis_05c129bf37fcf1be = function() {
-            return f(function() {
-                return globalThis.globalThis
+        e.wbg.__wbg_globalThis_86b222e13bdf32ed = function() {
+            return b(function() {
+                const n = globalThis.globalThis;
+                return c(n)
             }, arguments)
         }
         ,
-        n.wbg.__wbg_global_3eca19bb09e9c484 = function() {
-            return f(function() {
-                return j.global
+        e.wbg.__wbg_global_e5a3fe56f8be9485 = function() {
+            return b(function() {
+                const n = v.global;
+                return c(n)
             }, arguments)
         }
         ,
-        n.wbg.__wbg_instanceof_ArrayBuffer_74945570b4a62ec7 = function(e) {
+        e.wbg.__wbg_instanceof_ArrayBuffer_61dfc3198373c902 = function(n) {
             let t;
             try {
-                t = e instanceof ArrayBuffer
+                t = i(n)instanceof ArrayBuffer
             } catch {
                 t = !1
             }
             return t
         }
         ,
-        n.wbg.__wbg_call_3bfa248576352471 = function() {
-            return f(function(e, t, r) {
-                return e.call(t, r)
+        e.wbg.__wbg_call_89af060b4e1523f2 = function() {
+            return b(function(n, t, r) {
+                const o = i(n).call(i(t), i(r));
+                return c(o)
             }, arguments)
         }
         ,
-        n.wbg.__wbg_isSafeInteger_b9dff570f01a9100 = function(e) {
-            return Number.isSafeInteger(e)
+        e.wbg.__wbg_isSafeInteger_7f1ed56200d90674 = function(n) {
+            return Number.isSafeInteger(i(n))
         }
         ,
-        n.wbg.__wbg_entries_c02034de337d3ee2 = function(e) {
-            return Object.entries(e)
+        e.wbg.__wbg_entries_7a0e06255456ebcd = function(n) {
+            const t = Object.entries(i(n));
+            return c(t)
         }
         ,
-        n.wbg.__wbg_buffer_ccaed51a635d8a2d = function(e) {
-            return e.buffer
+        e.wbg.__wbg_buffer_b7b08af79b0b0974 = function(n) {
+            const t = i(n).buffer;
+            return c(t)
         }
         ,
-        n.wbg.__wbg_newwithbyteoffsetandlength_7e3eb787208af730 = function(e, t, r) {
-            return new Uint8Array(e,t >>> 0,r >>> 0)
+        e.wbg.__wbg_newwithbyteoffsetandlength_8a2cb9ca96b27ec9 = function(n, t, r) {
+            const o = new Uint8Array(i(n),t >>> 0,r >>> 0);
+            return c(o)
         }
         ,
-        n.wbg.__wbg_new_fec2611eb9180f95 = function(e) {
-            return new Uint8Array(e)
+        e.wbg.__wbg_new_ea1883e1e5e86686 = function(n) {
+            const t = new Uint8Array(i(n));
+            return c(t)
         }
         ,
-        n.wbg.__wbg_set_ec2fcf81bc573fd9 = function(e, t, r) {
-            e.set(t, r >>> 0)
+        e.wbg.__wbg_set_d1e79e2388520f18 = function(n, t, r) {
+            i(n).set(i(t), r >>> 0)
         }
         ,
-        n.wbg.__wbg_length_9254c4bd3b9f23c4 = function(e) {
-            return e.length
+        e.wbg.__wbg_length_8339fcf5d8ecd12e = function(n) {
+            return i(n).length
         }
         ,
-        n.wbg.__wbg_instanceof_Uint8Array_df0761410414ef36 = function(e) {
+        e.wbg.__wbg_instanceof_Uint8Array_247a91427532499e = function(n) {
             let t;
             try {
-                t = e instanceof Uint8Array
+                t = i(n)instanceof Uint8Array
             } catch {
                 t = !1
             }
             return t
         }
         ,
-        n.wbg.__wbg_newwithlength_76462a666eca145f = function(e) {
-            return new Uint8Array(e >>> 0)
+        e.wbg.__wbg_newwithlength_ec548f448387c968 = function(n) {
+            const t = new Uint8Array(n >>> 0);
+            return c(t)
         }
         ,
-        n.wbg.__wbg_subarray_975a06f9dbd16995 = function(e, t, r) {
-            return e.subarray(t >>> 0, r >>> 0)
+        e.wbg.__wbg_subarray_7c2e3576afe181d1 = function(n, t, r) {
+            const o = i(n).subarray(t >>> 0, r >>> 0);
+            return c(o)
         }
         ,
-        n.wbg.__wbg_has_bd717f25f195f23d = function() {
-            return f(function(e, t) {
-                return Reflect.has(e, t)
-            }, arguments)
-        }
-        ,
-        n.wbg.__wbindgen_bigint_get_as_i64 = function(e, t) {
-            const r = t
+        e.wbg.__wbindgen_bigint_get_as_i64 = function(n, t) {
+            const r = i(t)
               , o = typeof r == "bigint" ? r : void 0;
-            u().setBigInt64(e + 8 * 1, l(o) ? BigInt(0) : o, !0),
-            u().setInt32(e + 4 * 0, !l(o), !0)
+            u().setBigInt64(n + 8 * 1, h(o) ? BigInt(0) : o, !0),
+            u().setInt32(n + 4 * 0, !h(o), !0)
         }
         ,
-        n.wbg.__wbindgen_debug_string = function(e, t) {
-            const r = x(t)
-              , o = d(r, c.__wbindgen_malloc, c.__wbindgen_realloc)
-              , s = b;
-            u().setInt32(e + 4 * 1, s, !0),
-            u().setInt32(e + 4 * 0, o, !0)
+        e.wbg.__wbindgen_debug_string = function(n, t) {
+            const r = T(i(t))
+              , o = p(r, _.__wbindgen_malloc, _.__wbindgen_realloc)
+              , f = w;
+            u().setInt32(n + 4 * 1, f, !0),
+            u().setInt32(n + 4 * 0, o, !0)
         }
         ,
-        n.wbg.__wbindgen_throw = function(e, t) {
-            throw new Error(y(e, t))
+        e.wbg.__wbindgen_throw = function(n, t) {
+            throw new Error(A(n, t))
         }
         ,
-        n.wbg.__wbindgen_memory = function() {
-            return c.memory
+        e.wbg.__wbindgen_memory = function() {
+            const n = _.memory;
+            return c(n)
         }
         ,
-        n.wbg.__wbindgen_init_externref_table = function() {
-            const e = c.__wbindgen_export_2
-              , t = e.grow(4);
-            e.set(0, void 0),
-            e.set(t + 0, void 0),
-            e.set(t + 1, null),
-            e.set(t + 2, !0),
-            e.set(t + 3, !1)
-        }
-        ,
-        n
+        e
     }
-    function M(n, e) {
-        return c = n.exports,
-        T.__wbindgen_wasm_module = e,
-        a = null,
-        w = null,
-        c.__wbindgen_start(),
-        c
+    function L(e, n) {
+        return _ = e.exports,
+        R.__wbindgen_wasm_module = n,
+        d = null,
+        m = null,
+        _
+        _
     }
-    async function T(n) {
-        if (c !== void 0)
-            return c;
-        n = fs.readFileSync(path.resolve(__dirname, './blum_wasm.wasm'));
-        const e = k();
-        (typeof n == "string" || typeof Request == "function" && n instanceof Request || typeof URL == "function" && n instanceof URL) && (n = fetch(n));
-        const {instance: t, module: r} = await W(await n, e);
-        return M(t, r)
+    async function R(e) {
+        if (_ !== void 0)
+            return _;
+        e = fs.readFileSync(path.resolve(__dirname, './blum_wasm.wasm'));
+        const n = B();
+        (typeof e == "string" || typeof Request == "function" && e instanceof Request || typeof URL == "function" && e instanceof URL) && (e = fetch(e));
+        const {instance: t, module: r} = await $(await e, n);
+        return L(t, r)
     }
-    let S;
-    const F = async () => {
-        S === void 0 && (S = T()),
-        await S
+    let k;
+    const q = async () => {
+        k === void 0 && (k = R()),
+        await k
     }
     ;
-    self.onmessage = async n => {
-        await F();
-        const {id: e, method: t, payload: r} = n.data;
+    self.onmessage = async e => {
+        await q();
+        const {id: n, method: t, payload: r} = e.data;
         switch (t) {
         case "proof":
             {
-                const o = U(r);
+                const o = D(r);
                 return self.postMessage({
-                    id: e,
+                    id: n,
                     ...o
                 })
             }
         case "pack":
             {
-                const o = R(r.gameId, r.challenge, r.earnedPoints, r.assetClicks);
+                const o = F(r.gameId, r.challenge, r.earnedPoints, r.assetClicks);
                 return self.postMessage({
-                    id: e,
+                    id: n,
                     hash: o
                 })
             }
@@ -551,9 +602,9 @@ ${n.stack}` : r
         getChallenge: null,
         getPayload: null,
         init: async function() {
-            await F();
-            this.getChallenge = U;
-            this.getPayload = R;
+            await q();
+            this.getChallenge = D;
+            this.getPayload = F;
             this.getUUID = uuid;
         }
     };

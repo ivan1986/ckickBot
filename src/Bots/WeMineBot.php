@@ -149,6 +149,8 @@ class WeMineBot extends BaseBot implements BotInterface
             //TODO: Не хватает профилей
             return false;
         }
+        shuffle($profiles);
+
         $findDigits = [];
         sleep(10);
 

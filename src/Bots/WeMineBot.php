@@ -7,6 +7,7 @@ use App\Message\CustomFunction;
 use App\Message\CustomFunctionUser;
 use App\Message\UpdateUrl;
 use App\Service\ProfileService;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\RequestOptions;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
@@ -149,47 +150,73 @@ class WeMineBot extends BaseBot implements BotInterface
             //TODO: Не хватает профилей
             return false;
         }
-        shuffle($profiles);
+        $haveFreeSpinTotal = 0;
+        foreach ($profiles as $k => $profile) {
+            $this->curProfile = $profile;
+            $apiClient = $this->getClient();
+            $resp = $apiClient->get('roulette/info');
+            $content = json_decode($resp->getBody()->getContents(), true);
+            $userFreeSpin = $content['maxFreeTry'] - $content['rouletteUserData']['tryNumber'];
+            $this->logger->info('{bot}: find digits: {profile} free spins {freeSpins}', [
+                'bot' => $this->getName(),
+                'profile' => $profile,
+                'freeSpins' => $userFreeSpin
+            ]);
+            $this->lastAttempts[$profile] = $content['rouletteUserData']['tryNumber'];
+            $haveFreeSpinTotal += $userFreeSpin;
+        }
+
+        if ($haveFreeSpinTotal < 20) {
+            $this->logger->info('{bot}: find digits: no free spins for find', [
+                'bot' => $this->getName(),
+            ]);
+            return false;
+        }
 
         $findDigits = [];
-        sleep(10);
 
-        $check = [
-            0 => [0,1,2,3,4],
-            1 => [5,6,7,8,9],
-        ];
-        foreach ($check as $num => $digits) {
-            $this->curProfile = $profiles[$num];
-            $apiClient = $this->getClient();
-            foreach ($digits as $d) {
-                if (count($findDigits) == 3) {
-                    break 2;
-                }
-                $key = $d . $d . $d;
-                $result = $this->enterKey($apiClient, $key);
-                if ($result == 1) {
-                    $findDigits[] = $d;
-                }
-                if ($result == 2) {
-                    $findDigits[] = $d;
-                    $findDigits[] = $d;
-                }
-                if ($result == 3) {
-                    // Мы его нашли
-                    $this->logger->info('{bot}: find key: {key}', [
-                        'bot' => $this->getName(),
-                        'key' => $key,
-                    ]);
-                    $this->enterKeyForAll($key);
-                    return true;
-                }
+        $check = [0,1,2,3,4,5,6,7,8,9];
+        foreach ($check as $d) {
+            if (count($findDigits) == 3) {
+                break ;
+            }
+            $key = $d . $d . $d;
+            $result = $this->enterKeyAny($key);
+            if ($result == 1) {
+                $findDigits[] = $d;
+            }
+            if ($result == 2) {
+                $findDigits[] = $d;
+                $findDigits[] = $d;
+            }
+            if ($result == 3) {
+                // Мы его нашли
+                $this->logger->info('{bot}: find key: {key}', [
+                    'bot' => $this->getName(),
+                    'key' => $key,
+                ]);
+                $this->enterKeyForAll($key);
+                return true;
             }
         }
 
-        $this->logger->info('{bot}: find digits: {digits}', [
+        $attempts = '[';
+        foreach ($this->lastAttempts as $profile => $attempt) {
+            $attempts .= $profile . ': ' . $attempt . ', ';
+        }
+        $attempts .= ']';
+        $this->logger->info('{bot}: find digits: {digits}, used attempts {attempts}, full used profiles [{usedProfiles}]', [
             'bot' => $this->getName(),
             'digits' => join(', ', $findDigits),
+            'attempts' => $attempts,
+            'usedProfiles' => join(', ', array_keys($this->usedProfiles)),
         ]);
+        if (count($findDigits) < 3) {
+            $this->logger->info('{bot}: find digits - not fount 3 digits', [
+                'bot' => $this->getName(),
+            ]);
+            return false;
+        }
 
         // генерим перестановки
         $needCheck = [
@@ -203,11 +230,8 @@ class WeMineBot extends BaseBot implements BotInterface
         // для повторяющихся цифр
         $needCheck = array_unique($needCheck);
 
-        $this->curProfile = $profiles[3];
-        $apiClient = $this->getClient();
-
         foreach ($needCheck as $key) {
-            $result = $this->enterKey($apiClient, $key);
+            $result = $this->enterKeyAny($key);
             if ($result == 3) {
                 // Мы его нашли
                 $this->logger->info('{bot}: find key: {key}', [
@@ -241,6 +265,37 @@ class WeMineBot extends BaseBot implements BotInterface
         }
     }
 
+    protected $usedProfiles = [];
+    protected $lastAttempts = [];
+
+    protected function enterKeyAny($key)
+    {
+        $profiles = $this->getEnabledProfiles();
+        $profiles = array_filter($profiles, fn ($profile) => empty($this->usedProfiles[$profile]));
+        usort($profiles, fn ($a, $b) => ($this->lastAttempts[$a] ?? 0) <=> ($this->lastAttempts[$b] ?? 0));
+        if (empty($profiles)) {
+            return 0;
+        }
+        $this->curProfile = $profiles[0];
+        $apiClient = $this->getClient();
+
+        try {
+            return $this->enterKey($apiClient, $key);
+        } catch (ClientException $e) {
+            $this->logger->error('{bot} enter key for {profile}: {error}', [
+                'bot' => $this->getName(),
+                'profile' => $this->curProfile,
+                'error' => $e->getMessage(),
+            ]);
+            $content = $e->getResponse()->getBody()->getContents();
+            $content = json_decode($content, true);
+            if (!empty($content['message']) && str_contains($content['message'], 'You have already completed')) {
+                $this->usedProfiles[$this->curProfile] = 1;
+            }
+            return $this->enterKeyAny($key);
+        }
+    }
+
     protected function enterKey($apiClient, $key)
     {
         $resp = $apiClient->post('roulette/check/' . $key);
@@ -252,6 +307,7 @@ class WeMineBot extends BaseBot implements BotInterface
             'result' => $content,
         ]);
         $info = json_decode($content, true);
+        $this->lastAttempts[$this->curProfile] = $info['rouletteUserData']['tryNumber'];
         return $info['matchCount'];
     }
     //endregion

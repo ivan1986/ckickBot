@@ -11,6 +11,7 @@ class BlumBot extends BaseBot implements BotInterface
 {
     const ANSWERS = 'https://raw.githubusercontent.com/boytegar/BlumBOT/master/verif.json';
     const ANS2 = 'https://raw.githubusercontent.com/dancayairdrop/blum/refs/heads/main/nv.json';
+    const ANS3 = 'https://raw.githubusercontent.com/srutihsan/keywords-/refs/heads/main/keywords.json';
 
     protected string $path;
 
@@ -222,6 +223,11 @@ class BlumBot extends BaseBot implements BotInterface
         $resp = $ghClient->get(self::ANSWERS);
         $ans = $resp->getBody()->getContents();
         $allAnswers = json_decode($ans, true);
+
+        $resp = $ghClient->get(self::ANS3);
+        $ans = $resp->getBody()->getContents();
+        $ans = json_decode($ans, true);
+        $allAnswers = array_merge($allAnswers, $ans);
 
         $resp = $ghClient->get(self::ANS2);
         $ans = json_decode($resp->getBody()->getContents(), true);

@@ -17,6 +17,8 @@ class TinyVerseBot extends BaseBot implements BotInterface
     {
         $url = $this->platformFix($url);
         $client->request('GET', $url);
+        $html = $client->getPageSource();
+        preg_match('#app.js\?([0-9.]+)\"#', $html, $m);
         //$client->waitForElementToContain('#root', 'Не забудь собрать ежедневную награду');
         sleep(10);
 
@@ -30,6 +32,7 @@ class TinyVerseBot extends BaseBot implements BotInterface
 
         if ($token) {
             $this->UCSet('token', $token);
+            $this->UCSet('version', $m[1]);
         }
 
         parent::saveUrl($client, $url);
@@ -46,9 +49,6 @@ class TinyVerseBot extends BaseBot implements BotInterface
             'form_params' => [
                 'session' => $this->UCGet('token')
             ],
-            'headers' => [
-                'X-Api-Request-Id' => $this->getApiReqId(),
-            ]
         ]);
         $info = json_decode($resp->getBody()->getContents(), true);
         $info = $info['response'];
@@ -145,6 +145,7 @@ class TinyVerseBot extends BaseBot implements BotInterface
         return new \GuzzleHttp\Client([
             'base_uri' => 'https://api.tonverse.app/',
             'headers' => [
+                'X-Application-Version' => $this->UCGet('version'),
                 'Content-Type' => 'application/x-www-form-urlencoded;charset=UTF-8',
                 'X-Requested-With' => 'XMLHttpRequest',
                 'User-Agent' => ProfileService::UA,

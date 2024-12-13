@@ -52,7 +52,15 @@ class CityHolderBot extends BaseBot implements BotInterface
         $client = $this->profileService->getOrCreateBrowser($this->curProfile);
         $client->request('GET', $this->getUrl());
         sleep(2);
-        $client->waitForElementToContain('body', 'Отлично!');
+
+        $btn = false;
+        $ret = 20;
+        while (!$btn && --$ret > 0) {
+            sleep(1);
+            $btn = $client->executeScript(<<<JS
+                return document.querySelector('[class^="_dialogHolderComeBack"] button') !== null;
+            JS);
+        }
 
         $client->executeScript(<<<JS
             document.querySelector('[class^="_dialogHolderComeBack"] button').click()
@@ -86,6 +94,16 @@ class CityHolderBot extends BaseBot implements BotInterface
             'bot' => $this->getName(),
             'money' => $items[3],
         ]);
+
+        $btn = $client->executeScript(<<<JS
+            return document.querySelector('[class^="_dialogHolderComeBack"] button') !== null;
+        JS);
+        if ($btn) {
+            echo 'btn2';
+            $client->executeScript(<<<JS
+                document.querySelector('[class^="_dialogHolderComeBack"] button').click()
+            JS);
+        }
 
         $client->executeScript(<<<JS
             document.querySelector('a[href="/city"]').click();
@@ -197,10 +215,17 @@ class CityHolderBot extends BaseBot implements BotInterface
 
         $client = $this->profileService->getOrCreateBrowser($this->curProfile);
         $client->request('GET', $this->getUrl());
-        sleep(1);
-        $client->waitForElementToContain('body', 'Отлично!');
-
         sleep(2);
+
+        $btn = false;
+        $ret = 20;
+        while (!$btn && --$ret > 0) {
+            sleep(1);
+            $btn = $client->executeScript(<<<JS
+                return document.querySelector('[class^="_dialogHolderComeBack"] button') !== null;
+            JS);
+        }
+
         $client->executeScript(<<<JS
             document.querySelector('[class^="_dialogHolderComeBack"] button').click()
         JS);

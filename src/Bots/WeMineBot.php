@@ -90,6 +90,10 @@ class WeMineBot extends BaseBot implements BotInterface
         }
         if ($nextAsic && $nextAsic['purchaseCost'] < $profile['balance']['wUSD']) {
             $apiClient->post('mining/purchase', ['json' => ['asicId' => $nextAsic['_id']]]);
+            $this->logger->info('{bot} for {profile}: upgrade asic', [
+                'profile' => $this->curProfile,
+                'bot' => $this->getName(),
+            ]);
             return true;
         }
 
@@ -98,8 +102,9 @@ class WeMineBot extends BaseBot implements BotInterface
             'coolingSystem' => 8,
             'ramCapacity' => 8,
             'softwareEnhancement' => 8,
-            //'reductionOfHeatLoss' => 4,
-            //'processAutomation' => 4
+            'reductionOfHeatLoss' => 8,
+            'processAutomation' => 8,
+            'powerSupply' => 3,
         ];
         $info = null;
         foreach ($upgrades as $upgrade => $maxLevel) {
@@ -114,6 +119,11 @@ class WeMineBot extends BaseBot implements BotInterface
                     if ($v['type'] === $upgrade) {
                         if ($v['levelCosts'][$curLevel + 1] < $profile['balance']['wUSD']) {
                             $apiClient->post('upgrades/upgrade', ['json' => ['upgradeType' => $upgrade]]);
+                            $this->logger->info('{bot} for {profile}: upgrade {upgrade}', [
+                                'profile' => $this->curProfile,
+                                'bot' => $this->getName(),
+                                'upgrade' => $upgrade
+                            ]);
                             return true;
                         }
                     }

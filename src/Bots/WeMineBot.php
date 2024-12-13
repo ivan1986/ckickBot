@@ -99,25 +99,25 @@ class WeMineBot extends BaseBot implements BotInterface
 
         $curLevelsCode = $curAsicLevel * 10;
         $upgrades = [
-            'coolingSystem' => 8,
-            'ramCapacity' => 8,
-            'softwareEnhancement' => 8,
-            'reductionOfHeatLoss' => 8,
-            'processAutomation' => 8,
-            'powerSupply' => 3,
+            'coolingSystem',
+            'ramCapacity',
+            'softwareEnhancement',
+            'reductionOfHeatLoss',
+            'processAutomation',
+            'powerSupply',
         ];
         $info = null;
-        foreach ($upgrades as $upgrade => $maxLevel) {
+        foreach ($upgrades as $upgrade) {
             $curLevel = $profile['upgrades'][$upgrade];
             $curLevelsCode = $curLevelsCode * 10 + $curLevel;
-            if ($curLevel < min($curAsicLevel, $maxLevel)) {
+            if ($curLevel < $curAsicLevel) {
                 if (!$info) {
                     $resp = $apiClient->get('upgrades');
                     $info = json_decode($resp->getBody()->getContents(), true);
                 }
                 foreach ($info as $v) {
                     if ($v['type'] === $upgrade) {
-                        if ($v['levelCosts'][$curLevel + 1] < $profile['balance']['wUSD']) {
+                        if (isset($v['levelCosts'][$curLevel + 1]) && $v['levelCosts'][$curLevel + 1] < $profile['balance']['wUSD']) {
                             $apiClient->post('upgrades/upgrade', ['json' => ['upgradeType' => $upgrade]]);
                             $this->logger->info('{bot} for {profile}: upgrade {upgrade}', [
                                 'profile' => $this->curProfile,

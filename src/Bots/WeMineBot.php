@@ -150,6 +150,15 @@ class WeMineBot extends BaseBot implements BotInterface
             $apiClient = $this->getClient();
             $resp = $apiClient->get('roulette/info');
             $content = json_decode($resp->getBody()->getContents(), true);
+            if ($content['rouletteUserData']['wasWon']) {
+                $this->logger->info('{bot}: find digits: {profile} Won, not reset', [
+                    'bot' => $this->getName(),
+                    'profile' => $profile,
+                ]);
+//                $this->usedProfiles[$profile] = 1;
+//                unset($profiles[$k]);
+//                continue;
+            }
             $userFreeSpin = $content['maxFreeTry'] - $content['rouletteUserData']['tryNumber'];
             $this->logger->info('{bot}: find digits: {profile} free spins {freeSpins}', [
                 'bot' => $this->getName(),

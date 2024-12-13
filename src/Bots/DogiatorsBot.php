@@ -7,6 +7,7 @@ use App\Message\CustomFunction;
 use App\Message\CustomFunctionUser;
 use App\Message\UpdateUrl;
 use App\Service\ProfileService;
+use GuzzleHttp\RequestOptions;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
@@ -152,6 +153,7 @@ class DogiatorsBot extends BaseBot implements BotInterface
 
         return new \GuzzleHttp\Client([
             'base_uri' => 'https://tte.dogiators.com/api/v1/',
+            RequestOptions::PROXY => $this->getProxy(),
             'query' => [
                 'tg_data' => $tgData,
             ],

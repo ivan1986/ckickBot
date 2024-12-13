@@ -5,6 +5,7 @@ namespace App\Bots;
 use App\Attributes\ScheduleCallback;
 use App\Service\ProfileService;
 use Carbon\Carbon;
+use GuzzleHttp\RequestOptions;
 
 class DropeeBot extends BaseBot implements BotInterface
 {
@@ -194,6 +195,7 @@ class DropeeBot extends BaseBot implements BotInterface
 
         return new \GuzzleHttp\Client([
             'base_uri' => 'https://dropee.clicker-game-api.tropee.com/api/',
+            RequestOptions::PROXY => $this->getProxy(),
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
                 'Content-Type' => 'application/json',

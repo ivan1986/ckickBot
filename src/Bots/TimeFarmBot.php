@@ -6,6 +6,7 @@ use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunctionUser;
 use App\Service\ProfileService;
 use Carbon\Carbon;
+use GuzzleHttp\RequestOptions;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Panther\Client;
 
@@ -38,6 +39,7 @@ class TimeFarmBot extends BaseBot implements BotInterface
 
         $authClient = new \GuzzleHttp\Client([
             'base_uri' => self::HOST,
+            RequestOptions::PROXY => $this->getProxy(),
             'headers' => [
                 'Content-Type' => 'application/json',
                 'User-Agent' => ProfileService::UA,
@@ -119,6 +121,7 @@ class TimeFarmBot extends BaseBot implements BotInterface
 
         return new \GuzzleHttp\Client([
             'base_uri' => self::HOST,
+            RequestOptions::PROXY => $this->getProxy(),
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
                 'Content-Type' => 'application/json',

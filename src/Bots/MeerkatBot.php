@@ -8,6 +8,7 @@ use App\Message\CustomFunctionUser;
 use App\Message\UpdateUrl;
 use App\Service\ProfileService;
 use Carbon\Carbon;
+use GuzzleHttp\RequestOptions;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Panther\Client;
 use Symfony\Component\Scheduler\RecurringMessage;
@@ -121,6 +122,7 @@ class MeerkatBot extends BaseBot implements BotInterface
 
         return new \GuzzleHttp\Client([
             'base_uri' => 'https://tma.timesoul.com/main-api/',
+            RequestOptions::PROXY => $this->getProxy(),
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
                 'Content-Type' => 'application/json',

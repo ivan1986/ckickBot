@@ -4,6 +4,7 @@ namespace App\Bots;
 
 use App\Attributes\ScheduleCallback;
 use App\Service\ProfileService;
+use GuzzleHttp\RequestOptions;
 
 class Mine2Bot extends BaseBot implements BotInterface
 {
@@ -108,6 +109,7 @@ class Mine2Bot extends BaseBot implements BotInterface
     {
         return new \GuzzleHttp\Client([
             'base_uri' => 'https://dev.clonetap.tech/api/',
+            RequestOptions::PROXY => $this->getProxy(),
             'headers' => [
                 'Content-Type' => 'application/json',
                 'User-Agent' => ProfileService::UA,

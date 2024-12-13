@@ -1,0 +1,21 @@
+diff --git a/src/ProcessManager/ChromeManager.php b/src/ProcessManager/ChromeManager.php
+index 12d5e45..59a521a 100644
+--- a/src/ProcessManager/ChromeManager.php
++++ b/src/ProcessManager/ChromeManager.php
+@@ -130,7 +130,15 @@ final class ChromeManager implements BrowserManagerInterface
+             $this->options['chromedriver_arguments']
+         );
+ 
+-        return new Process($command, null, null, null, null);
++        $env = [];
++        if (!empty($this->options['proxychain'])) {
++            $env = [
++                'LD_PRELOAD' => '/usr/lib/libproxychains4.so',
++                'PROXYCHAINS_CONF_FILE' => $this->options['proxychain'],
++            ];
++        }
++
++        return new Process($command, null, $env, null, null);
+     }
+ 
+     private function getDefaultOptions(): array

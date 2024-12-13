@@ -32,12 +32,6 @@ class WeMineBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
-    public function getProxy()
-    {
-        return '';
-        //return 'socks://127.0.0.1:2080';
-    }
-
     #[ScheduleCallback('30 min', delta: 900)]
     public function claimAndReset()
     {

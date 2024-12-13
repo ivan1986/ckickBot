@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use GuzzleHttp\Cookie\CookieJar as GuzzleCookieJar;
 use GuzzleHttp\Cookie\SetCookie;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\RequestOptions;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Panther\Client;
 use Symfony\Component\Scheduler\RecurringMessage;
@@ -164,6 +165,7 @@ class TonStationBot extends BaseBot implements BotInterface
 
         return new \GuzzleHttp\Client([
             'base_uri' => 'https://tonstation.app/',
+            RequestOptions::PROXY => $this->getProxy(),
             //'cookies' => $jar,
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
@@ -205,6 +207,7 @@ class TonStationBot extends BaseBot implements BotInterface
 
         $authClient = new \GuzzleHttp\Client([
             'base_uri' => 'https://tonstation.app/',
+            RequestOptions::PROXY => $this->getProxy(),
             //'cookies' => $jar,
             'headers' => [
                 'Content-Type' => 'application/json',

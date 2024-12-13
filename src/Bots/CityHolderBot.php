@@ -6,6 +6,7 @@ use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunction;
 use App\Message\UpdateUrl;
 use App\Service\ProfileService;
+use GuzzleHttp\RequestOptions;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 use Symfony\Contracts\Service\Attribute\Required;
@@ -26,6 +27,7 @@ class CityHolderBot extends BaseBot implements BotInterface
 
         $authClient = new \GuzzleHttp\Client([
             'base_uri' => 'https://api-reserve.city-holder.com/',
+            RequestOptions::PROXY => $this->getProxy(),
             'headers' => [
                 'Content-Type' => 'application/json',
                 'User-Agent' => ProfileService::UA,
@@ -246,6 +248,7 @@ class CityHolderBot extends BaseBot implements BotInterface
 
         return new \GuzzleHttp\Client([
             'base_uri' => 'https://api-reserve.city-holder.com/',
+            RequestOptions::PROXY => $this->getProxy(),
             'query' => [
                 'tg_data' => $token,
             ],

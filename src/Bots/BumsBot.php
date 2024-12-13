@@ -10,6 +10,7 @@ use App\Message\UpdateUrlUser;
 use App\Service\ProfileService;
 use Carbon\Carbon;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\RequestOptions;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
@@ -28,6 +29,7 @@ class BumsBot extends BaseBot implements BotInterface
 
         $authClient = new \GuzzleHttp\Client([
             'base_uri' => 'https://api.bums.bot/',
+            RequestOptions::PROXY => $this->getProxy(),
             'headers' => [
                 'Content-Type' => 'application/json',
                 'User-Agent' => ProfileService::UA,
@@ -219,6 +221,7 @@ class BumsBot extends BaseBot implements BotInterface
 
         return new \GuzzleHttp\Client([
             'base_uri' => 'https://api.bums.bot/',
+            RequestOptions::PROXY => $this->getProxy(),
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
                 'Content-Type' => 'application/json',

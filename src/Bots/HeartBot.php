@@ -4,6 +4,7 @@ namespace App\Bots;
 
 use App\Attributes\ScheduleCallback;
 use App\Service\ProfileService;
+use GuzzleHttp\RequestOptions;
 
 class HeartBot extends BaseBot implements BotInterface
 {
@@ -147,6 +148,7 @@ class HeartBot extends BaseBot implements BotInterface
     {
         return new \GuzzleHttp\Client([
             'base_uri' => self::API,
+            RequestOptions::PROXY => $this->getProxy(),
             'headers' => [
                 'Content-Type' => 'application/json',
                 'User-Agent' => ProfileService::UA,

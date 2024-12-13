@@ -44,6 +44,7 @@ class MenuBuilderSubscriber implements EventSubscriberInterface
         $event->addItem($bots);
 
         $admin = new MenuItemModel('admin', 'Admin', null, [], 'fas fa-cogs');
+        $admin->addChild(new MenuItemModel('admin-setup-proxy', 'Setup Proxy', 'admin-setup-proxy', [], ''));
         $admin->addChild(new MenuItemModel('admin-init-urls', 'Init URLs', 'admin-init-urls', [], ''));
         $admin->addChild(new MenuItemModel('admin-clear-profile-cache', 'Clear profile cache', 'admin-clear-profile-cache', [], ''));
         $event->addItem($admin);

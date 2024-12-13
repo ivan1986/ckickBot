@@ -6,6 +6,7 @@ use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunction;
 use App\Message\UpdateUrl;
 use App\Service\ProfileService;
+use GuzzleHttp\RequestOptions;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 
@@ -80,6 +81,7 @@ class FartyBeetleBot extends BaseBot implements BotInterface
 
         return new \GuzzleHttp\Client([
             'base_uri' => 'https://factory.fireheadz.games',
+            RequestOptions::PROXY => $this->getProxy(),
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
                 'Content-Type' => 'application/json',

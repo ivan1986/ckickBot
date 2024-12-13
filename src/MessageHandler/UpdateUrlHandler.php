@@ -32,11 +32,7 @@ final class UpdateUrlHandler
             'bot' => $message->name
         ]);
 
-        $client = $this->clientFactory->getOrCreateBrowser(
-            $message->profile,
-            headless: !$message->debug,
-            proxy: $bot->getProxy()
-        );
+        $client = $this->clientFactory->getOrCreateBrowser($message->profile, headless: !$message->debug);
 
         // load bot chat
         $page = $client->request('GET', 'https://web.telegram.org/k/#@' . $bot->getTgBotName());

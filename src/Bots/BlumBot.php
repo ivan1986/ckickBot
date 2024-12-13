@@ -4,6 +4,7 @@ namespace App\Bots;
 
 use App\Attributes\ScheduleCallback;
 use App\Service\ProfileService;
+use GuzzleHttp\RequestOptions;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Process\Process;
 
@@ -218,7 +219,6 @@ class BlumBot extends BaseBot implements BotInterface
             'base_uri' => self::ANSWERS,
             'headers' => [
                 'Content-Type' => 'application/json',
-                'User-Agent' => ProfileService::UA,
             ]
         ]);
         $resp = $ghClient->get(self::ANSWERS);
@@ -252,6 +252,7 @@ class BlumBot extends BaseBot implements BotInterface
     {
         $authClient = new \GuzzleHttp\Client([
             'base_uri' => 'https://user-domain.blum.codes/api/v1/',
+            RequestOptions::PROXY => $this->getProxy(),
             'headers' => [
                 'Content-Type' => 'application/json',
                 'User-Agent' => ProfileService::UA,
@@ -278,6 +279,7 @@ class BlumBot extends BaseBot implements BotInterface
 
         return new \GuzzleHttp\Client([
             'base_uri' => 'https://' . $subDomain . '.blum.codes/api/v1/',
+            RequestOptions::PROXY => $this->getProxy(),
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
                 'Content-Type' => 'application/json',

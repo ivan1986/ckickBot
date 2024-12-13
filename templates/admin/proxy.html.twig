@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block page_content %}
+<div class="row">
+    <div class="col-lg-6">
+    <form class="card" method="post">
+        <div class="card-header">
+            <h3 class="card-title">Setup Proxy
+                <span class="card-subtitle">in format socks5://username:password@host:port/</span>
+            </h3>
+        </div>
+        <div class="card-body">
+            {% for profile, proxy in proxies %}
+            <div class="mb-3 row">
+                <label class="col-3 col-form-label">{{ profile }}</label>
+                <div class="col">
+                    <input type="text" class="form-control" name="proxy[{{ profile }}]" value="{{ proxy }}">
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="card-footer text-end">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </form>
+    </div>
+</div>
+
+{% endblock %}

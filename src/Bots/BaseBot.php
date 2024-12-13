@@ -7,6 +7,7 @@ use App\Model\ActionState;
 use App\Model\ActionStatusDto;
 use App\Service\CacheService;
 use App\Service\ProfileService;
+use App\Service\ProxyService;
 use Carbon\Carbon;
 use GuzzleHttp\Cookie\CookieJar as GuzzleCookieJar;
 use GuzzleHttp\Cookie\SetCookie;
@@ -52,7 +53,7 @@ class BaseBot
 
     public function getProxy()
     {
-        return '';
+        return $this->profileService->getGuzzleProxy($this->curProfile);
     }
 
     public function runInTg(Client $client)

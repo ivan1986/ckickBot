@@ -8,6 +8,7 @@ use App\Message\CustomFunctionUser;
 use App\Message\UpdateUrl;
 use App\Service\ProfileService;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\RequestOptions;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
@@ -237,6 +238,7 @@ class OneWinBot extends BaseBot implements BotInterface
 
         return new \GuzzleHttp\Client([
             'base_uri' => 'https://crypto-clicker-backend-go-prod.100hp.app/',
+            RequestOptions::PROXY => $this->getProxy(),
             'headers' => [
                 'X-User-Id' => $userId,
                 'referer' => 'https://cryptocklicker-frontend-rnd-prod.100hp.app/',

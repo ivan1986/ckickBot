@@ -9,6 +9,7 @@
         "ext-iconv": "*",
         "artprima/prometheus-metrics-bundle": "^1.19",
         "chrome-php/chrome": "^1.11",
+        "cweagans/composer-patches": "^1.7",
         "dragonmantank/cron-expression": "^3.4",
         "guzzlehttp/guzzle": "^7.9",
         "kevinpapst/tabler-bundle": "^1.5",
@@ -36,9 +37,14 @@
     },
     "config": {
         "allow-plugins": {
+            "cweagans/composer-patches": true,
             "php-http/discovery": true,
             "symfony/flex": true,
             "symfony/runtime": true
+        },
+        "preferred-install": {
+            "symfony/panther": "source",
+            "*": "dist"
         },
         "sort-packages": true
     },
@@ -78,6 +84,11 @@
         "symfony/symfony": "*"
     },
     "extra": {
+        "patches": {
+            "symfony/panther": {
+                "proxychains": "patches/proxychains.patch"
+            }
+        },
         "symfony": {
             "allow-contrib": false,
             "require": "7.1.*"

@@ -5,6 +5,7 @@ namespace App\Bots;
 use App\Attributes\ScheduleCallback;
 use App\Message\UpdateUrlUser;
 use App\Service\ProfileService;
+use GuzzleHttp\RequestOptions;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 
 class TinyVerseBot extends BaseBot implements BotInterface
@@ -144,7 +145,8 @@ class TinyVerseBot extends BaseBot implements BotInterface
 
         return new \GuzzleHttp\Client([
             'base_uri' => 'https://api.tonverse.app/',
-            'headers' => [
+            RequestOptions::PROXY => $this->getProxy(),
+            RequestOptions::HEADERS => [
                 'X-Application-Version' => $this->UCGet('version'),
                 'Content-Type' => 'application/x-www-form-urlencoded;charset=UTF-8',
                 'X-Requested-With' => 'XMLHttpRequest',

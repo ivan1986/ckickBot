@@ -7,6 +7,7 @@ use App\Message\CustomFunction;
 use App\Message\UpdateUrl;
 use App\Service\ProfileService;
 use DateTime;
+use GuzzleHttp\RequestOptions;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
 
@@ -71,6 +72,7 @@ class CatsDogsBot extends BaseBot implements BotInterface
 
         return new \GuzzleHttp\Client([
             'base_uri' => 'https://api.catsdogs.live/',
+            RequestOptions::PROXY => $this->getProxy(),
             'headers' => [
                 'x-telegram-web-app-data' => $token,
                 'Content-Type' => 'application/json',

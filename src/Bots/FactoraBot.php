@@ -5,6 +5,7 @@ namespace App\Bots;
 use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunction;
 use App\Message\CustomFunctionUser;
+use GuzzleHttp\RequestOptions;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
@@ -29,6 +30,7 @@ class FactoraBot extends BaseBot implements BotInterface
     {
         $this->client = new \GuzzleHttp\Client([
             'base_uri' => 'https://api.factoragame.com/FactoraTapApi/',
+            RequestOptions::PROXY => $this->getProxy(),
             'headers' => [
                 'Content-Type' => 'application/json, text/plain, */*',
                 'Sec-Fetch-Dest' => 'empty',

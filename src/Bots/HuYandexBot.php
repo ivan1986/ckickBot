@@ -10,6 +10,7 @@ use App\Service\ProfileService;
 use Carbon\Carbon;
 use GuzzleHttp\Cookie\CookieJar as GuzzleCookieJar;
 use GuzzleHttp\Cookie\SetCookie;
+use GuzzleHttp\RequestOptions;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Scheduler\RecurringMessage;
 use Symfony\Component\Scheduler\Schedule;
@@ -127,6 +128,7 @@ class HuYandexBot extends BaseBot implements BotInterface
         $jar->setCookie(SetCookie::fromString($cookie));
         return new \GuzzleHttp\Client([
             'base_uri' => 'https://qlyuker.io/api/',
+            RequestOptions::PROXY => $this->getProxy(),
             'cookies' => $jar,
             'headers' => [
                 'Klyuk' => '0110101101101100011011110110111101101011',
@@ -145,6 +147,7 @@ class HuYandexBot extends BaseBot implements BotInterface
 
         $authClient = new \GuzzleHttp\Client([
             'base_uri' => 'https://qlyuker.io/api/',
+            RequestOptions::PROXY => $this->getProxy(),
             'headers' => [
                 'Content-Type' => 'application/json',
                 'User-Agent' => ProfileService::UA,

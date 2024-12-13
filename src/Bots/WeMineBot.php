@@ -69,7 +69,7 @@ class WeMineBot extends BaseBot implements BotInterface
         $profile = json_decode($resp->getBody()->getContents(), true);
         $this->updateStat($profile);
         $last = \DateTime::createFromFormat(\DateTime::RFC3339_EXTENDED, $profile['lastExchangeTime']);
-        $delta = $last ? $last->diff(New \DateTime()) : \DateInterval::createFromDateString('30 minutes');
+        $delta = $last ? $last->diff(New \DateTime()) : \DateInterval::createFromDateString('40 minutes');
         $deltaS = $delta->h * 3600 + $delta->i * 60 + $delta->s;
         if ($deltaS > 1800 && $profile['balance']['wBTC'] > 0.001) {
             $apiClient->post('exchange/btc-to-usd', ['json' => ['amount' => $profile['balance']['wBTC']]]);

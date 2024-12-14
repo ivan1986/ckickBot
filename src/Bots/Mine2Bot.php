@@ -8,6 +8,8 @@ use GuzzleHttp\RequestOptions;
 
 class Mine2Bot extends BaseBot implements BotInterface
 {
+    const API_ENDPOINT = 'https://dev.clonetap.tech/api/';
+
     public function getTgBotName() { return 'tBTCminer_bot'; }
 
     public function saveUrl($client, $url)
@@ -26,7 +28,14 @@ class Mine2Bot extends BaseBot implements BotInterface
         $this->UCSet('tgData', $tg_data);
         $this->UCSet('tgId', $id);
 
-        $client = $this->getClient();
+        $client = new \GuzzleHttp\Client([
+            'base_uri' => self::API_ENDPOINT,
+            RequestOptions::PROXY => $this->getProxy(),
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'User-Agent' => ProfileService::UA,
+            ]
+        ]);
         $resp = $client->request('POST', 'auth/register?ref_id=', [
             'json' => [
                 'hash' => $tg_data,
@@ -60,6 +69,21 @@ class Mine2Bot extends BaseBot implements BotInterface
         $this->UCSet('uuid', $resp['uuid']);
 
         parent::saveUrl($client, $url);
+    }
+
+    #[ScheduleCallback('4 hour', delta: 1800)]
+    public function repairAndUpgrade()
+    {
+        if (!$apiClient = $this->getClient()) {
+            return;
+        }
+
+        $resp = $apiClient->get('user/profile');
+        $resp = json_decode($resp->getBody()->getContents(), true);
+        if ($resp['power_plant']['wear'] < 0.8) {
+            $apiClient->post('power-plants/repair');
+            $this->markRun('repair');
+        }
     }
 
     #[ScheduleCallback('1 hour', delta: 1800)]
@@ -107,10 +131,15 @@ class Mine2Bot extends BaseBot implements BotInterface
 
     protected function getClient(): ?\GuzzleHttp\Client
     {
+        if (!$token = $this->UCGet('token')) {
+            return null;
+        }
+
         return new \GuzzleHttp\Client([
-            'base_uri' => 'https://dev.clonetap.tech/api/',
+            'base_uri' => self::API_ENDPOINT,
             RequestOptions::PROXY => $this->getProxy(),
             'headers' => [
+                'Authorization' => 'Bearer ' . $token,
                 'Content-Type' => 'application/json',
                 'User-Agent' => ProfileService::UA,
             ]

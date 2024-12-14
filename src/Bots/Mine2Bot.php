@@ -84,6 +84,7 @@ class Mine2Bot extends BaseBot implements BotInterface
             $apiClient->post('power-plants/repair');
             $this->markRun('repair');
         }
+        $this->updateStatItem('wear', number_format($resp['power_plant']['wear'], 2));
     }
 
     #[ScheduleCallback('1 hour', delta: 1800)]
@@ -116,7 +117,7 @@ class Mine2Bot extends BaseBot implements BotInterface
         }
         $client->text('status');
         $message = json_decode($client->receive()->getContent(), true);
-        $this->updateStatItem('energy', $message['tap_info']['user_energy']);
+        $this->updateStatItem('energy', number_format($message['tap_info']['user_energy'], 2));
         $this->logger->info('{bot} for {profile}: energy: {energy} - {mined} - {rest}', [
             'profile' => $this->curProfile,
             'bot' => $this->getName(),

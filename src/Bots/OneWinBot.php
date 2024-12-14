@@ -145,7 +145,7 @@ class OneWinBot extends BaseBot implements BotInterface
         $profit = array_filter($profit, function ($i) use ($coinsBalance) {
             return $i['cost'] <= $coinsBalance;
         });
-        usort($profit, fn ($a, $b) => $b['profit'] / ($b['cost'] ?? 1) <=> $a['profit'] / ($a['cost'] ?? 1));
+        usort($profit, fn ($a, $b) => $b['profit'] / ($b['cost'] ?: 1) <=> $a['profit'] / ($a['cost'] ?: 1));
 
         if (empty($profit)) {
             return;

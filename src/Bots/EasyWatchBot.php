@@ -49,7 +49,7 @@ class EasyWatchBot extends BaseBot implements BotInterface
         $cookies = $client->getCookieJar();
         $client->waitForVisibility('[data-test-id="primary-balance"]', 60);
         $balance = $client->executeScript(<<<JS
-            return document.querySelector('[data-test-id="primary-balance"] > span.truncate').innerHTML;
+            return document.querySelector('[data-test-id="primary-balance"] span.truncate').innerHTML;
         JS);
         $balance = (float)str_replace(' ', '', $balance);
         $this->updateStatItem('balance', round($balance, 3));

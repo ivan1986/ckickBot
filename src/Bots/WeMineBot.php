@@ -158,6 +158,11 @@ class WeMineBot extends BaseBot implements BotInterface
         foreach ($profiles as $k => $profile) {
             $this->curProfile = $profile;
             $apiClient = $this->getClient();
+            if (!$apiClient) {
+                $this->usedProfiles[$profile] = 1;
+                unset($profiles[$k]);
+                continue;
+            }
             $resp = $apiClient->get('roulette/info');
             $content = json_decode($resp->getBody()->getContents(), true);
             if ($content['rouletteUserData']['wasWon']) {
@@ -266,6 +271,9 @@ class WeMineBot extends BaseBot implements BotInterface
         foreach ($other as $profile) {
             $this->curProfile = $profile;
             $apiClient = $this->getClient();
+            if (!$apiClient) {
+                continue;
+            }
             try {
                 $this->enterKey($apiClient, $key);
             } catch (\Exception $e) {

@@ -148,7 +148,7 @@ class CityHolderBot extends BaseBot implements BotInterface
             }
             array_shift($lines);
             $price = array_shift($lines);
-            $price = preg_replace('/[^0-9]/', '', $price);
+            $price = preg_replace('/[^0-9]/', '', $price) ?: 1;
             array_shift($lines);
             $deltaSum = 0;
             while (count($lines) > 0) {

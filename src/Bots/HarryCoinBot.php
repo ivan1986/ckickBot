@@ -133,6 +133,36 @@ class HarryCoinBot extends BaseBot implements BotInterface
         sleep(2);
     }
 
+    #[ScheduleCallback('8 hour', delta: 7200)]
+    public function spin()
+    {
+        if (!$this->getUrl()) {
+            return;
+        }
+
+        $client = $this->profileService->getOrCreateBrowser($this->curProfile, false);
+        $client->request('GET', $this->getUrl());
+        sleep(1);
+        $client->waitForVisibility('.user-tap-button');
+        sleep(5);
+
+        $client->executeScript(<<<JS
+            document.querySelector('img[src*="spinn-wheel.jpg"').click()
+        JS);
+        sleep(2);
+        $last = $client->executeScript(<<<JS
+            return document.querySelector('#wheel-container').nextElementSibling.firstChild.innerText
+        JS);
+        $last = explode('/', $last)[0];
+        if ($last > 0) {
+            $client->executeScript(<<<JS
+                document.querySelector('#wheel-container').nextElementSibling.firstElementChild.nextElementSibling.click()
+            JS);
+            sleep(15);
+            return true;
+        }
+    }
+
     protected function updateStat($balance)
     {
         $b = round($balance, 2);

@@ -137,7 +137,6 @@ class HeartBot extends BaseBot implements BotInterface
                         break;
                     }
                 }
-                //node.parentNode.parentNode.parentNode.querySelector('button').click();
             JS);
             sleep(5);
             $existPopup = true;

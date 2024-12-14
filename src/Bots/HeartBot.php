@@ -123,14 +123,21 @@ class HeartBot extends BaseBot implements BotInterface
                 return;
             }
 
-            $client = $this->profileService->getOrCreateBrowser($this->curProfile);
+            $client = $this->profileService->getOrCreateBrowser($this->curProfile,false);
             $client->get($this->getUrl());
             sleep(10);
             $client->executeScript(<<<JS
                 let node = Array.prototype.slice.call(document.querySelectorAll('div.font-semibold')).filter(function (el) {
                     return el.textContent === 'Watch ads from partners'
                 })[0];
-                node.parentNode.parentNode.parentNode.querySelector('button').click();
+                while (node.parentNode) {
+                    node = node.parentNode;
+                    if (node.querySelector('button')) {
+                        node.querySelector('button').click();
+                        break;
+                    }
+                }
+                //node.parentNode.parentNode.parentNode.querySelector('button').click();
             JS);
             sleep(5);
             $existPopup = true;

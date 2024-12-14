@@ -54,12 +54,8 @@ class CatsDogsBot extends BaseBot implements BotInterface
     {
         $resp = $apiClient->get('user/balance');
         $balance = json_decode($resp->getBody()->getContents(), true);
-        $balanceAll = 0;
-        foreach ($balance as $b) {
-            $balanceAll += $b;
-        }
-
-        $this->updateStatItem('balance', $balanceAll);
+        $food = $balance['balance']['food'];
+        $this->updateStatItem('balance', $food);
     }
 
     protected function getClient(): ?\GuzzleHttp\Client

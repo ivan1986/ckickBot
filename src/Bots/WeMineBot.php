@@ -311,8 +311,13 @@ class WeMineBot extends BaseBot implements BotInterface
             ]);
             $content = $e->getResponse()->getBody()->getContents();
             $content = json_decode($content, true);
-            if (!empty($content['message']) && str_contains($content['message'], 'You have already completed')) {
-                $this->usedProfiles[$this->curProfile] = 1;
+            if (!empty($content['message'])) {
+                if (str_contains($content['message'], 'You have already completed')) {
+                    $this->usedProfiles[$this->curProfile] = 1;
+                }
+                if (str_contains($content['message'], 'You have already won')) {
+                    $this->usedProfiles[$this->curProfile] = 1;
+                }
             }
             return $this->enterKeyAny($key);
         }

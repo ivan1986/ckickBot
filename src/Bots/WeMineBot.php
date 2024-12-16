@@ -140,10 +140,10 @@ class WeMineBot extends BaseBot implements BotInterface
             return;
         }
 
-        $schedule->add(RecurringMessage::cron('0 20 * * *',
-            new CustomFunctionUser($profiles[0], $this->getName(), 'findKey'),
-            new \DateTimeZone('Europe/Moscow')
-        ));
+//        $schedule->add(RecurringMessage::cron('0 20 * * *',
+//            new CustomFunctionUser($profiles[0], $this->getName(), 'findKey'),
+//            new \DateTimeZone('Europe/Moscow')
+//        ));
     }
 
     //region Crack daily case

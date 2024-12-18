@@ -184,7 +184,7 @@ class WeMineBot extends BaseBot implements BotInterface
             ]);
             $this->lastAttempts[$profile] = $content['rouletteUserData']['tryNumber'];
             $haveFreeSpinTotal += $userFreeSpin;
-            if ($haveFreeSpinTotal > 17) {
+            if ($haveFreeSpinTotal >= 20) {
                 break;
             }
         }

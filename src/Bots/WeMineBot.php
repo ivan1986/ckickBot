@@ -154,6 +154,7 @@ class WeMineBot extends BaseBot implements BotInterface
             //TODO: Не хватает профилей
             return false;
         }
+        shuffle($profiles);
         $haveFreeSpinTotal = 0;
         foreach ($profiles as $k => $profile) {
             $this->curProfile = $profile;
@@ -271,6 +272,7 @@ class WeMineBot extends BaseBot implements BotInterface
     protected function enterKeyForAll($key)
     {
         $profiles = $this->getEnabledProfiles();
+        shuffle($profiles);
         $other = array_filter($profiles, fn ($profile) => $profile !== $this->curProfile);
         foreach ($other as $profile) {
             $this->curProfile = $profile;

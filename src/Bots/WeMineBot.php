@@ -164,33 +164,36 @@ class WeMineBot extends BaseBot implements BotInterface
                 continue;
             }
             // disable for speed
-//            $resp = $apiClient->get('roulette/info');
-//            $content = json_decode($resp->getBody()->getContents(), true);
-//            if ($content['rouletteUserData']['wasWon']) {
-//                $this->logger->info('{bot}: find digits: {profile} Won, not reset', [
-//                    'bot' => $this->getName(),
-//                    'profile' => $profile,
-//                ]);
-////                $this->usedProfiles[$profile] = 1;
-////                unset($profiles[$k]);
-////                continue;
-//            }
-//            $userFreeSpin = $content['maxFreeTry'] - $content['rouletteUserData']['tryNumber'];
-//            $this->logger->info('{bot}: find digits: {profile} free spins {freeSpins}', [
-//                'bot' => $this->getName(),
-//                'profile' => $profile,
-//                'freeSpins' => $userFreeSpin
-//            ]);
-//            $this->lastAttempts[$profile] = $content['rouletteUserData']['tryNumber'];
-//            $haveFreeSpinTotal += $userFreeSpin;
+            $resp = $apiClient->get('roulette/info');
+            $content = json_decode($resp->getBody()->getContents(), true);
+            if ($content['rouletteUserData']['wasWon']) {
+                $this->logger->info('{bot}: find digits: {profile} Won, not reset', [
+                    'bot' => $this->getName(),
+                    'profile' => $profile,
+                ]);
+                $this->usedProfiles[$profile] = 1;
+                unset($profiles[$k]);
+                continue;
+            }
+            $userFreeSpin = $content['maxFreeTry'] - $content['rouletteUserData']['tryNumber'];
+            $this->logger->info('{bot}: find digits: {profile} free spins {freeSpins}', [
+                'bot' => $this->getName(),
+                'profile' => $profile,
+                'freeSpins' => $userFreeSpin
+            ]);
+            $this->lastAttempts[$profile] = $content['rouletteUserData']['tryNumber'];
+            $haveFreeSpinTotal += $userFreeSpin;
+            if ($haveFreeSpinTotal > 17) {
+                break;
+            }
         }
 
-//        if ($haveFreeSpinTotal < 20) {
-//            $this->logger->info('{bot}: find digits: no free spins for find', [
-//                'bot' => $this->getName(),
-//            ]);
-//            return false;
-//        }
+        if ($haveFreeSpinTotal < 20) {
+            $this->logger->info('{bot}: find digits: no free spins for find', [
+                'bot' => $this->getName(),
+            ]);
+            return false;
+        }
 
         $findDigits = [];
 

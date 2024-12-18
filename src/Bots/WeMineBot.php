@@ -273,6 +273,7 @@ class WeMineBot extends BaseBot implements BotInterface
     {
         $profiles = $this->getEnabledProfiles();
         shuffle($profiles);
+        $profiles = array_filter($profiles, fn ($profile) => empty($this->usedProfiles[$profile]));
         $other = array_filter($profiles, fn ($profile) => $profile !== $this->curProfile);
         foreach ($other as $profile) {
             $this->curProfile = $profile;
@@ -339,6 +340,13 @@ class WeMineBot extends BaseBot implements BotInterface
             'result' => $content,
         ]);
         $info = json_decode($content, true);
+        if (!empty($info['rouletteUserData']['wasWon'])) {
+            $this->logger->info('{bot}: find digits: {profile} Won, skip', [
+                'bot' => $this->getName(),
+                'profile' => $this->curProfile,
+            ]);
+            $this->usedProfiles[$this->curProfile] = 1;
+        }
         $this->lastAttempts[$this->curProfile] = $info['rouletteUserData']['tryNumber'];
         return $info['matchCount'];
     }

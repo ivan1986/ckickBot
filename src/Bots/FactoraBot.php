@@ -5,6 +5,7 @@ namespace App\Bots;
 use App\Attributes\ScheduleCallback;
 use App\Message\CustomFunction;
 use App\Message\CustomFunctionUser;
+use Carbon\Carbon;
 use GuzzleHttp\RequestOptions;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Scheduler\RecurringMessage;
@@ -67,6 +68,32 @@ class FactoraBot extends BaseBot implements BotInterface
             $userInfo = $this->getuserInfo();
         }
         return true;
+    }
+
+    #[ScheduleCallback('8 hour', delta: 3600)]
+    public function daily()
+    {
+        $this->initClient();
+        if (!$this->auth) {
+            return;
+        }
+        $userInfo = $this->getuserInfo();
+        $last = Carbon::createFromFormat('Y-m-d\\TH:i:s.vP', $userInfo['lastReceivingDailyReward']) ?? Carbon::now()->subDays(2);
+        if ($last->diff()->totalSeconds > 24 * 3600) {
+            $this->logger->info('{bot} for {profile}: get daily reward', [
+                'profile' => $this->curProfile,
+                'bot' => $this->getName(),
+                'level' => $userInfo['energyLimitUpgradeToNextLevel']['level'],
+            ]);
+            $this->client->post('GetDailyRewards?' . http_build_query([
+                    'authData' => $this->auth,
+                ]), [
+                'headers' => [
+                    'content-length' => '0',
+                ],
+            ]);
+            return true;
+        }
     }
 
     #[ScheduleCallback('12 hour', delta: 3600)]

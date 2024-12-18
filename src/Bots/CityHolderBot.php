@@ -63,7 +63,9 @@ class CityHolderBot extends BaseBot implements BotInterface
         }
 
         $client->executeScript(<<<JS
-            document.querySelector('[class^="_dialogHolderComeBack"] button').click()
+            if (document.querySelector('[class^="_dialogHolderComeBack"] button')) {
+                document.querySelector('[class^="_dialogHolderComeBack"] button').click()
+            }
         JS);
 
         // идем в казну и берем числа

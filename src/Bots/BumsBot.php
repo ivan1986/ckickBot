@@ -111,6 +111,48 @@ class BumsBot extends BaseBot implements BotInterface
         return true;
     }
 
+    #[ScheduleCallback('2 hour', delta: 1800)]
+    public function spin()
+    {
+        if (!$apiClient = $this->getClient()) {
+            return;
+        }
+        $resp = $apiClient->get('miniapps/api/game_slot/stamina');
+        $info = json_decode($resp->getBody()->getContents(), true);
+        $info = $info['data'];
+
+        $this->updateStatItem('spins', $info['staminaNow']);
+        $count = min($info['staminaNow'], 10);
+        if (!$count) {
+            return;
+        }
+        while ($count--) {
+            $reward = $this->oneSpin($apiClient);
+            $this->logger->info('{bot} for {profile}: spin - {reward}', [
+                'profile' => $this->curProfile,
+                'bot' => $this->getName(),
+                'reward' => $reward,
+            ]);
+            sleep(random_int(4, 8));
+        }
+        return true;
+    }
+
+    protected function oneSpin($apiClient)
+    {
+        $resp = $apiClient->post('miniapps/api/game_slot/start', [
+            'multipart' => [
+                [
+                    'name' => 'count',
+                    'contents' => 1,
+                ],
+            ]
+        ]);
+        $info = json_decode($resp->getBody()->getContents(), true);
+        $info = $info['data'];
+        return $info['rewardLists']['rewardList'][0]['name'] ?? '';
+    }
+
     #[ScheduleCallback('8 hour', delta: 7200)]
     public function bonus()
     {

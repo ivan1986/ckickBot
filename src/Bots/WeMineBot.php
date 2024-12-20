@@ -18,6 +18,8 @@ class WeMineBot extends BaseBot implements BotInterface
 {
     use MultiUser;
 
+    const USDT = 'usdt';
+
     public function getTgBotName() { return 'WeMineBot'; }
 
     public function saveUrl($client, $url)
@@ -48,13 +50,35 @@ class WeMineBot extends BaseBot implements BotInterface
         $limit = \DateInterval::createFromDateString('20 minutes');
         $deltaS = $delta->h * 3600 + $delta->i * 60 + $delta->s;
         $limitS = $limit->i * 60 + $limit->s;
-//        if (isset($profile['balance']['usdt']) && $profile['balance']['usdt'] > 0) {
-//            $apiClient->post('mining/usdt/start-claim');
-//            sleep(10);
-//        }
+        if ($profile['asicLevel'] >= 4 && $this->UCGet(self::USDT) != 'disabled') {
+            $this->usdtPoll();
+        }
         if ($deltaS > $limitS) {
             $apiClient->post('mining/wbtc/start-claim');
             return true;
+        }
+    }
+
+    protected function usdtPoll()
+    {
+        $apiClient = $this->getClient();
+        if (!$this->UCGet(self::USDT)) {
+            $resp = $apiClient->post('mining/usdt/is-miner-available', ['json' => ['countryCode' => 'Europe/Moscow']]);
+            $can = json_decode($resp->getBody()->getContents(), true);
+            foreach ($can as $k => $v) {
+                if (!$v) {
+                    $this->UCSet(self::USDT, 'disabled', 24 * 3600 * 30);
+                    return;
+                }
+            }
+            var_dump($can);
+            $this->UCSet(self::USDT, 'enabled', 24 * 3600 * 30);
+        }
+        $resp = $apiClient->get('mining/usdt/pool-state');
+        $pool = json_decode($resp->getBody()->getContents(), true);
+        if ($pool['left'] > 0) {
+            $apiClient->post('mining/usdt/start-claim');
+            sleep(10);
         }
     }
 

@@ -65,10 +65,7 @@ class BumsBot extends BaseBot implements BotInterface
                 'profile' => $this->curProfile,
                 'bot' => $this->getName(),
             ]);
-            $this->bus->dispatch(
-                new UpdateUrlUser($this->curProfile, $this->getName()),
-                [new DelayStamp(10 * 1000)]
-            );
+            $this->runUpdate();
             return;
         }
         $info = json_decode($resp->getBody()->getContents(), true);
@@ -104,10 +101,7 @@ class BumsBot extends BaseBot implements BotInterface
             'profile' => $this->curProfile,
             'bot' => $this->getName(),
         ]);
-        $this->bus->dispatch(
-            new CustomFunctionUser($this->curProfile, $this->getName(), 'update'),
-            [new DelayStamp(10 * 1000)]
-        );
+        $this->runDelay('update');
         return true;
     }
 
@@ -258,6 +252,7 @@ class BumsBot extends BaseBot implements BotInterface
         $token = $this->UCGet('token');
 
         if (!$token) {
+            $this->runUpdate();
             return null;
         }
 

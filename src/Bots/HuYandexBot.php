@@ -115,10 +115,7 @@ class HuYandexBot extends BaseBot implements BotInterface
         }
 
         $client->post('upgrades/buy', [ 'json' => ['upgradeId' => $profit[0]['id']] ]);
-        $this->bus->dispatch(
-            new CustomFunctionUser($this->curProfile, $this->getName(), 'upgrade'),
-            [new DelayStamp(10 * 1000)]
-        );
+        $this->runDelay('upgrade', rand(15, 20));
         return true;
     }
 

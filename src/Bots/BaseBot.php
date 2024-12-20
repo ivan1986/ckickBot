@@ -3,6 +3,8 @@
 namespace App\Bots;
 
 use App\Message\CustomFunction;
+use App\Message\CustomFunctionUser;
+use App\Message\UpdateUrlUser;
 use App\Model\ActionState;
 use App\Model\ActionStatusDto;
 use App\Service\CacheService;
@@ -15,6 +17,7 @@ use Prometheus\CollectorRegistry;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\Panther\Client;
 use Symfony\Component\Panther\Cookie\CookieJar as SymfonyCookieJar;
 use Symfony\Component\Scheduler\RecurringMessage;
@@ -160,4 +163,19 @@ class BaseBot
         );
     }
 
+    protected function runDelay($callback, $delay = 10): void
+    {
+        $this->bus->dispatch(
+            new CustomFunctionUser($this->curProfile, $this->getName(), $callback),
+            [new DelayStamp($delay * 1000)]
+        );
+    }
+
+    protected function runUpdate($delay = 10): void
+    {
+        $this->bus->dispatch(
+            new UpdateUrlUser($this->curProfile, $this->getName()),
+            [new DelayStamp($delay * 1000)]
+        );
+    }
 }

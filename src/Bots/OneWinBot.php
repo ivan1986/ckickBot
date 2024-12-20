@@ -154,10 +154,7 @@ class OneWinBot extends BaseBot implements BotInterface
         $apiClient->post('/city/building', [
             'json' => ['buildingId' => $profit['id'], 'type' => $profit['type']]
         ]);
-        $this->bus->dispatch(
-            new CustomFunctionUser($this->curProfile, $this->getName(), 'updateCity'),
-            [new DelayStamp(10 * 1000)]
-        );
+        $this->runDelay('upgradeCity', rand(15, 20));
         return true;
 
     }
@@ -220,10 +217,7 @@ class OneWinBot extends BaseBot implements BotInterface
         $apiClient->post('/minings', [
             'json' => ['id' => $profit['id']]
         ]);
-        $this->bus->dispatch(
-            new CustomFunctionUser($this->curProfile, $this->getName(), 'update'),
-            [new DelayStamp(10 * 1000)]
-        );
+        $this->runDelay('upgrade', rand(15, 20));
         return true;
     }
 

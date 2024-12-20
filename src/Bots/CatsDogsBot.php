@@ -63,6 +63,7 @@ class CatsDogsBot extends BaseBot implements BotInterface
         $token = $this->UCGet('auth');
 
         if (!$token) {
+            $this->runUpdate();
             return null;
         }
 

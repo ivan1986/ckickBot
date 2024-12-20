@@ -46,6 +46,7 @@ class CityHolderBot extends BaseBot implements BotInterface
     public function update()
     {
         if (!$this->getUrl()) {
+            $this->runUpdate();
             return;
         }
 

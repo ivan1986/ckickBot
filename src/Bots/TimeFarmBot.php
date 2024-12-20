@@ -89,10 +89,7 @@ class TimeFarmBot extends BaseBot implements BotInterface
         }
 
         if ($secondsLeft < 0) {
-            $this->bus->dispatch(
-                new CustomFunctionUser($this->curProfile, $this->getName(), 'claimAndReset'),
-                [new DelayStamp(($delay + 2) * 1000)]
-            );
+            $this->runDelay('claimAndReset', $delay + 2);
             $this->markRun('check');
         } else {
 
@@ -103,10 +100,7 @@ class TimeFarmBot extends BaseBot implements BotInterface
 
             $delay = $status['farmingDurationInSec'];
             $this->UCSet('lock', 1, $delay + 1);
-            $this->bus->dispatch(
-                new CustomFunctionUser($this->curProfile, $this->getName(), 'claimAndReset'),
-                [new DelayStamp(($delay + 2) * 1000)]
-            );
+            $this->runDelay('claimAndReset', $delay + 2);
             return true;
         }
     }

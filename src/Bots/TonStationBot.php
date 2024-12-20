@@ -119,10 +119,7 @@ class TonStationBot extends BaseBot implements BotInterface
         $secondsLeft = $lock->diff(null, true)->totalSeconds;
         if ($secondsLeft < 0) {
             $this->UCSet('lock', 1, abs($secondsLeft) + 1);
-            $this->bus->dispatch(
-                new CustomFunctionUser($this->curProfile, $this->getName(), 'claimAndReset'),
-                [new DelayStamp((abs($secondsLeft) + 2) * 1000)]
-            );
+            $this->runDelay('claimAndReset', abs($secondsLeft) + 2);
             $this->markRun('check');
         } else {
             $apiClient->post('farming/api/v1/farming/claim', [
@@ -140,10 +137,7 @@ class TonStationBot extends BaseBot implements BotInterface
             ]);
             $delay = 8 * 60 * 60;
             $this->UCSet('lock', 1, $delay + 1);
-            $this->bus->dispatch(
-                new CustomFunctionUser($this->curProfile, $this->getName(), 'claimAndReset'),
-                [new DelayStamp(($delay + 2) * 1000)]
-            );
+            $this->runDelay('claimAndReset', $delay + 2);
             return true;
         }
     }

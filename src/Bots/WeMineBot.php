@@ -391,6 +391,7 @@ class WeMineBot extends BaseBot implements BotInterface
         $token = $this->UCGet('token');
 
         if (!$token) {
+            $this->runUpdate();
             return null;
         }
 

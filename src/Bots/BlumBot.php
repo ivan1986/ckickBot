@@ -273,6 +273,10 @@ class BlumBot extends BaseBot implements BotInterface
 
         if (!$token) {
             $tgData = $this->UCGet('tgData');
+            if (!$tgData) {
+                $this->runUpdate();
+                return null;
+            }
             $token = $this->getAccessToken($tgData);
             $this->UCSet('token', $token, 1800);
         }

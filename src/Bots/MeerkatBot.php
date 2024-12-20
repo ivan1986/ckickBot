@@ -90,10 +90,7 @@ class MeerkatBot extends BaseBot implements BotInterface
         }
         if ($lastBoost && $lastBoost + $boostDuration + 5 < time()) {
             $apiClient->post('user/state/turbo/activation');
-            $this->bus->dispatch(
-                new CustomFunctionUser($this->curProfile, $this->getName(), 'claimAndReset'),
-                [new DelayStamp(($boostDuration + 10) * 1000)]
-            );
+            $this->runDelay('claimAndReset', $boostDuration + 10);
             $this->markRun('turbo');
             return true;
         }
@@ -101,10 +98,7 @@ class MeerkatBot extends BaseBot implements BotInterface
         $nextClaim = $status['state']['lastClaimAt'] + $duration;
         if ($nextClaim + 5 < time()) {
             $apiClient->post('user/claim');
-            $this->bus->dispatch(
-                new CustomFunctionUser($this->curProfile, $this->getName(), 'claimAndReset'),
-                [new DelayStamp(($duration + 10) * 1000)]
-            );
+            $this->runDelay('claimAndReset', $duration + 10);
             return true;
         }
         if (!$lastBoost && $nextClaim > time() + 3600) {

@@ -228,10 +228,7 @@ class FactoraBot extends BaseBot implements BotInterface
             ],
         ]);
         $status = $resp->getBody()->getContents();
-        $this->bus->dispatch(
-            new CustomFunctionUser($this->curProfile, $this->getName(), 'upgradeBuildings'),
-            [new DelayStamp((rand(5, 10) + 10) * 1000)]
-        );
+        $this->runDelay('upgradeBuildings', rand(15, 20));
         return $status == 'ok';
     }
 

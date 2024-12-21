@@ -101,13 +101,16 @@ class BlumBot extends BaseBot implements BotInterface
         }
 
         try {
-            $apiClient->get('daily-reward?offset=-180');
-            sleep(1);
-            $apiClient->post('daily-reward?offset=-180');
-            $this->logger->info('{bot} for {profile}: daily reward', [
-                'profile' => $this->curProfile,
-                'bot' => $this->getName(),
-            ]);
+            $resp = $apiClient->get('/api/v2/daily-reward');
+            $daily = json_decode($resp->getBody()->getContents(), true);
+            if ($daily['claim'] == 'available') {
+                sleep(1);
+                $apiClient->post('/api/v2/daily-reward');
+                $this->logger->info('{bot} for {profile}: daily reward', [
+                    'profile' => $this->curProfile,
+                    'bot' => $this->getName(),
+                ]);
+            }
         } catch (\Exception $e) {}
 
         $resp = $apiClient->get('user/balance');

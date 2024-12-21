@@ -26,7 +26,7 @@ use Symfony\Contracts\Service\Attribute\Required;
 
 class BaseBot
 {
-    const TTL = 3600 * 24;
+    const TTL = 3600 * 24 * 2;
     #[Required] public LoggerInterface $logger;
     #[Required] public CacheService $cache;
     #[Required] public ProfileService $profileService;

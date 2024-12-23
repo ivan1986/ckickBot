@@ -173,9 +173,19 @@ class WeMineBot extends BaseBot implements BotInterface
     //region Crack daily case
     public function findKey()
     {
-        $this->logger->info('{bot}: find digits run', [
+        $this->logger->info('{bot}: find digits run bot', [
             'bot' => $this->getName(),
         ]);
+        do {
+            usleep(100 * 1000);
+            $date = new \DateTime('now', new \DateTimeZone('Europe/Moscow'));
+            $h = $date->format('H:i:s');
+        } while ($h < '20:00:01');
+
+        $this->logger->info('{bot}: find digits - start find digits', [
+            'bot' => $this->getName(),
+        ]);
+
         $profiles = $this->getEnabledProfiles();
         if (count($profiles) < 3) {
             //TODO: Не хватает профилей

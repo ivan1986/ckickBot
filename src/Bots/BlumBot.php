@@ -65,7 +65,7 @@ class BlumBot extends BaseBot implements BotInterface
         }
         $gameId = $game['gameId'];
 
-        $count = random_int(500, 1000);
+        $count = random_int(700, 1000);
         $freese_count = random_int(3, 5);
         sleep(30 + $freese_count * 5);
 

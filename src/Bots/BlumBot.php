@@ -39,7 +39,7 @@ class BlumBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
-    #[ScheduleCallback('4 hour', delta: 1800)]
+    #[ScheduleCallback('1 hour', delta: 900)]
     public function game()
     {
         if (!$apiClient = $this->getClient('game-domain')) {
@@ -65,7 +65,7 @@ class BlumBot extends BaseBot implements BotInterface
         }
         $gameId = $game['gameId'];
 
-        $count = random_int(100, 200);
+        $count = random_int(500, 1000);
         $freese_count = random_int(3, 5);
         sleep(30 + $freese_count * 5);
 
@@ -90,6 +90,10 @@ class BlumBot extends BaseBot implements BotInterface
             'profile' => $this->curProfile,
             'bot' => $this->getName(),
         ]);
+
+        if ($balance['playPasses'] > 20) {
+            $this->runDelay('game', 600);
+        }
         return true;
     }
 

@@ -113,10 +113,15 @@ class DropeeBot extends BaseBot implements BotInterface
             }
 
             $coins -= $upgrade['price'];
+            $this->logger->info('{bot} for {profile}: upgrade - {name}', [
+                'profile' => $this->curProfile,
+                'bot' => $this->getName(),
+                'name' => $upgrade['name'],
+            ]);
             $apiClient->post('game/actions/upgrade', [
                 'json' => ['upgradeId' => $upgrade['id']]
             ]);
-            sleep(random_int(8, 15));
+            sleep(random_int(5, 10));
         }
         return true;
     }

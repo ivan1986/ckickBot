@@ -10,10 +10,10 @@ use Symfony\Component\Process\Process;
 
 class BlumBot extends BaseBot implements BotInterface
 {
-    const ANSWERS = 'https://raw.githubusercontent.com/boytegar/BlumBOT/master/verif.json';
-    const ANS2 = 'https://raw.githubusercontent.com/dancayairdrop/blum/refs/heads/main/nv.json';
-    const ANS3 = 'https://raw.githubusercontent.com/srutihsan/keywords-/refs/heads/main/keywords.json';
-    const ANS4 = 'https://raw.githubusercontent.com/IopiXD/blum/refs/heads/main/answer.json';
+    const ANSWERS = [
+        'https://raw.githubusercontent.com/Mbah-Shondong/intercom/master/blam.json',
+        'https://raw.githubusercontent.com/Omnividente/QUIZ/master/answer.json',
+    ];
 
     protected string $path;
 
@@ -223,30 +223,18 @@ class BlumBot extends BaseBot implements BotInterface
         $allAnswers = [];
 
         $ghClient = new \GuzzleHttp\Client([
-            'base_uri' => self::ANSWERS,
+            'base_uri' => 'https://raw.githubusercontent.com',
             'headers' => [
                 'Content-Type' => 'application/json',
             ]
         ]);
-        $resp = $ghClient->get(self::ANSWERS);
-        $ans = $resp->getBody()->getContents();
-        $allAnswers = json_decode($ans, true);
 
-        $resp = $ghClient->get(self::ANS2);
-        $ans = json_decode($resp->getBody()->getContents(), true);
-        foreach ($ans['tasks'] as $item) {
-            $allAnswers[$item['id']] = $item['keyword'];
+        foreach (self::ANSWERS as $url) {
+            $resp = $ghClient->get($url);
+            $ans = $resp->getBody()->getContents();
+            $ans = json_decode($ans, true);
+            $allAnswers = array_merge($allAnswers, $ans);
         }
-
-        $resp = $ghClient->get(self::ANS3);
-        $ans = $resp->getBody()->getContents();
-        $ans = json_decode($ans, true);
-        $allAnswers = array_merge($allAnswers, $ans);
-
-        $resp = $ghClient->get(self::ANS4);
-        $ans = $resp->getBody()->getContents();
-        $ans = json_decode($ans, true);
-        $allAnswers = array_merge($allAnswers, $ans);
 
         // Fixes
         $allAnswers['27ac150a-e5bd-49eb-82e4-13bde70b3f3c'] = 'Elsalvador';

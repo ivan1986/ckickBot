@@ -39,7 +39,7 @@ final class UpdateUrlHandler
         sleep(2);
         $client->waitFor('div', 5);;
         sleep(5);
-        $client->waitForElementToNotContain('body', 'Waiting for network', 10);
+        $client->waitForElementToContain('.sidebar-header', 'Search', 60);
 
         // click Start if exist
         try {

@@ -50,6 +50,7 @@ class InitSystemdCommand extends Command
 
         $units = [
             'click-bot.service' => 'click-bot.service',
+            'click-bot-browser.service' => 'click-bot-browser.service',
             'scheduler.service' => 'click-bot-scheduler.service',
             'custom-easy-watch.service' => 'click-bot-easy-watch.service',
             'http.service' => 'click-bot-http.service',

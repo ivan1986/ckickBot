@@ -1,0 +1,15 @@
+[Unit]
+Description=Click Bot Messages Processor Browser
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory={{ dir }}
+ExecStart={{ dir }}/bin/console messenger:consume async-browser
+Restart=on-failure
+RestartSec=10s
+User={{ user }}
+Group={{ group }}
+
+[Install]
+WantedBy=default.target

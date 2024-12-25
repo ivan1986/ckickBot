@@ -6,6 +6,7 @@ framework:
         transports:
             # https://symfony.com/doc/current/messenger.html#transport-configuration
             async: '%env(MESSENGER_TRANSPORT_DSN)%'
+            async-browser: '%env(MESSENGER_TRANSPORT_DSN)%'
             # failed: 'doctrine://default?queue_name=failed'
             sync: 'sync://'
 
@@ -13,7 +14,8 @@ framework:
             # Route your messages to the transports
             'App\Message\UpdateUrlUser': async-browser
             'App\Message\CustomFunctionBrowserUser': async-browser
-            'App\Message\*': async
+            'App\Message\CustomFunctionUser': async
+            'App\Message\CustomFunction': async
 
 # when@test:
 #    framework:

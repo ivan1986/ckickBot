@@ -36,7 +36,7 @@ class OneWinBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
-    #[ScheduleCallback('1 hour', delta: 600)]
+    #[ScheduleCallback('1 hour', delta: 600, browser: true)]
     public function passiveIncome()
     {
         $client = $this->profileService->getOrCreateBrowser($this->curProfile);

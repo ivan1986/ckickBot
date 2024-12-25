@@ -3,6 +3,7 @@
 namespace App\MessageHandler;
 
 use App\Message\CustomFunction;
+use App\Message\CustomFunctionBrowserUser;
 use App\Message\CustomFunctionUser;
 use App\Message\UpdateUrl;
 use App\Message\UpdateUrlUser;
@@ -45,11 +46,19 @@ class ProfileSender
             if ($message->delta) {
                 $stamps[] = new DelayStamp(random_int(0, $message->delta) * 1000);
             }
-            $this->bus->dispatch(new CustomFunctionUser(
-                $profile,
-                $message->name,
-                $message->callback
-            ), $stamps);
+            if ($message->browser) {
+                $this->bus->dispatch(new CustomFunctionBrowserUser(
+                    $profile,
+                    $message->name,
+                    $message->callback
+                ), $stamps);
+            } else {
+                $this->bus->dispatch(new CustomFunctionUser(
+                    $profile,
+                    $message->name,
+                    $message->callback
+                ), $stamps);
+            }
         }
     }
 

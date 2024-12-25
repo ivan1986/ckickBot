@@ -40,7 +40,7 @@ final class MainSchedule implements ScheduleProviderInterface
                 $attribute = $attrs[0];
                 $class = new \ReflectionClass(ScheduleCallback::class);
                 $info = $class->newInstanceArgs($attribute->getArguments());
-                $message = new CustomFunction($bot->getName(), $method->getShortName(), $info->delta);
+                $message = new CustomFunction($bot->getName(), $method->getShortName(), $info->delta, $info->browser);
                 $message = RecurringMessage::every($info->frequency, $message);
                 if ($info->delta) {
                     $message->withJitter($info->delta);

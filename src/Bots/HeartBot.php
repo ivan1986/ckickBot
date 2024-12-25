@@ -100,7 +100,7 @@ class HeartBot extends BaseBot implements BotInterface
         }
     }
 
-    #[ScheduleCallback('1 hour', delta: 900)]
+    #[ScheduleCallback('1 hour', delta: 900, browser: true)]
     public function watchAd()
     {
         $tgData = $this->UCGet('tgData');

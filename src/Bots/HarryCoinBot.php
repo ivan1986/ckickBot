@@ -19,7 +19,7 @@ class HarryCoinBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
-    #[ScheduleCallback('1 hour')]
+    #[ScheduleCallback('1 hour', browser: true)]
     public function resetMine()
     {
         if (!$this->getUrl()) {
@@ -59,7 +59,7 @@ class HarryCoinBot extends BaseBot implements BotInterface
         }
     }
 
-    #[ScheduleCallback('1 hour', delta: 900)]
+    #[ScheduleCallback('1 hour', delta: 900, browser: true)]
     public function watchAd()
     {
         if (!$this->getUrl()) {
@@ -109,7 +109,7 @@ class HarryCoinBot extends BaseBot implements BotInterface
         return true;
     }
 
-    #[ScheduleCallback('1 day', delta: 7200)]
+    #[ScheduleCallback('1 day', delta: 7200, browser: true)]
     public function claimRewards()
     {
         if (!$this->getUrl()) {
@@ -133,7 +133,7 @@ class HarryCoinBot extends BaseBot implements BotInterface
         sleep(2);
     }
 
-    #[ScheduleCallback('8 hour', delta: 7200)]
+    #[ScheduleCallback('8 hour', delta: 7200, browser: true)]
     public function spin()
     {
         if (!$this->getUrl()) {

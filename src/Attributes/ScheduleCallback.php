@@ -9,7 +9,8 @@ class ScheduleCallback
 {
     public function __construct(
         public string $frequency,
-        public int $delta = 0
+        public int $delta = 0,
+        public bool $browser = false
     )
     {}
 }

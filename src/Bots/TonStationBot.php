@@ -58,7 +58,7 @@ class TonStationBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
-    #[ScheduleCallback('8 hour', delta: 3600)]
+    #[ScheduleCallback('8 hour', delta: 3600, browser: true)]
     public function getBalance()
     {
         if (!$this->getUrl()) {

@@ -17,7 +17,7 @@ class DropeeBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
-    #[ScheduleCallback('2 hour', delta: 3600)]
+    #[ScheduleCallback('2 hour', delta: 3600, browser: true)]
     public function online()
     {
         if (!$this->getUrl()) {

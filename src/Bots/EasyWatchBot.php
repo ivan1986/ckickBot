@@ -27,7 +27,7 @@ class EasyWatchBot extends BaseBot implements BotInterface
         parent::runInTg($client);
     }
 
-    #[ScheduleCallback('30 min')]
+    #[ScheduleCallback('30 min', browser: true)]
     public function checkStream()
     {
         if (!$this->getUrl()) {

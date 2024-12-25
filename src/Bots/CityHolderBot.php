@@ -42,7 +42,7 @@ class CityHolderBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
-    #[ScheduleCallback('2 hour', delta: 1800)]
+    #[ScheduleCallback('2 hour', delta: 1800, browser: true)]
     public function update()
     {
         if (!$this->getUrl()) {
@@ -209,7 +209,7 @@ class CityHolderBot extends BaseBot implements BotInterface
         return true;
     }
 
-    #[ScheduleCallback('24 hour')]
+    #[ScheduleCallback('24 hour', browser: true)]
     public function updateAll()
     {
         if (!$this->getUrl()) {

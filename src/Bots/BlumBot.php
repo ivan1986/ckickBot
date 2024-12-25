@@ -49,6 +49,7 @@ class BlumBot extends BaseBot implements BotInterface
         $resp = $apiClient->get('user/balance');
         $balance = json_decode($resp->getBody()->getContents(), true);
         $this->updateStatItem('tickets', $balance['playPasses']);
+        var_dump($balance['playPasses']);
 
         if ($balance['playPasses'] == 0) {
             return false;
@@ -92,6 +93,7 @@ class BlumBot extends BaseBot implements BotInterface
         ]);
 
         if ($balance['playPasses'] > 20) {
+            echo 'add';
             $this->runDelay('game', 600);
         }
         return true;

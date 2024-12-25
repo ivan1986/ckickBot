@@ -2,7 +2,7 @@
 
 namespace App\Message;
 
-final class CustomFunction
+final class CustomFunctionBrowserUser
 {
     /*
      * Add whatever properties and methods you need
@@ -10,10 +10,9 @@ final class CustomFunction
      */
 
      public function __construct(
+         public readonly string $profile,
          public readonly string $name,
          public readonly string $callback,
-         public readonly int $delta = 0,
-         public readonly bool $browser = false
      ) {
      }
 }

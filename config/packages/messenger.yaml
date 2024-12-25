@@ -11,6 +11,8 @@ framework:
 
         routing:
             # Route your messages to the transports
+            'App\Message\UpdateUrlUser': async-browser
+            'App\Message\CustomFunctionBrowserUser': async-browser
             'App\Message\*': async
 
 # when@test:

@@ -177,7 +177,7 @@ class DropeeBot extends BaseBot implements BotInterface
 
         $rest = 10 - $sync['activities']['watchAdForSpin'];
         while ($rest > 0) {
-            $this->logger->info('{bot} for {profile}: spin last {rest}', [
+            $this->logger->info('{bot} for {profile}: watchAd last {rest}', [
                 'profile' => $this->curProfile,
                 'bot' => $this->getName(),
                 'rest' => $rest,

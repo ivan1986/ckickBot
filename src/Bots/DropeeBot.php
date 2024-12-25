@@ -158,7 +158,7 @@ class DropeeBot extends BaseBot implements BotInterface
         $this->logger->info($this->getName() . ' for ' . $this->curProfile . ' spin bonus: {id}', $result['prize']);
     }
 
-    #[ScheduleCallback('6 hour', delta: 3600)]
+    #[ScheduleCallback('6 hour', delta: 3600, browser: true)]
     public function daily()
     {
         if (!$apiClient = $this->getClient()) {

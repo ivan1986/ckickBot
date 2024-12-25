@@ -64,6 +64,7 @@ class ProfileService
             $arguments,
             $options
         );
+        $client->manage()->window()->maximize();
 
         return $client;
     }

@@ -38,7 +38,8 @@ final class UpdateUrlHandler
         $page = $client->request('GET', 'https://web.telegram.org/k/#@' . $bot->getTgBotName());
         sleep(2);
         $client->waitFor('div', 5);;
-        sleep(2);
+        sleep(5);
+        $client->waitForElementToNotContain('body', 'Waiting for network', 10);
 
         // click Start if exist
         try {

@@ -4,6 +4,7 @@ namespace App\Bots;
 
 use App\Attributes\ScheduleCallback;
 use App\Service\ProfileService;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\RequestOptions;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Process\Process;
@@ -45,6 +46,9 @@ class BlumBot extends BaseBot implements BotInterface
         if (!$apiClient = $this->getClient('game-domain')) {
             return false;
         }
+        if ($this->UCGet('gameError')) {
+            return;
+        }
 
         $resp = $apiClient->get('user/balance');
         $balance = json_decode($resp->getBody()->getContents(), true);
@@ -54,7 +58,17 @@ class BlumBot extends BaseBot implements BotInterface
             return false;
         }
 
-        $resp = $apiClient->post('/api/v2/game/play');
+        try {
+            $resp = $apiClient->post('/api/v2/game/play');
+        } catch (ClientException $e) {
+            $this->UCSet('gameError', 1);
+            $this->logger->error('{bot} for {profile}: game 400 error: {error}', [
+                'profile' => $this->curProfile,
+                'bot' => $this->getName(),
+                'error' => $e->getResponse()->getBody()->getContents()
+            ]);
+            return false;
+        }
         $game = json_decode($resp->getBody()->getContents(), true);
         if (empty($game['gameId'])) {
             $this->logger->error('{bot} for {profile}: Broken game - no gameId', [
@@ -65,7 +79,7 @@ class BlumBot extends BaseBot implements BotInterface
         }
         $gameId = $game['gameId'];
 
-        $count = random_int(300, 600);
+        $count = random_int(100, 200);
         $freese_count = random_int(3, 5);
         sleep(30 + $freese_count * 5);
 

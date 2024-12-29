@@ -153,6 +153,11 @@ class OneWinBot extends BaseBot implements BotInterface
         $apiClient->post('/city/building', [
             'json' => ['buildingId' => $profit['id'], 'type' => $profit['type']]
         ]);
+        $this->logger->info('{bot} for {profile}: update city {update}', [
+            'profile' => $this->curProfile,
+            'bot' => $this->getName(),
+            'update' => $profit['id'],
+        ]);
         $this->runDelay('updateCity', rand(15, 20));
         return true;
     }
@@ -214,6 +219,11 @@ class OneWinBot extends BaseBot implements BotInterface
         $profit = current($profit);
         $apiClient->post('/minings', [
             'json' => ['id' => $profit['id']]
+        ]);
+        $this->logger->info('{bot} for {profile}: update {update}', [
+            'profile' => $this->curProfile,
+            'bot' => $this->getName(),
+            'update' => $profit['id'],
         ]);
         $this->runDelay('update', rand(15, 20));
         return true;

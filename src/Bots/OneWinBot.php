@@ -39,9 +39,23 @@ class OneWinBot extends BaseBot implements BotInterface
     #[ScheduleCallback('2 hour', delta: 600, browser: true)]
     public function passiveIncome()
     {
-        $client = $this->profileService->getOrCreateBrowser($this->curProfile);
+        $client = $this->profileService->getOrCreateBrowser($this->curProfile, false);
         $client->request('GET', $this->getUrl());
-        $client->waitForElementToContain('#root', 'Не забудь собрать ежедневную награду', 10);
+        $client->waitForElementToContain('#root', 'Главная', 10);
+
+        sleep(1);
+        $client->executeScript(<<<JS
+            let btns = document.querySelectorAll('[class^="_bottomSheetModalContainer"] button[class^="_close"]');
+            btns = Array.from(btns);
+            if (btns.length == 0) {
+                return false;
+            }
+            for(let btn of btns) {
+                btn.click();
+            }
+            return true;
+        JS);
+        sleep(1);
     }
 
     #[ScheduleCallback('9 hour', delta: 1800)]

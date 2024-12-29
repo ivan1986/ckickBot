@@ -157,6 +157,7 @@ class HeartBot extends BaseBot implements BotInterface
         $client->executeScript(<<<JS
             document.querySelector('button.float-right').click();
         JS);
+        $this->updateStatItem('watchLast', --$adProm['attempts']);
         $this->logger->info('{bot} for {profile}: watchAD success left {left}', [
             'profile' => $this->curProfile,
             'bot' => $this->getName(),

@@ -36,13 +36,12 @@ class OneWinBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
-    #[ScheduleCallback('1 hour', delta: 600, browser: true)]
+    #[ScheduleCallback('2 hour', delta: 600, browser: true)]
     public function passiveIncome()
     {
         $client = $this->profileService->getOrCreateBrowser($this->curProfile);
         $client->request('GET', $this->getUrl());
-        //$client->waitForElementToContain('#root', 'Не забудь собрать ежедневную награду');
-        sleep(10);
+        $client->waitForElementToContain('#root', 'Не забудь собрать ежедневную награду', 10);
     }
 
     #[ScheduleCallback('9 hour', delta: 1800)]
@@ -154,9 +153,8 @@ class OneWinBot extends BaseBot implements BotInterface
         $apiClient->post('/city/building', [
             'json' => ['buildingId' => $profit['id'], 'type' => $profit['type']]
         ]);
-        $this->runDelay('upgradeCity', rand(15, 20));
+        $this->runDelay('updateCity', rand(15, 20));
         return true;
-
     }
 
     #[ScheduleCallback('4 hour', delta: 900)]
@@ -217,7 +215,7 @@ class OneWinBot extends BaseBot implements BotInterface
         $apiClient->post('/minings', [
             'json' => ['id' => $profit['id']]
         ]);
-        $this->runDelay('upgrade', rand(15, 20));
+        $this->runDelay('update', rand(15, 20));
         return true;
     }
 

@@ -17,7 +17,7 @@ class DropeeBot extends BaseBot implements BotInterface
         parent::saveUrl($client, $url);
     }
 
-    #[ScheduleCallback('2 hour', delta: 3600, browser: true)]
+    #[ScheduleCallback('4 hour', delta: 3600, browser: true)]
     public function online()
     {
         if (!$this->getUrl()) {
@@ -126,7 +126,7 @@ class DropeeBot extends BaseBot implements BotInterface
         return true;
     }
 
-    #[ScheduleCallback('1 hour', delta: 3600)]
+    #[ScheduleCallback('3 hour', delta: 3600)]
     public function spin()
     {
         if (!$apiClient = $this->getClient()) {

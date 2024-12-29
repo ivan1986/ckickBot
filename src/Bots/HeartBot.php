@@ -114,40 +114,55 @@ class HeartBot extends BaseBot implements BotInterface
             ]
         ]);
         $auth = json_decode($resp->getBody()->getContents(), true);
+        $adProm = null;
         foreach ($auth['promotions'] as $promotion) {
             if ($promotion['done'] || $promotion['category'] != 'ad') {
                 continue;
             }
-
             if ($promotion['attempts'] == 0) {
                 return;
             }
-
-            $client = $this->profileService->getOrCreateBrowser($this->curProfile);
-            $client->get($this->getUrl());
-            sleep(10);
-            $client->executeScript(<<<JS
-                let node = Array.prototype.slice.call(document.querySelectorAll('div.font-semibold')).filter(function (el) {
-                    return el.textContent === 'Watch ads from partners'
-                })[0];
-                while (node.parentNode) {
-                    node = node.parentNode;
-                    if (node.querySelector('button')) {
-                        node.querySelector('button').click();
-                        break;
-                    }
-                }
-            JS);
-            sleep(5);
-            $existPopup = true;
-            while ($existPopup) {
-                sleep(5);
-                $existPopup = $client->executeScript(<<<JS
-                    return document.querySelectorAll('html > div').length > 0;
-                JS);
-            }
-            return true;
+            $adProm = $promotion;
+            break;
         }
+        $this->logger->info('{bot} for {profile}: watchAD start {left}', [
+            'profile' => $this->curProfile,
+            'bot' => $this->getName(),
+            'left' => $adProm['attempts'],
+        ]);
+
+        $client = $this->profileService->getOrCreateBrowser($this->curProfile);
+        $client->get($this->getUrl());
+
+        $client->executeScript(<<<JS
+            let node = Array.prototype.slice.call(document.querySelectorAll('div.font-semibold')).filter(function (el) {
+                return el.textContent === 'Watch ads from partners'
+            })[0];
+            while (node.parentNode) {
+                node = node.parentNode;
+                if (node.querySelector('button')) {
+                    node.querySelector('button').click();
+                    break;
+                }
+            }
+        JS);
+        sleep(5);
+        $existPopup = true;
+        while ($existPopup) {
+            sleep(5);
+            $existPopup = $client->executeScript(<<<JS
+                return document.querySelectorAll('html > div').length > 0;
+            JS);
+        }
+        $client->executeScript(<<<JS
+            document.querySelector('button.float-right').click();
+        JS);
+        $this->logger->info('{bot} for {profile}: watchAD success left {left}', [
+            'profile' => $this->curProfile,
+            'bot' => $this->getName(),
+            'left' => $adProm['attempts'],
+        ]);
+        return true;
     }
 
     protected function getClient(): ?\GuzzleHttp\Client

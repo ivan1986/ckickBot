@@ -48,6 +48,10 @@ final class UpdateUrlHandler
             $client->executeScript('document.querySelector(".chat-input-control span")?.click();');
             sleep(2);
         }
+        $this->logger->info('Update url for {profile}: {bot} - load telegram', [
+            'profile' => $message->profile,
+            'bot' => $message->name
+        ]);
 
         // open miniapp
         $client->executeScript('document.getElementsByClassName("new-message-bot-commands-view")[0].click();');
@@ -66,6 +70,11 @@ final class UpdateUrlHandler
         $src = $iframe->getAttribute('src');
         if ($message->debug) {
             echo $src . PHP_EOL;
+        } else {
+            $this->logger->info('Update url for {profile}: {bot} get url', [
+                'profile' => $message->profile,
+                'bot' => $message->name
+            ]);
         }
         sleep(2);
         $client->executeScript('document.getElementsByClassName("animated-close-icon")[1].click();');

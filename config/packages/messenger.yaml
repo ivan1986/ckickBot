@@ -6,7 +6,10 @@ framework:
         transports:
             # https://symfony.com/doc/current/messenger.html#transport-configuration
             async: '%env(MESSENGER_TRANSPORT_DSN_ASYNC)%'
-            async-browser: '%env(MESSENGER_TRANSPORT_DSN_BROWS)%'
+            async-browser:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN_BROWS)%'
+                retry_strategy:
+                    max_retries: 1
             # failed: 'doctrine://default?queue_name=failed'
             sync: 'sync://'
 

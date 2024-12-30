@@ -43,6 +43,9 @@ class ProfileService
             '--user-data-dir=' . $this->profilePath . '/' . $profile,
             '--no-first-run',
             '--disable-gpu',
+            '--disable-browser-side-navigation',
+            '--disable-dev-shm-usage',
+            '--no-sandbox',
             '--user-agent=' . ($ua ?: self::UA)
         ];
 

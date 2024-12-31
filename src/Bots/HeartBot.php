@@ -134,6 +134,8 @@ class HeartBot extends BaseBot implements BotInterface
         $client = $this->profileService->getOrCreateBrowser($this->curProfile);
         $client->get($this->getUrl());
 
+        $client->waitForVisibility('div.font-semibold', 60);
+
         $client->executeScript(<<<JS
             let node = Array.prototype.slice.call(document.querySelectorAll('div.font-semibold')).filter(function (el) {
                 return el.textContent === 'Watch ads from partners'

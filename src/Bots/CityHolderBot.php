@@ -269,7 +269,7 @@ class CityHolderBot extends BaseBot implements BotInterface
                     await sleep(1000);
                     items[0].querySelector('button').click();
                     await sleep(1000);
-                    document.querySelector('[class^="_buildDetail"] button').click();
+                    document.querySelector('[class^="_buildDetail"] button[class*="_upgrade"]').click();
                     await sleep(1000);
                     count++;
                 }

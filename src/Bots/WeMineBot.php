@@ -177,19 +177,19 @@ class WeMineBot extends BaseBot implements BotInterface
             'bot' => $this->getName(),
         ]);
 
-        $profiles = $this->getEnabledProfiles();
-        if (count($profiles) < 3) {
+        $this->profiles = $this->getEnabledProfiles();
+        if (count($this->profiles) < 3) {
             //TODO: Не хватает профилей
             return false;
         }
-        shuffle($profiles);
+        shuffle($this->profiles);
         $haveFreeSpinTotal = 0;
-        foreach ($profiles as $k => $profile) {
+        foreach ($this->profiles as $k => $profile) {
             $this->curProfile = $profile;
             $apiClient = $this->getClient();
             if (!$apiClient) {
                 $this->usedProfiles[$profile] = 1;
-                unset($profiles[$k]);
+                unset($this->profiles[$k]);
                 continue;
             }
             // disable for speed
@@ -201,7 +201,7 @@ class WeMineBot extends BaseBot implements BotInterface
                     'profile' => $profile,
                 ]);
                 $this->usedProfiles[$profile] = 1;
-                unset($profiles[$k]);
+                unset($this->profiles[$k]);
                 continue;
             }
             $userFreeSpin = $content['maxFreeTry'] - $content['rouletteUserData']['tryNumber'];
@@ -306,10 +306,7 @@ class WeMineBot extends BaseBot implements BotInterface
 
     protected function enterKeyForAll($key)
     {
-        $profiles = $this->getEnabledProfiles();
-        shuffle($profiles);
-        $profiles = array_filter($profiles, fn ($profile) => empty($this->usedProfiles[$profile]));
-        $other = array_filter($profiles, fn ($profile) => $profile !== $this->curProfile);
+        $other = array_filter($this->profiles, fn ($profile) => $profile !== $this->curProfile);
         foreach ($other as $profile) {
             $this->curProfile = $profile;
             $apiClient = $this->getClient();
@@ -328,18 +325,17 @@ class WeMineBot extends BaseBot implements BotInterface
         }
     }
 
+    protected $profiles = [];
     protected $usedProfiles = [];
     protected $lastAttempts = [];
 
     protected function enterKeyAny($key)
     {
-        $profiles = $this->getEnabledProfiles();
-        $profiles = array_filter($profiles, fn ($profile) => empty($this->usedProfiles[$profile]));
-        usort($profiles, fn ($a, $b) => ($this->lastAttempts[$a] ?? 0) <=> ($this->lastAttempts[$b] ?? 0));
-        if (empty($profiles)) {
+        usort($this->profiles, fn ($a, $b) => ($this->lastAttempts[$a] ?? 0) <=> ($this->lastAttempts[$b] ?? 0));
+        if (empty($this->profiles)) {
             return 0;
         }
-        $this->curProfile = $profiles[0];
+        $this->curProfile = $this->profiles[0];
         $apiClient = $this->getClient();
 
         try {

@@ -192,7 +192,7 @@ class CityHolderBot extends BaseBot implements BotInterface
                         await sleep(1000);
                         let popup = document.querySelector('[class^="_buildDetail"]');
                         let current = popup.querySelector('[class^="_detailLevel"]').innerText;
-                        popup.querySelector('button').click();
+                        popup.querySelector('button[class*="_upgrade"]').click();
                         return current;
                     }
                 }

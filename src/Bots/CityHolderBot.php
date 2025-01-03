@@ -50,7 +50,7 @@ class CityHolderBot extends BaseBot implements BotInterface
             return;
         }
 
-        $client = $this->profileService->getOrCreateBrowser($this->curProfile);
+        $client = $this->profileService->getOrCreateBrowser($this->curProfile, false);
         $client->request('GET', $this->getUrl());
         sleep(2);
 
@@ -192,7 +192,7 @@ class CityHolderBot extends BaseBot implements BotInterface
                         await sleep(1000);
                         let popup = document.querySelector('[class^="_buildDetail"]');
                         let current = popup.querySelector('[class^="_detailLevel"]').innerText;
-                        popup.querySelector('button[class*="_upgrade"]').click();
+                        popup.querySelector('button span').click();
                         return current;
                     }
                 }

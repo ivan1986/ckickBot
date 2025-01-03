@@ -125,13 +125,16 @@ class HeartBot extends BaseBot implements BotInterface
             $adProm = $promotion;
             break;
         }
+        if (!$adProm) {
+            return false;
+        }
         $this->logger->info('{bot} for {profile}: watchAD start {left}', [
             'profile' => $this->curProfile,
             'bot' => $this->getName(),
             'left' => $adProm['attempts'],
         ]);
 
-        $client = $this->profileService->getOrCreateBrowser($this->curProfile);
+        $client = $this->profileService->getOrCreateBrowser($this->curProfile, false);
         $client->get($this->getUrl());
 
         $client->waitForVisibility('div.font-semibold', 60);

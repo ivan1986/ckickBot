@@ -34,6 +34,11 @@ final class CustomFunctionHandler
         try {
             $result = $bot->{$message->callback}();
             $bot->logAction($message->callback, $result ? ActionState::CHANGE : ActionState::FINISH);
+            $this->logger->info('Run for {profile}: {bot}->{callback} success', [
+                'profile' => $message->profile,
+                'bot' => $message->name,
+                'callback' => $message->callback
+            ]);
         } catch (Exception $e) {
             $bot->logAction($message->callback, ActionState::ERROR);
             $this->logger->error('Error for {profile} in {bot}->{callback}: {error}', [

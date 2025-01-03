@@ -214,8 +214,12 @@ class BumsBot extends BaseBot implements BotInterface
             $apiClient->post('miniapps/api/game_spin/Start', [
                 'multipart' => [
                     [
-                        'count' => 1,
+                        'name' => 'propId',
                         'contents' => $expedition['propId'],
+                    ],
+                    [
+                        'name' => 'count',
+                        'contents' => 1,
                     ],
                 ]
             ]);

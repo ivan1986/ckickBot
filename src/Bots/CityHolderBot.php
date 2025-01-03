@@ -50,7 +50,7 @@ class CityHolderBot extends BaseBot implements BotInterface
             return;
         }
 
-        $client = $this->profileService->getOrCreateBrowser($this->curProfile, false);
+        $client = $this->profileService->getOrCreateBrowser($this->curProfile);
         $client->request('GET', $this->getUrl());
         sleep(2);
 

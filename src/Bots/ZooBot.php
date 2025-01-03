@@ -18,7 +18,7 @@ class ZooBot extends BaseBot implements BotInterface
             return;
         }
 
-        $client = $this->profileService->getOrCreateBrowser($this->curProfile, false);
+        $client = $this->profileService->getOrCreateBrowser($this->curProfile);
         $client->request('GET', $this->getUrl());
         sleep(1);
         $client->waitForVisibility('div.flyBtn', 60);
@@ -54,7 +54,7 @@ class ZooBot extends BaseBot implements BotInterface
             return;
         }
 
-        $client = $this->profileService->getOrCreateBrowser($this->curProfile, false);
+        $client = $this->profileService->getOrCreateBrowser($this->curProfile);
         $client->request('GET', $this->getUrl());
         sleep(1);
         $client->waitForVisibility('div.flyBtn', 60);

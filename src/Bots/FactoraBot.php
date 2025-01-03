@@ -56,7 +56,9 @@ class FactoraBot extends BaseBot implements BotInterface
 
         $topUp = intval($userInfo['energyLimit'] * random_int(95,98) / 100);
 
-        while ($userInfo['currentEnergy'] < $topUp) {
+        $repeat = 0;
+        $limit = 30;
+        while ($userInfo['currentEnergy'] < $topUp && $repeat++ < $limit) {
             $maxClicks = $topUp - $userInfo['currentEnergy'];
             $maxClicks /= $userInfo['tapPower'];
             $maxClicks = intval($maxClicks);

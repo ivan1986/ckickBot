@@ -134,7 +134,7 @@ class HeartBot extends BaseBot implements BotInterface
             'left' => $adProm['attempts'],
         ]);
 
-        $client = $this->profileService->getOrCreateBrowser($this->curProfile, false);
+        $client = $this->profileService->getOrCreateBrowser($this->curProfile);
         $client->get($this->getUrl());
 
         $client->waitForVisibility('div.font-semibold', 60);

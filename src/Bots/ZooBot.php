@@ -77,6 +77,7 @@ class ZooBot extends BaseBot implements BotInterface
                 };
                 return await f1();
             JS);
+            sleep(5);
         }
 
         $hasTask = $client->executeScript(<<<JS
@@ -93,12 +94,14 @@ class ZooBot extends BaseBot implements BotInterface
         $rebusAns = $this->cache->get($rebus);
         if ($rebusAns && $hasRebus) {
             $this->inputAns($client, 'Ребус дня', $rebusAns);
+            sleep(5);
         }
 
         $task = $this->botKey('task-'.$today);
         $taskAns = $this->cache->get($task);
         if ($taskAns && $hasTask) {
             $this->inputAns($client, 'Загадка дня', $taskAns);
+            sleep(5);
         }
     }
 
@@ -111,17 +114,16 @@ class ZooBot extends BaseBot implements BotInterface
             var f1 = async function (tabs) {
                 let item = [...document.querySelectorAll('.van-cell')].filter(d => d.innerText.includes(name))[0];
                 item.click();
-                await sleep(100);
+                await sleep(2000);
                 document.querySelector('.van-popup input').value = param;
-                await sleep(100);
+                await sleep(2000);
                 document.querySelector('.van-popup input').dispatchEvent(new Event('input', { bubbles: true }));
-                await sleep(100);
+                await sleep(2000);
                 document.querySelector('.van-popup button').click();
-                await sleep(100);
+                await sleep(2000);
                 document.querySelector('.van-popup button').click()
             };
             return await f1();
         JS, [$name, $ans]);
     }
-
 }

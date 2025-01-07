@@ -131,6 +131,62 @@ class TinyVerseBot extends BaseBot implements BotInterface
         return true;
     }
 
+    #[ScheduleCallback('8 hour', delta: 3600)]
+    public function findCiv()
+    {
+        if (!$apiClient = $this->getClient()) {
+            return;
+        }
+
+        $resp = $apiClient->post('/galaxy/get', [
+            'form_params' => [
+                'session' => $this->UCGet('token'),
+            ],
+            'headers' => [
+                'X-Api-Request-Id' => $this->getApiReqId(),
+            ]
+        ]);
+        $info = json_decode($resp->getBody()->getContents(), true);
+        $info = $info['response'];
+
+        if ($info['civilization'] == 0 && empty($info['scan'])) {
+            $resp = $apiClient->post('/scan/start', [
+                'form_params' => [
+                    'session' => $this->UCGet('token'),
+                    'galaxy_id' => $info['id'],
+                    'power' => 1,
+                ],
+                'headers' => [
+                    'X-Api-Request-Id' => $this->getApiReqId(),
+                ]
+            ]);
+            $this->logger->info('{bot} for {profile}: start scan', [
+                'profile' => $this->curProfile,
+                'bot' => $this->getName(),
+            ]);
+            return true;
+        }
+        if (!empty($info['scan']) && $info['scan']['progress'] == 1) {
+            $resp = $apiClient->post('/scan/result', [
+                'form_params' => [
+                    'session' => $this->UCGet('token'),
+                    'galaxy_id' => $info['id'],
+                ],
+                'headers' => [
+                    'X-Api-Request-Id' => $this->getApiReqId(),
+                ]
+            ]);
+            $info = json_decode($resp->getBody()->getContents(), true);
+            $info = $info['response'];
+            $this->logger->info('{bot} for {profile}: scan result: {res}', [
+                'profile' => $this->curProfile,
+                'bot' => $this->getName(),
+                'res' => json_encode($info)
+            ]);
+            return true;
+        }
+    }
+
     protected function getClient(): ?\GuzzleHttp\Client
     {
         $token = $this->UCGet('token');

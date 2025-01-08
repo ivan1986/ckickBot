@@ -188,6 +188,9 @@ class FactoraBot extends BaseBot implements BotInterface
             $exist[$building['buildingId']] = $building['level'];
         }
         $userBuildings = array_filter($userBuildings, function ($i) use ($userInfo, $exist) {
+            if (empty($i['buildingUpgrade'])) {
+                return false;
+            }
             $cond = $i['buildingUpgrade']['upgradeCondition'];
             if ($cond['referrals'] && $cond['referrals'] > $userInfo['inviteesCount']) {
                 return false;

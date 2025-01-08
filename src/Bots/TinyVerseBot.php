@@ -138,6 +138,20 @@ class TinyVerseBot extends BaseBot implements BotInterface
             return;
         }
 
+        $resp = $apiClient->post('/user/info', [
+            'form_params' => [
+                'session' => $this->UCGet('token')
+            ],
+            'headers' => [
+                'X-Api-Request-Id' => $this->getApiReqId(),
+            ]
+        ]);
+        $info = json_decode($resp->getBody()->getContents(), true);
+        $info = $info['response'];
+        if ($info['dust'] < 12000 || !$info['is_scan_available']) {
+            return;
+        }
+
         $resp = $apiClient->post('/galaxy/get', [
             'form_params' => [
                 'session' => $this->UCGet('token'),

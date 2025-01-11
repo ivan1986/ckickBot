@@ -28,7 +28,8 @@ class ZooBot extends BaseBot implements BotInterface
         JS);
 
         $needFood = $client->executeScript(<<<JS
-            return document.querySelector('div#tokens').innerHTML.indexOf('Добыча остановлена') !== -1;
+            let text = document.querySelector('div#tokens').innerHTML
+            return text.indexOf('Добыча остановлена') !== -1 || text.indexOf('Mining stopped') !== -1;
         JS);
         if ($needFood) {
             $client->executeScript(<<<JS
@@ -47,19 +48,19 @@ class ZooBot extends BaseBot implements BotInterface
         }
     }
 
-    #[ScheduleCallback('8 hour', delta: 600, browser: true)]
+    #[ScheduleCallback('4 hour', delta: 600, browser: true)]
     public function daily()
     {
         if (!$this->getUrl()) {
             return;
         }
 
-        $client = $this->profileService->getOrCreateBrowser($this->curProfile);
+        $client = $this->profileService->getOrCreateBrowser($this->curProfile, false);
         $client->request('GET', $this->getUrl());
         sleep(1);
         $client->waitForVisibility('div.flyBtn', 60);
         $client->executeScript(<<<JS
-            [...document.querySelectorAll('div.flyBtn')].filter(a => a.innerText.includes("Задачи"))[0].click();
+            [...document.querySelectorAll('div.flyBtn')].filter(a => a.innerText.includes("Задачи") || a.innerText.includes("Tasks"))[0].click();
         JS);
 
         sleep(1);
@@ -81,11 +82,11 @@ class ZooBot extends BaseBot implements BotInterface
         }
 
         $hasTask = $client->executeScript(<<<JS
-            let item = [...document.querySelectorAll('.van-cell')].filter(d => d.innerText.includes('Загадка дня'))[0];
+            let item = [...document.querySelectorAll('.van-cell')].filter(d => d.innerText.includes('Загадка') || d.innerText.includes('Riddle'))[0];
             return item && !item.classList.contains('finished');
         JS);
         $hasRebus = $client->executeScript(<<<JS
-            let item = [...document.querySelectorAll('.van-cell')].filter(d => d.innerText.includes('Ребус дня'))[0];
+            let item = [...document.querySelectorAll('.van-cell')].filter(d => d.innerText.includes('Ребус') || d.innerText.includes('Rebus'))[0];
             return item && !item.classList.contains('finished');
         JS);
         $today = Carbon::today()->format('Y-m-d');
@@ -93,26 +94,27 @@ class ZooBot extends BaseBot implements BotInterface
         $rebus = $this->botKey('rebus-'.$today);
         $rebusAns = $this->cache->get($rebus);
         if ($rebusAns && $hasRebus) {
-            $this->inputAns($client, 'Ребус дня', $rebusAns);
+            $this->inputAns($client, 'Ребус', 'Rebus', $rebusAns);
             sleep(5);
         }
 
         $task = $this->botKey('task-'.$today);
         $taskAns = $this->cache->get($task);
         if ($taskAns && $hasTask) {
-            $this->inputAns($client, 'Загадка дня', $taskAns);
+            $this->inputAns($client, 'Загадка', 'Riddle', $taskAns);
             sleep(5);
         }
     }
 
-    private function inputAns($client, $name, $ans)
+    private function inputAns($client, $name, $nameEn, $ans)
     {
         $client->executeScript(<<<JS
             const name = arguments[0];
-            const param = arguments[1];
+            const nameEn = arguments[1];
+            const param = arguments[2];
             const sleep = ms => new Promise(r => setTimeout(r, ms));
             var f1 = async function (tabs) {
-                let item = [...document.querySelectorAll('.van-cell')].filter(d => d.innerText.includes(name))[0];
+                let item = [...document.querySelectorAll('.van-cell')].filter(d => d.innerText.includes(name) || d.innerText.includes(nameEn))[0];
                 item.click();
                 await sleep(2000);
                 document.querySelector('.van-popup input').value = param;
@@ -124,6 +126,6 @@ class ZooBot extends BaseBot implements BotInterface
                 document.querySelector('.van-popup button').click()
             };
             return await f1();
-        JS, [$name, $ans]);
+        JS, [$name, $nameEn, $ans]);
     }
 }

@@ -59,6 +59,10 @@ final class UpdateUrlHandler
 
         $bot->runInTg($client);
 
+        $this->logger->info('Update url for {profile}: {bot} - click Launch', [
+            'profile' => $message->profile,
+            'bot' => $message->name
+        ]);
         // click Launch
         try {
             $page->findElement(WebDriverBy::cssSelector('iframe'));;

@@ -116,7 +116,12 @@ class BumsBot extends BaseBot implements BotInterface
         $info = $info['data'];
 
         $this->updateStatItem('spins', $info['staminaNow']);
-        $count = min($info['staminaNow'], 10);
+        $count = min($info['staminaNow'], 20);
+        $this->logger->info('{bot} for {profile}: left {count} spins', [
+            'profile' => $this->curProfile,
+            'bot' => $this->getName(),
+            'count' => $info['staminaNow'],
+        ]);
         if (!$count) {
             return;
         }

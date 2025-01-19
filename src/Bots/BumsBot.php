@@ -127,7 +127,7 @@ class BumsBot extends BaseBot implements BotInterface
                 'bot' => $this->getName(),
                 'reward' => $reward,
             ]);
-            sleep(random_int(4, 8));
+            sleep(random_int(2, 4));
         }
         return true;
     }
